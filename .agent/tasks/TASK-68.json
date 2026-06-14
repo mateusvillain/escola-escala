@@ -1,0 +1,39 @@
+{
+  "id": "TASK-68",
+  "title": "POST /api/subscriptions/checkout — criar Stripe Checkout Session",
+  "category": "integration",
+  "description": "Endpoint que cria uma Stripe Checkout Session para o aluno iniciar o pagamento de um plano de assinatura.",
+  "acceptanceCriteria": [
+    "Recebe `{ priceId, billingCycle }` no body",
+    "Cria ou recupera Stripe Customer para o usuário (via stripeCustomerId no banco)",
+    "Cria Checkout Session com: priceId, mode='subscription', success_url e cancel_url",
+    "Retorna `{ checkoutUrl }` para o cliente redirecionar",
+    "Usuário já assinante: retorna erro 409 ('Você já possui uma assinatura ativa')"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar cliente Stripe",
+      "details": "Criar `src/lib/stripe.ts` com `import Stripe from 'stripe'` e `export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-12-18.acacia' })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/subscriptions/checkout/route.ts`. Verificar autenticação. Verificar que usuário não tem assinatura ativa. Criar ou recuperar Stripe Customer: se `user.stripeCustomerId` existe, usar; senão criar com `stripe.customers.create({ email, name })` e salvar no banco. Criar Session com `stripe.checkout.sessions.create()`. Retornar URL.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar checkout",
+      "details": "Logar como aluno sem assinatura. Chamar endpoint com priceId do Básico Mensal. Verificar que URL retornada redireciona para Stripe Checkout. Completar com cartão de teste 4242... Verificar que webhook é disparado.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-67", "TASK-7"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Adicionar `stripeCustomerId` ao modelo `User` no Prisma schema e criar migration.",
+    "Parâmetro `success_url`: `{APP_URL}/dashboard?checkout=success`; `cancel_url`: `{APP_URL}/planos`."
+  ]
+}

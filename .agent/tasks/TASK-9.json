@@ -1,0 +1,41 @@
+{
+  "id": "TASK-9",
+  "title": "POST /api/auth/register — cadastro de novo aluno",
+  "category": "api-endpoint",
+  "description": "Endpoint que recebe nome, e-mail e senha, valida os dados, faz hash da senha com bcrypt, cria o usuário no banco com role `student` e retorna o token JWT em cookie HttpOnly.",
+  "acceptanceCriteria": [
+    "POST com dados válidos retorna 201 e seta cookie `auth-token` HttpOnly",
+    "E-mail duplicado retorna 409 com mensagem de erro",
+    "E-mail com formato inválido retorna 400",
+    "Senha com menos de 8 caracteres retorna 400",
+    "Senha nunca é armazenada em texto plano (hash bcrypt no banco)",
+    "Resposta 201 contém `{ user: { id, name, email, role } }` sem passwordHash"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar schema de validação Zod",
+      "details": "Criar `src/lib/schemas/auth.ts` com `registerSchema = z.object({ name: z.string().min(2).max(100), email: z.string().email(), password: z.string().min(8).max(100) })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/auth/register/route.ts`. Validar body com `registerSchema.safeParse()`. Se inválido, retornar 400 com erros Zod. Verificar se email já existe no banco via `prisma.user.findUnique({ where: { email } })`. Se existir, retornar 409. Gerar hash com `bcrypt.hash(password, 12)`. Criar usuário com `prisma.user.create()`. Gerar JWT com `signToken()`. Setar cookie `auth-token` HttpOnly, SameSite=Strict, Secure.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Verificar com teste manual",
+      "details": "Usar curl: `curl -X POST http://localhost:3000/api/auth/register -H 'Content-Type: application/json' -d '{\"name\":\"Teste\",\"email\":\"novo@test.com\",\"password\":\"Senha@123\"}' -v`. Verificar: status 201, header `Set-Cookie` com `auth-token HttpOnly`. Verificar no banco que senha está hasheada.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-5", "TASK-6"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "bcrypt salt rounds = 12 para equilíbrio de segurança e performance.",
+    "Nunca logar a senha, nem em desenvolvimento.",
+    "Usar `select` no Prisma para excluir `passwordHash` da resposta: `select: { id: true, name: true, email: true, role: true }`."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "TASK-72",
+  "title": "Webhook: invoice.payment_succeeded → renovar período da assinatura",
+  "category": "integration",
+  "description": "Handler que atualiza currentPeriodStart e currentPeriodEnd no banco quando um pagamento de renovação é bem-sucedido.",
+  "acceptanceCriteria": [
+    "Atualiza `currentPeriodStart` e `currentPeriodEnd` da UserSubscription",
+    "Garante status `active` após pagamento bem-sucedido",
+    "Idempotente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler",
+      "details": "Em `src/lib/stripe-handlers.ts`: `handleInvoicePaymentSucceeded(invoice: Stripe.Invoice)`. Buscar UserSubscription por `stripeSubscriptionId = invoice.subscription`. Atualizar `currentPeriodStart`, `currentPeriodEnd` (da subscription Stripe) e `status = 'active'`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-71"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

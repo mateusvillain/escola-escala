@@ -1,0 +1,39 @@
+{
+  "id": "TASK-49",
+  "title": "GET + POST /api/progress/[lessonId] — ler e registrar progresso de aula",
+  "category": "api-endpoint",
+  "description": "Endpoints para ler o progresso atual de uma aula e atualizar o percentual assistido e status de conclusão.",
+  "acceptanceCriteria": [
+    "GET retorna `{ lessonId, watchPercentage, isCompleted, completedAt }` para o usuário autenticado",
+    "POST aceita `{ watchPercentage: number, isCompleted?: boolean }` e atualiza ou cria o registro",
+    "POST dispara auto-complete se `watchPercentage >= 80` e `isCompleted` ainda é false",
+    "Retorna 403 se usuário não tem acesso à aula (via `checkLessonAccess`)",
+    "Upsert: cria registro se não existe, atualiza se existe"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/progress/[lessonId]/route.ts`. Verificar autenticação. Chamar `checkLessonAccess()`. GET: `prisma.lessonProgress.findUnique({ where: { userId_lessonId: { userId, lessonId } } })`. POST: `prisma.lessonProgress.upsert({ where: { userId_lessonId }, create: { ... }, update: { watchPercentage, isCompleted, completedAt } })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Auto-complete ao 80%",
+      "details": "No handler POST: após upsert, se `watchPercentage >= 80 && !existingProgress?.isCompleted`: atualizar `isCompleted = true`, `completedAt = new Date()`. Chamar TASK-55 `checkCourseCompletion()` de forma assíncrona.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Auto-matrícula",
+      "details": "Se é o primeiro POST de progresso em qualquer aula do curso: criar `CourseEnrollment` se ainda não existe — chamar `POST /api/enrollments/[courseId]` internamente ou via helper.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-43", "TASK-54"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Usar `@@unique([userId, lessonId])` no Prisma para o upsert compound key funcionar.",
+    "POST pode ser chamado com frequência (a cada 5-10s durante o vídeo) — endpoint deve ser leve."
+  ]
+}

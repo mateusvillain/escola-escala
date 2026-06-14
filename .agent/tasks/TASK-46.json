@@ -1,0 +1,29 @@
+{
+  "id": "TASK-46",
+  "title": "Navegação entre aulas — botões Anterior e Próxima Aula",
+  "category": "functional",
+  "description": "Botões de navegação na página da aula para ir à aula anterior ou próxima dentro do mesmo curso, respeitando a ordem dos módulos.",
+  "acceptanceCriteria": [
+    "Botão 'Próxima Aula' navega para a aula seguinte na ordem (pode ser em outro módulo)",
+    "Botão 'Aula Anterior' navega para a aula anterior",
+    "Primeira aula do curso: botão 'Anterior' desabilitado ou oculto",
+    "Última aula: botão 'Próxima Aula' muda para 'Voltar ao Curso' ou mostra mensagem de parabéns"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Calcular aulas anterior e próxima",
+      "details": "Criar utilitário `getAdjacentLessons(modules, currentLessonId): { prev?: Lesson; next?: Lesson }`. Achatar todos os módulos e aulas em lista plana ordenada. Encontrar index da aula atual. Retornar `modules[index-1]` e `modules[index+1]`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar botões à página da aula",
+      "details": "Renderizar botões de navegação abaixo do player. Usar `next/link` para navegação. Se `next` é undefined (última aula): exibir botão 'Ver certificado' se curso concluído, ou 'Voltar ao início do curso'.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-44"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

@@ -1,0 +1,33 @@
+{
+  "id": "TASK-69",
+  "title": "Página de planos e preços UI — comparativo Básico vs. Premium",
+  "category": "ui-ux",
+  "description": "Página `/planos` pública com comparativo visual dos planos de assinatura, toggle mensal/anual e botão de checkout.",
+  "acceptanceCriteria": [
+    "Toggle mensal/anual altera preços exibidos e destaca desconto anual (ex: 'Economize 30%')",
+    "Dois cards: Básico e Premium, com lista de benefícios de cada plano",
+    "Card Premium destacado visualmente (borda, badge 'Mais popular')",
+    "Botão 'Assinar' chama POST /api/subscriptions/checkout com priceId correto",
+    "Após sucesso do checkout, Stripe redireciona para `/dashboard?checkout=success`",
+    "Para usuários com assinatura ativa: exibir plano atual e botão 'Gerenciar assinatura'"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página de planos",
+      "details": "Criar `src/app/planos/page.tsx`. Toggle mensal/anual como estado React. Cards de plano com lista de features. Preços lidos de variáveis de ambiente ou da API (GET /api/plans se existir). Botão 'Assinar': Client Component que chama checkout e redireciona para `checkoutUrl`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Estado para usuário com assinatura",
+      "details": "Se usuário autenticado com assinatura ativa: em vez de botões de assinar, exibir plano atual e botão 'Gerenciar assinatura' (link para Customer Portal via TASK-76).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-68", "TASK-17"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Preços dos planos podem ser hardcoded na UI para MVP (evitar fetch extra) — atualizar se mudar os preços."
+  ]
+}

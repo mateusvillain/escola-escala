@@ -1,0 +1,39 @@
+{
+  "id": "TASK-67",
+  "title": "Configurar produtos e preços dos planos no Stripe Dashboard",
+  "category": "setup",
+  "description": "Criar no Stripe Dashboard os 4 Price IDs necessários para as assinaturas recorrentes (Básico Mensal, Básico Anual, Premium Mensal, Premium Anual) e preencher no .env.local.",
+  "acceptanceCriteria": [
+    "4 Products criados no Stripe: 'Plano Básico' e 'Plano Premium'",
+    "Cada product tem 2 Prices: mensal (recurring monthly) e anual (recurring yearly)",
+    "Price IDs preenchidos no `.env.local`: STRIPE_PRICE_ID_BASIC_MONTHLY, STRIPE_PRICE_ID_BASIC_ANNUAL, STRIPE_PRICE_ID_PREMIUM_MONTHLY, STRIPE_PRICE_ID_PREMIUM_ANNUAL",
+    "Em ambiente de teste: usar preços de teste do Stripe (modo Test)",
+    "Stripe Customer Portal habilitado e configurado para permitir cancelamento e troca de plano"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar produtos no Stripe",
+      "details": "Acessar Stripe Dashboard → Products → Add product. Criar 'Plano Básico' e 'Plano Premium'. Para cada produto, criar 2 preços: mensal (ex: R$29,90/mês) e anual (ex: R$249,90/ano) com tipo `Recurring`. Anotar os Price IDs (prefixo `price_`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Preencher variáveis de ambiente",
+      "details": "Copiar os 4 Price IDs para `.env.local`. Adicionar também ao Vercel Dashboard → Environment Variables para produção.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Configurar Customer Portal",
+      "details": "No Stripe Dashboard → Settings → Customer Portal: habilitar. Configurar: permitir cancelamento, permitir troca entre planos (Básico ↔ Premium), exibir histórico de faturas. Salvar configurações.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-1"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Usar modo Test do Stripe em desenvolvimento — nunca misturar Test e Live.",
+    "Cartões de teste Stripe: 4242424242424242 (sucesso), 4000000000000002 (recusado)."
+  ]
+}

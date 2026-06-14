@@ -1,0 +1,33 @@
+{
+  "id": "TASK-56",
+  "title": "GET /api/dashboard — cursos matriculados com progresso e última aula",
+  "category": "api-endpoint",
+  "description": "Endpoint que retorna os dados do dashboard do aluno: cursos em andamento, concluídos, disponíveis e última aula assistida por curso.",
+  "acceptanceCriteria": [
+    "Retorna `{ inProgress: Course[], completed: Course[], available: Course[] }`",
+    "inProgress: cursos com enrollment, completedAt null e progress > 0",
+    "completed: cursos com enrollment.completedAt preenchido",
+    "available: cursos acessíveis pelo plano do aluno, sem enrollment ainda",
+    "Cada curso inclui: id, title, slug, thumbnailUrl, progress (%), lastLesson (id, title, slug)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/dashboard/route.ts`. Buscar assinatura ativa do aluno. Buscar todos os enrollments do usuário com `include: { course: true }`. Para cada enrolled course: chamar `getCourseProgress()` e buscar última aula via `prisma.lessonProgress.findFirst({ where: { userId, lesson: { module: { courseId } } }, orderBy: { lastWatchedAt: 'desc' } })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Cursos disponíveis",
+      "details": "Buscar cursos publicados que o aluno pode acessar pelo plano (usando lógica de `checkLessonAccess` mas por curso). Excluir os que já têm enrollment. Retornar em `available`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-53", "TASK-54"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Usar `Promise.all()` para calcular progresso de múltiplos cursos em paralelo.",
+    "Limitar `available` a 6-10 cursos para não sobrecarregar a resposta."
+  ]
+}

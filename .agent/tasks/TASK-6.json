@@ -1,0 +1,34 @@
+{
+  "id": "TASK-6",
+  "title": "Utilitário JWT — assinar e verificar tokens",
+  "category": "security",
+  "description": "Criar módulo utilitário em `src/lib/jwt.ts` com funções para assinar e verificar tokens JWT usados na autenticação da plataforma.",
+  "acceptanceCriteria": [
+    "Função `signToken(payload)` retorna string JWT assinada com HS256",
+    "Função `verifyToken(token)` retorna payload decodificado ou lança erro em token inválido/expirado",
+    "Token usa expiração configurável via `JWT_EXPIRES_IN` (env var)",
+    "Payload inclui: `userId`, `email`, `role`",
+    "Teste unitário: token gerado e verificado retorna payload correto",
+    "Teste unitário: token expirado lança erro `TokenExpiredError`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar `src/lib/jwt.ts`",
+      "details": "Importar `jsonwebtoken`. Definir tipo `JwtPayload { userId: string; email: string; role: string }`. Implementar `signToken(payload: JwtPayload): string` usando `jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' })`. Implementar `verifyToken(token: string): JwtPayload` usando `jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar teste unitário",
+      "details": "Criar `src/lib/__tests__/jwt.test.ts`. Testar: (1) `signToken` retorna string, (2) `verifyToken(signToken(payload))` retorna payload correto, (3) `verifyToken('token-invalido')` lança erro, (4) token com `expiresIn: '1ms'` lança `TokenExpiredError` após delay.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-2"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Usar HS256 (HMAC-SHA256) com `JWT_SECRET` de pelo menos 32 caracteres aleatórios.",
+    "NÃO incluir informações sensíveis (senha, dados de pagamento) no payload JWT."
+  ]
+}

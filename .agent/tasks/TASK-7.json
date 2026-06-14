@@ -1,0 +1,39 @@
+{
+  "id": "TASK-7",
+  "title": "Middleware de autenticação — validar JWT de HttpOnly cookie",
+  "category": "security",
+  "description": "Criar middleware Next.js em `src/middleware.ts` que intercepta rotas protegidas, lê o token JWT de um HttpOnly cookie, valida e injeta o usuário na requisição.",
+  "acceptanceCriteria": [
+    "Rotas sob `/dashboard`, `/curso`, `/admin`, `/api/admin`, `/api/dashboard`, `/api/progress`, `/api/enrollments`, `/api/certificates`, `/api/subscriptions`, `/api/users/me` requerem autenticação",
+    "Cookie `auth-token` HttpOnly lido e validado em cada requisição",
+    "Token inválido ou ausente retorna 401 em rotas de API ou redireciona para `/login` em rotas de página",
+    "Payload do token (`userId`, `email`, `role`) disponível via header customizado ou contexto nas API Routes"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper de autenticação para API Routes",
+      "details": "Criar `src/lib/auth.ts` com função `getAuthUser(request: NextRequest): JwtPayload | null` que lê o cookie `auth-token` da request e chama `verifyToken()`. Retorna null se token ausente ou inválido.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar middleware Next.js",
+      "details": "Criar `src/middleware.ts`. Usar `NextRequest` e `NextResponse`. Definir `config.matcher` com padrões das rotas protegidas. Na função `middleware()`: ler cookie `auth-token`, chamar `verifyToken()`. Se inválido: para rotas `/api/*` retornar `NextResponse.json({ error: 'Não autorizado' }, { status: 401 })`; para páginas: `NextResponse.redirect(new URL('/login', request.url))`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Verificar proteção de rotas",
+      "details": "Testar manualmente: acessar `/dashboard` sem cookie → deve redirecionar para `/login`. Chamar `GET /api/dashboard` sem cookie → deve retornar 401. Fazer login (TASK-10) e verificar que as rotas ficam acessíveis.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-6"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "HttpOnly cookies não são acessíveis via `document.cookie` — protegem contra XSS.",
+    "Configurar cookie com `SameSite=Strict` e `Secure=true` em produção.",
+    "O middleware do Next.js executa no Edge Runtime — não pode usar Prisma diretamente."
+  ]
+}

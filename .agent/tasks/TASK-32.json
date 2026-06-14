@@ -1,0 +1,41 @@
+{
+  "id": "TASK-32",
+  "title": "Admin — editor completo de aula com vídeo UI",
+  "category": "ui-ux",
+  "description": "Modal ou página dedicada para editar todos os campos de uma aula: título, descrição, conteúdo textual, vídeo (upload ou ID manual) e flag de preview.",
+  "acceptanceCriteria": [
+    "Formulário com: Título, Descrição, Conteúdo (textarea markdown), Is Preview (toggle), Video",
+    "Seção de vídeo com duas abas: 'Upload' e 'Inserir ID do Bunny Stream'",
+    "Aba Upload: input de arquivo, barra de progresso de upload, exibe player de preview após upload",
+    "Aba ID Manual: input de texto para Video ID, botão Salvar, exibe player preview com o ID inserido",
+    "Player de preview Bunny Stream embedado na seção de vídeo quando ID disponível",
+    "Botão Salvar salva todos os campos via PATCH /api/admin/lessons/[id]",
+    "Duração do vídeo preenchida automaticamente após upload (retornada pela API Bunny Stream)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar componente LessonEditor",
+      "details": "Criar `src/components/admin/LessonEditor.tsx` como modal ou página em `/admin/aulas/[id]`. Campos: título, descrição, content (textarea), isPreview (Switch). Seção de vídeo com tabs.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar upload de vídeo",
+      "details": "Aba Upload: usar `<input type='file' accept='video/*'>`. Ao selecionar arquivo: POST /api/admin/videos/upload com FormData. Mostrar barra de progresso (usar XMLHttpRequest para `onprogress`). Após conclusão: setar videoId no formulário e exibir player.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar ID manual e preview",
+      "details": "Aba ID Manual: input de texto para Video ID. Botão 'Verificar': criar URL de embed e exibir iframe do Bunny Stream: `https://{CDN_HOSTNAME}/{videoId}/play`. Ao salvar, setar videoId no formulário.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-26", "TASK-27", "TASK-31"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Bunny Stream embed URL: `https://{BUNNY_STREAM_CDN_HOSTNAME}/{videoId}/play` em iframe com parâmetros de estilo.",
+    "Upload de vídeos grandes pode demorar minutos — exibir progresso é essencial para UX."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "TASK-51",
+  "title": "Marcação automática de aula concluída ao atingir 80% do vídeo",
+  "category": "functional",
+  "description": "Lógica server-side (no endpoint POST /api/progress/[lessonId]) que marca automaticamente a aula como concluída quando watchPercentage >= 80.",
+  "acceptanceCriteria": [
+    "Ao salvar progresso com watchPercentage >= 80: isCompleted é setado para true e completedAt para now()",
+    "Uma vez marcada como concluída, não volta para incompleta ao receber watchPercentage menor",
+    "Sidebar e dashboard refletem a conclusão em tempo real (após refresh ou poll)",
+    "Marcação acontece no servidor (não confiar apenas no cliente)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Implementar lógica no endpoint de progresso",
+      "details": "No handler `POST /api/progress/[lessonId]`: após ler `watchPercentage` do body, verificar se `watchPercentage >= 80`. Se sim E o progresso atual ainda tem `isCompleted = false` (ou não existe): incluir `isCompleted: true` e `completedAt: new Date()` no upsert. Nunca resetar `isCompleted` para false se já era true.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Verificar no banco",
+      "details": "Após implementação: simular sequência: POST com watchPercentage=50 → isCompleted false. POST com watchPercentage=80 → isCompleted true, completedAt preenchido. POST com watchPercentage=60 (usuário volta) → isCompleted continua true.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-49"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Este comportamento já está descrito em TASK-49 step 2 — garantir que a lógica está implementada corretamente."
+  ]
+}

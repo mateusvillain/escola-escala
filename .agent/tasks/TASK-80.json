@@ -1,0 +1,31 @@
+{
+  "id": "TASK-80",
+  "title": "Validação e sanitização de inputs em todas as rotas de API",
+  "category": "security",
+  "description": "Garantir que todas as rotas de API validam inputs com Zod e que o Prisma ORM protege contra SQL Injection via queries parametrizadas.",
+  "acceptanceCriteria": [
+    "Todos os route handlers de POST/PATCH usam `schema.safeParse(body)` antes de processar",
+    "Inputs inválidos retornam 400 com detalhes dos erros de validação Zod",
+    "Strings recebidas pelo usuário nunca são interpoladas em queries SQL brutas",
+    "Campos de texto livres (description, content) têm limite máximo de tamanho via Zod"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper de validação reutilizável",
+      "details": "Criar `src/lib/validate.ts` com função `validateBody<T>(schema: ZodSchema<T>, body: unknown): T | NextResponse`. Chama `schema.safeParse(body)`. Em sucesso: retorna dados tipados. Em falha: retorna `NextResponse.json({ error: 'Dados inválidos', details: result.error.format() }, { status: 400 })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Auditar todos os route handlers",
+      "details": "Revisar cada route handler de POST/PATCH e confirmar que: (1) usa `validateBody()`, (2) usa Prisma (não SQL bruto), (3) campos string têm `.max(N)` no schema Zod. Criar checklist por arquivo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-9"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Prisma usa queries parametrizadas por padrão — não é vulnerável a SQL Injection ao usar a API do Prisma (não `$queryRaw` com interpolação)."
+  ]
+}

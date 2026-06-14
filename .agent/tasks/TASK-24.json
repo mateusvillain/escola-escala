@@ -1,0 +1,25 @@
+{
+  "id": "TASK-24",
+  "title": "PATCH + DELETE /api/admin/modules/[id]",
+  "category": "api-endpoint",
+  "description": "Endpoints para editar título/descrição/ordem de um módulo e removê-lo (com suas aulas).",
+  "acceptanceCriteria": [
+    "PATCH atualiza title, description e/ou order",
+    "DELETE remove módulo e todas as suas aulas (cascade)",
+    "Retorna 404 se módulo não encontrado",
+    "Ao reordenar, outros módulos do mesmo curso são reordenados automaticamente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/admin/modules/[id]/route.ts`. PATCH: `prisma.module.update()` com campos permitidos. DELETE: `prisma.module.delete()` (Prisma faz cascade em lessons se configurado no schema com `onDelete: Cascade`). Verificar que o schema Prisma tem `onDelete: Cascade` em Lesson.moduleId.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-23"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Adicionar `onDelete: Cascade` na relação `Module → Lesson` no Prisma schema para deletar aulas junto com o módulo."
+  ]
+}

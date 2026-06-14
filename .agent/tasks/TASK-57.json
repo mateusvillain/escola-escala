@@ -1,0 +1,38 @@
+{
+  "id": "TASK-57",
+  "title": "Dashboard do aluno UI — cursos em andamento com barra de progresso",
+  "category": "ui-ux",
+  "description": "Página `/dashboard` com visão geral dos cursos em andamento, seções de continuar assistindo, disponíveis e concluídos.",
+  "acceptanceCriteria": [
+    "Saudação personalizada: 'Olá, [nome]!'",
+    "Seção 'Em andamento': cards de cursos com barra de progresso (%) e botão 'Continuar'",
+    "Seção 'Continuar de onde parei': card da última aula assistida (se existir)",
+    "Seção 'Disponíveis para você': cursos do plano do aluno sem enrollment",
+    "Seção 'Concluídos': cursos com 100% e link de certificado",
+    "Estado vazio (sem cursos): CTA 'Explorar cursos' com link para catálogo",
+    "Skeleton loader durante carregamento"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página de dashboard",
+      "details": "Criar `src/app/(app)/dashboard/page.tsx` como Client Component. Buscar dados de `GET /api/dashboard`. Exibir seções condicionalmente (mostrar apenas seções com conteúdo). Criar componente `CourseProgressCard` com thumbnail, título, barra de progresso e CTA.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Card de última aula",
+      "details": "Seção 'Continuar de onde parei': card grande destacado com thumbnail do curso, título do curso, título da última aula e botão 'Continuar aula'. Link para `/cursos/[slug]/aulas/[lessonId]`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Skeleton loader",
+      "details": "Enquanto dados carregam: exibir 3 skeleton cards animados em cada seção. Usar `animate-pulse` do Tailwind.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-56", "TASK-17"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}

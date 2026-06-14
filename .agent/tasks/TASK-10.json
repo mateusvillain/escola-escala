@@ -1,0 +1,33 @@
+{
+  "id": "TASK-10",
+  "title": "POST /api/auth/login — login com e-mail e senha",
+  "category": "api-endpoint",
+  "description": "Endpoint de login que valida credenciais de e-mail e senha, compara hash com bcrypt e retorna JWT em cookie HttpOnly.",
+  "acceptanceCriteria": [
+    "Credenciais válidas retornam 200 e setam cookie `auth-token` HttpOnly",
+    "E-mail não encontrado retorna 401 com mensagem genérica (não revela se o e-mail existe)",
+    "Senha incorreta retorna 401 com mensagem genérica",
+    "Usuário com `isActive: false` retorna 403",
+    "Resposta contém `{ user: { id, name, email, role } }`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar schema e route handler",
+      "details": "Criar `src/app/api/auth/login/route.ts`. Validar body com `loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })`. Buscar usuário por email. Se não encontrado: retornar 401 com `{ error: 'Credenciais inválidas' }`. Comparar senha com `bcrypt.compare(password, user.passwordHash)`. Se falso: retornar 401. Se `user.isActive === false`: retornar 403. Gerar JWT e setar cookie.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Verificar com usuários de teste",
+      "details": "Fazer login com `admin@test.com / Test@12345` → 200 com cookie. Tentar com senha errada → 401. Tentar com e-mail inexistente → 401. Verificar que tempo de resposta é similar em ambos os casos (proteção contra timing attack via bcrypt).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-9"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Mensagem de erro genérica 'Credenciais inválidas' em ambos os casos (e-mail não encontrado e senha errada) previne enumeração de e-mails.",
+    "bcrypt.compare() já usa comparação em tempo constante — não adicionar lógica extra de timing."
+  ]
+}

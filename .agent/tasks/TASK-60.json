@@ -1,0 +1,30 @@
+{
+  "id": "TASK-60",
+  "title": "Seção 'Concluídos' no dashboard com link para download de certificado",
+  "category": "ui-ux",
+  "description": "Seção do dashboard exibindo cursos concluídos (100%) com botão de download do certificado PDF.",
+  "acceptanceCriteria": [
+    "Card de curso concluído: thumbnail, título, data de conclusão, badge 'Concluído'",
+    "Botão 'Baixar Certificado' presente em cada card concluído",
+    "Clique no botão dispara download do PDF via `GET /api/certificates/[courseId]/download`",
+    "Se certificado ainda está sendo gerado: botão com spinner 'Gerando...'",
+    "Seção oculta se não há cursos concluídos"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar card de curso concluído",
+      "details": "Criar `src/components/dashboard/CompletedCourseCard.tsx`. Props: course (título, thumbnail, slug), completedAt, certificateUrl. Formatar data de conclusão. Botão 'Baixar Certificado': se `certificateUrl` existe, é link direto para download; se não, mostrar spinner.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Integrar seção no dashboard",
+      "details": "No dashboard: se `completed.length > 0`, renderizar seção 'Concluídos' com `CompletedCourseCard` para cada item. Incluir `certificateUrl` no response de `GET /api/dashboard`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-57", "TASK-63"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

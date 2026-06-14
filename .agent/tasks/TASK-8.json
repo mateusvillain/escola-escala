@@ -1,0 +1,38 @@
+{
+  "id": "TASK-8",
+  "title": "Middleware de autorização — verificar role do usuário na rota",
+  "category": "security",
+  "description": "Criar utilitário de autorização baseado em role para uso nas API Routes. Garante que apenas usuários com o role correto acessam endpoints protegidos (ex: apenas `admin` acessa rotas `/api/admin/`).",
+  "acceptanceCriteria": [
+    "Função `requireRole(roles)` verifica se o usuário autenticado tem o role necessário",
+    "Acesso a `/api/admin/*` por usuário com role `student` retorna 403",
+    "Acesso a `/api/admin/*` por usuário com role `admin` é permitido",
+    "Rotas de aluno (`/api/dashboard`, `/api/progress`, etc.) bloqueiam usuários não autenticados com 401"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper `requireRole`",
+      "details": "Em `src/lib/auth.ts`, adicionar função `requireRole(request: NextRequest, allowedRoles: string[]): { user: JwtPayload } | NextResponse`. Chamar `getAuthUser(request)` — se null, retornar 401. Se user.role não está em `allowedRoles`, retornar 403 com `{ error: 'Acesso negado' }`. Caso contrário, retornar `{ user }`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar em rotas admin",
+      "details": "Em cada API Route admin (TASK-20 em diante), chamar `requireRole(request, ['admin'])` no início do handler. Se retornar `NextResponse`, fazer `return` imediato. Verificar que usuários com role `student` ou `instructor` recebem 403.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar autorização",
+      "details": "Usar curl ou cliente HTTP: (1) chamar `GET /api/admin/courses` com token de aluno → 403. (2) chamar com token de admin → 200. (3) chamar sem token → 401.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-7"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Retornar 403 (Forbidden) quando autenticado mas sem permissão, 401 (Unauthorized) quando não autenticado.",
+    "Logar tentativas de acesso não autorizado para auditoria de segurança."
+  ]
+}

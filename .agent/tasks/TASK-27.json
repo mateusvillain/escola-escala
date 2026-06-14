@@ -1,0 +1,40 @@
+{
+  "id": "TASK-27",
+  "title": "POST /api/admin/videos/upload — upload de vídeo via Bunny Stream API",
+  "category": "integration",
+  "description": "Endpoint admin para fazer upload de arquivo de vídeo para o Bunny Stream. Cria o vídeo na biblioteca, retorna o Video ID e a URL do thumbnail.",
+  "acceptanceCriteria": [
+    "POST com arquivo de vídeo (multipart/form-data) retorna 200 com `{ videoId, thumbnailUrl, status }`",
+    "Vídeo é criado na biblioteca configurada (`BUNNY_STREAM_LIBRARY_ID`)",
+    "Upload usa TUS protocol ou direct upload via Bunny Stream API",
+    "Retorna erro 413 se arquivo maior que limite configurado (ex: 2GB)",
+    "Apenas admin pode acessar o endpoint"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar cliente Bunny Stream",
+      "details": "Criar `src/lib/bunny.ts` com funções: `createVideo(title: string): Promise<{ guid: string }>` — POST `https://video.bunnycdn.com/library/{libraryId}/videos` com header `AccessKey: BUNNY_STREAM_API_KEY`. `uploadVideo(videoGuid: string, fileBuffer: Buffer): Promise<void>` — PUT `https://video.bunnycdn.com/library/{libraryId}/videos/{videoGuid}` com o buffer do vídeo.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler de upload",
+      "details": "Criar `src/app/api/admin/videos/upload/route.ts`. Usar `request.formData()` para ler o arquivo. Chamar `createVideo(title)` → obter `guid`. Chamar `uploadVideo(guid, buffer)`. Retornar `{ videoId: guid, embedUrl: 'https://{CDN_HOSTNAME}/{guid}/play' }`. Configurar `export const config = { api: { bodyParser: false } }` se necessário.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar upload",
+      "details": "Fazer upload de vídeo de teste (ex: 10MB MP4) via formulário admin (TASK-32). Confirmar que vídeo aparece na biblioteca Bunny Stream. Confirmar que `videoId` retornado pode ser usado para embed na aula.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-8", "TASK-1"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Next.js tem limite de payload de 4MB por padrão — configurar `next.config.js` com `api.bodyParser.sizeLimit: '2gb'` ou usar streaming upload.",
+    "Para vídeos grandes, considerar upload direto do cliente para Bunny Stream (client-side TUS) — o endpoint apenas cria o vídeo e retorna o GUID para o cliente usar no upload direto.",
+    "Bunny Stream API docs: https://docs.bunny.net/reference/video_createvideo"
+  ]
+}

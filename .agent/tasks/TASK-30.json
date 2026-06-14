@@ -1,0 +1,38 @@
+{
+  "id": "TASK-30",
+  "title": "Admin — editor de módulos dentro da página do curso UI",
+  "category": "ui-ux",
+  "description": "Seção da página de edição do curso que exibe e permite gerenciar módulos: criar, editar, reordenar e excluir.",
+  "acceptanceCriteria": [
+    "Lista de módulos exibida abaixo do formulário de dados gerais",
+    "Cada módulo exibe: título, número de aulas, ações (editar título, mover para cima/baixo, excluir)",
+    "Botão 'Adicionar módulo' com input inline para inserir título",
+    "Confirmação antes de excluir módulo (pois remove todas as aulas)",
+    "Reordenação via botões de seta (cima/baixo)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar componente ModuleList",
+      "details": "Criar `src/components/admin/ModuleList.tsx`. Listar módulos do curso. Cada item tem: título editável inline (click para editar, blur para salvar via PATCH), contador de aulas, botões de reordenação e exclusão.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar módulo",
+      "details": "Botão 'Adicionar módulo' expande input de título. Enter ou botão Confirmar → POST /api/admin/courses/[id]/modules. Atualizar lista localmente após criação.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Reordenação",
+      "details": "Botões ↑/↓ trocam o `order` do módulo com o adjacente. Chamar PATCH /api/admin/modules/[id] com novo `order` para ambos os módulos afetados.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-23", "TASK-24", "TASK-29"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Para drag-and-drop no futuro, usar `@dnd-kit/core` — por ora, botões de seta são suficientes para MVP."
+  ]
+}

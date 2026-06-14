@@ -1,0 +1,32 @@
+{
+  "id": "TASK-40",
+  "title": "GET /api/courses/[slug] — detalhe público de um curso",
+  "category": "api-endpoint",
+  "description": "Endpoint público que retorna dados completos de um curso pelo slug, incluindo estrutura de módulos e aulas (sem videoId para não autenticados).",
+  "acceptanceCriteria": [
+    "Retorna curso com: dados gerais, instructor, módulos com aulas (título, duração, isPreview, order)",
+    "Para não autenticados: `videoId` não é retornado nas aulas",
+    "Para autenticados sem acesso: mesmos dados mas sem videoId",
+    "Para autenticados com acesso: inclui `videoId` e progresso do aluno em cada aula",
+    "Retorna 404 se curso não encontrado ou não publicado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/courses/[slug]/route.ts`. Buscar curso por slug com módulos e aulas. Verificar autenticação e acesso. Montar resposta condicional: se tem acesso, incluir videoId e progresso. Se não tem, omitir videoId. Usar `select` do Prisma para controlar campos retornados.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Incluir progresso do aluno",
+      "details": "Se autenticado com acesso: para cada aula, buscar `lessonProgress` do usuário e incluir `{ watchPercentage, isCompleted }` na resposta.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-39"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Nunca retornar videoId para usuários sem acesso — previne bypass da paywall via API direta."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "TASK-52",
+  "title": "Marcação manual de aula concluída/não concluída pelo aluno",
+  "category": "functional",
+  "description": "Checkbox ou botão toggle na página da aula que permite ao aluno marcar/desmarcar manualmente a conclusão de uma aula.",
+  "acceptanceCriteria": [
+    "Checkbox 'Marcar como concluída' visível na página da aula (abaixo do player ou na sidebar)",
+    "Marcar → POST /api/progress/[lessonId] com `{ isCompleted: true, watchPercentage: 100 }`",
+    "Desmarcar → POST com `{ isCompleted: false }` — permitido apenas desmarcação manual",
+    "Estado do checkbox reflete o `isCompleted` atual do progresso",
+    "Feedback visual imediato (otimistic update)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Componente de marcação manual",
+      "details": "Criar `src/components/course/LessonCompletionToggle.tsx`. Checkbox estilizado com label 'Marcar como concluída'. Ao clicar: otimistic update do estado local, POST /api/progress/[lessonId] com novo estado. Em erro: reverter estado local e exibir toast de erro.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Ajustar endpoint para desmarcação manual",
+      "details": "No POST /api/progress: se `body.isCompleted === false` (explicitamente enviado pelo cliente): permitir reverter `isCompleted` para false e limpar `completedAt`. Isso é diferente do auto-complete que nunca reverte.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-49", "TASK-44"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

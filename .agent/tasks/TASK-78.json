@@ -1,0 +1,29 @@
+{
+  "id": "TASK-78",
+  "title": "Bloqueio de acesso ao conteúdo para assinaturas past_due ou canceladas",
+  "category": "security",
+  "description": "Garantir que o helper checkLessonAccess e o middleware bloqueiam acesso quando a assinatura está past_due ou cancelada, e exibir mensagem apropriada na UI.",
+  "acceptanceCriteria": [
+    "`checkLessonAccess()` retorna `{ allowed: false, reason: 'subscription_inactive' }` para status past_due ou canceled",
+    "Página da aula exibe mensagem específica para past_due: 'Seu pagamento está pendente. Atualize seu método de pagamento.'",
+    "Para canceled: 'Sua assinatura foi cancelada. Assine novamente para acessar o conteúdo.'",
+    "Ambas as mensagens incluem CTA para `/dashboard/assinatura`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Atualizar checkLessonAccess",
+      "details": "Em `src/lib/access.ts`: ao buscar assinatura, verificar que `status === 'active'`. Se `status === 'past_due'` ou `'canceled'`: retornar `{ allowed: false, reason: 'subscription_inactive' }`. Atualizar `AccessResult` type para incluir este reason.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Atualizar UpgradePrompt",
+      "details": "Em `UpgradePrompt.tsx`: adicionar case para `reason === 'subscription_inactive'`. Diferenciar mensagem baseada se é past_due ou canceled (passar info adicional via props). Botão 'Gerenciar assinatura' com link para `/dashboard/assinatura`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-43", "TASK-48"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

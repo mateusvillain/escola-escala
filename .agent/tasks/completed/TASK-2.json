@@ -1,0 +1,60 @@
+{
+  "id": "TASK-2",
+  "title": "Inicializar projeto Next.js 14+ com TypeScript, Prisma e Tailwind",
+  "category": "setup",
+  "description": "Criar a estrutura base do projeto com Next.js App Router, TypeScript, Prisma ORM e Tailwind CSS. Configurar scripts, lint, formatação e estrutura de pastas.",
+  "acceptanceCriteria": [
+    "`npx next dev` inicia o servidor sem erros",
+    "`npx tsc --noEmit` passa sem erros de tipo",
+    "`npx prisma generate` executa com sucesso",
+    "Tailwind CSS aplicado corretamente (classe de teste visível na página inicial)",
+    "Estrutura de pastas criada: `src/app`, `src/components`, `src/lib`, `src/types`, `prisma/`",
+    "ESLint e Prettier configurados e executam sem erros"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar projeto Next.js",
+      "details": "Executar: `npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias '@/*'`. Confirmar que o App Router está habilitado.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Instalar dependências principais",
+      "details": "Executar: `npm install prisma @prisma/client bcryptjs jsonwebtoken zod nodemailer pdf-lib`. Executar: `npm install -D @types/bcryptjs @types/jsonwebtoken @types/nodemailer prettier eslint-config-prettier`.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Inicializar Prisma",
+      "details": "Executar: `npx prisma init --datasource-provider postgresql`. Confirmar que `prisma/schema.prisma` foi criado e que `DATABASE_URL` está referenciado no `.env` (mover para `.env.local`). NOTA: Next.js 16 usa `prisma.config.ts` — atualizado para carregar `.env.local` via dotenv.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Configurar estrutura de pastas",
+      "details": "Criar pastas: `src/lib/`, `src/types/`, `src/components/ui/`, `src/components/layout/`, `src/components/auth/`, `src/components/admin/`, `src/components/course/`, `src/components/dashboard/`, `src/components/player/`.",
+      "pass": true
+    },
+    {
+      "step": 5,
+      "description": "Configurar Prettier",
+      "details": "Criado `.prettierrc` com semi=false, singleQuote=true, trailingComma=es5, tabWidth=2. Script `format` adicionado ao package.json. eslint-config-prettier integrado ao eslint.config.mjs.",
+      "pass": true
+    },
+    {
+      "step": 6,
+      "description": "Verificar inicialização",
+      "details": "GET http://localhost:3000 → 200. `npx tsc --noEmit` → sem erros. `npm run lint` → sem erros. `npx prisma generate` → cliente gerado em src/generated/prisma. NOTA: Next.js 16 renomeou `middleware.ts` para `proxy.ts` — arquivo vazio removido; será criado corretamente na TASK-7.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-1"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Usar Node.js 20+ para compatibilidade com Next.js 14. Instalado com Node 25.",
+    "Confirmar que `.env.local` está no `.gitignore` antes de qualquer commit.",
+    "Next.js 16 renomeou middleware para proxy — TASK-7 deve criar src/proxy.ts em vez de src/middleware.ts.",
+    "Prisma v7 usa prisma.config.ts em vez de .env para configuração do datasource."
+  ]
+}

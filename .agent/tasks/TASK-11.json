@@ -1,0 +1,31 @@
+{
+  "id": "TASK-11",
+  "title": "POST /api/auth/logout — invalidar sessão JWT",
+  "category": "api-endpoint",
+  "description": "Endpoint de logout que limpa o cookie `auth-token` do cliente.",
+  "acceptanceCriteria": [
+    "POST retorna 200 e o cookie `auth-token` é removido (Max-Age=0 ou Expires no passado)",
+    "Após logout, rotas protegidas retornam 401",
+    "Funciona mesmo sem cookie ativo (idempotente)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/auth/logout/route.ts`. Retornar `NextResponse.json({ success: true })` com header `Set-Cookie: auth-token=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`. Isso remove o cookie no browser.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Verificar logout",
+      "details": "Fazer login, confirmar cookie presente. Chamar POST /api/auth/logout. Confirmar que cookie é removido (header `Set-Cookie` com Max-Age=0). Tentar acessar `/api/dashboard` após logout → 401.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-10"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "JWT stateless não pode ser invalidado no servidor sem uma blocklist. A estratégia simples de limpar o cookie é suficiente para a Fase 1.",
+    "Se implementar refresh tokens no futuro, adicionar lógica de revoção server-side."
+  ]
+}

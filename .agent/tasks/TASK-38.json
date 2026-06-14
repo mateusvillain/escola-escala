@@ -1,0 +1,29 @@
+{
+  "id": "TASK-38",
+  "title": "Admin — dashboard com KPIs (alunos, assinaturas, cursos publicados) UI",
+  "category": "ui-ux",
+  "description": "Página `/admin` (dashboard admin) com cards de KPIs e atalhos para as principais seções.",
+  "acceptanceCriteria": [
+    "Cards de métricas: Total de Alunos, Assinaturas Ativas, Plano Básico, Plano Premium, Cursos Publicados, Novos Alunos (30 dias)",
+    "Cada card com ícone, valor numérico e label",
+    "Links rápidos para: Gerenciar Cursos, Gerenciar Usuários, Ver Assinaturas",
+    "Carregamento com skeleton loader enquanto dados chegam"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página dashboard admin",
+      "details": "Criar `src/app/(admin)/page.tsx`. Criar componente `MetricCard` com props: icon, label, value, trend (opcional). Buscar dados de `GET /api/admin/metrics` com SWR ou fetch.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Skeleton loader",
+      "details": "Enquanto dados carregam, exibir 6 skeleton cards animados (pulse animation via Tailwind `animate-pulse`).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-37", "TASK-28"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

@@ -1,0 +1,29 @@
+{
+  "id": "TASK-58",
+  "title": "Seção 'Continuar de onde parei' — última aula assistida por curso",
+  "category": "functional",
+  "description": "Lógica para determinar a última aula assistida de cada curso matriculado e exibir como CTA principal no dashboard.",
+  "acceptanceCriteria": [
+    "Identifica a aula com `lastWatchedAt` mais recente por curso",
+    "Inclui: lessonId, lessonTitle, courseSlug, courseTitle para montar o link",
+    "Prioriza curso com atualização mais recente no dashboard",
+    "Se todas as aulas concluídas: aponta para a última aula (não confundir com seção de concluídos)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Incluir lastLesson no endpoint de dashboard",
+      "details": "Em `GET /api/dashboard` (TASK-56): para cursos `inProgress`, incluir `lastLesson: { lessonId, lessonTitle, lessonSlug? }` obtido via `prisma.lessonProgress.findFirst({ where: { userId, lesson: { module: { courseId } } }, orderBy: { lastWatchedAt: 'desc' }, include: { lesson: { select: { id, title, module: { select: { courseId } } } } } })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Card de 'Continuar' no dashboard",
+      "details": "Este card usa `lastLesson` do curso com `lastWatchedAt` mais recente dentre todos os cursos em andamento. É o card de destaque no topo do dashboard — ver TASK-57.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-56", "TASK-57"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

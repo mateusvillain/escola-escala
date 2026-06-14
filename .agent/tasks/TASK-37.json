@@ -1,0 +1,24 @@
+{
+  "id": "TASK-37",
+  "title": "GET /api/admin/metrics — métricas gerais da plataforma",
+  "category": "api-endpoint",
+  "description": "Endpoint que retorna métricas agregadas para o dashboard admin: total de alunos, assinaturas ativas por plano, cursos publicados e novos alunos nos últimos 30 dias.",
+  "acceptanceCriteria": [
+    "Retorna: totalStudents, activeSubscriptions, basicSubscriptions, premiumSubscriptions, publishedCourses, newStudentsLast30Days",
+    "Apenas admin acessa",
+    "Resposta em menos de 500ms (queries otimizadas com count)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler com queries paralelas",
+      "details": "Criar `src/app/api/admin/metrics/route.ts`. Usar `Promise.all([...])` para executar todas as queries em paralelo: `prisma.user.count({ where: { role: 'student' } })`, `prisma.userSubscription.count({ where: { status: 'active' } })`, `prisma.userSubscription.count({ where: { status: 'active', plan: { type: 'basic' } } })`, etc. Retornar objeto de métricas.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-8", "TASK-5"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Usar `Promise.all()` para paralelizar as queries — evitar N queries sequenciais."
+  ]
+}

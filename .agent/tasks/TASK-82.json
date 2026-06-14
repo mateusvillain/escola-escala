@@ -1,0 +1,46 @@
+{
+  "id": "TASK-82",
+  "title": "Deploy em produção na Vercel com variáveis de ambiente configuradas",
+  "category": "setup",
+  "description": "Configurar e executar o deploy em produção na Vercel, incluindo variáveis de ambiente, domínio customizado e verificação de funcionamento.",
+  "acceptanceCriteria": [
+    "Projeto conectado ao repositório Git e deploy automático configurado (push para main = deploy)",
+    "Todas as variáveis de ambiente de produção configuradas no Vercel Dashboard",
+    "Domínio customizado configurado (se disponível) ou usando domínio .vercel.app",
+    "Build de produção executado sem erros",
+    "Stripe webhook atualizado com URL de produção",
+    "Smoke test: login, acesso a aula, checkout de assinatura funcionando em produção"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Conectar projeto à Vercel",
+      "details": "Executar `vercel` ou acessar Vercel Dashboard → New Project → Importar repositório Git. Selecionar framework Next.js. Confirmar configurações de build.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Configurar variáveis de ambiente",
+      "details": "No Vercel Dashboard → Settings → Environment Variables: adicionar todas as variáveis do `.env.local` com valores de produção. Importante: usar chaves Live do Stripe (não Test) e DATABASE_URL do banco de produção.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar webhook Stripe",
+      "details": "No Stripe Dashboard → Webhooks: adicionar novo endpoint com URL de produção `https://{dominio}/api/webhooks/stripe`. Selecionar eventos: checkout.session.completed, invoice.payment_succeeded, invoice.payment_failed, customer.subscription.deleted, customer.subscription.updated. Copiar Webhook Secret para variável `STRIPE_WEBHOOK_SECRET` de produção.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Smoke test em produção",
+      "details": "Testar: (1) Cadastro de novo usuário. (2) Login. (3) Acesso ao catálogo. (4) Checkout com cartão de teste (modo Live com cartão real ou modo Test se ainda em teste). (5) Verificar acesso ao conteúdo após assinatura. (6) Assistir aula e verificar progresso salvo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-1", "TASK-79", "TASK-80"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Executar `npx prisma migrate deploy` no banco de produção antes do primeiro deploy.",
+    "Nunca usar chaves Test do Stripe em produção — verificar prefixo `sk_live_` vs `sk_test_`."
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "TASK-59",
+  "title": "Seção 'Disponíveis para você' — cursos acessíveis pelo plano do aluno",
+  "category": "functional",
+  "description": "Lógica para listar cursos publicados que o aluno pode acessar com seu plano atual mas ainda não iniciou.",
+  "acceptanceCriteria": [
+    "Exibe apenas cursos que o aluno ainda não tem enrollment",
+    "Respeita lógica de plano: aluno Básico vê cursos basic; aluno Premium vê todos",
+    "Limitado a 6 cursos no dashboard (link 'Ver todos' aponta para catálogo)",
+    "Card simplificado: thumbnail, título, badge de plano, botão 'Começar'"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Implementar no endpoint de dashboard",
+      "details": "Em `GET /api/dashboard`: buscar plano do aluno. Buscar IDs de cursos com enrollment do aluno. Buscar cursos publicados com planAccess compatível excluindo IDs com enrollment. Limitar a 6 com `take: 6`. Incluir em `available` no response.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-56", "TASK-57"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

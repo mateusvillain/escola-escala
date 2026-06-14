@@ -1,0 +1,35 @@
+{
+  "id": "TASK-47",
+  "title": "Preview gratuito de aulas marcadas como preview (sem assinatura)",
+  "category": "functional",
+  "description": "Aulas com `isPreview: true` devem ser acessíveis sem assinatura, exibindo o player completo como degustação de conteúdo.",
+  "acceptanceCriteria": [
+    "Aula preview acessível sem login — redireciona para `/login` apenas para rastrear progresso",
+    "Player completo exibido para aulas preview independente do status de assinatura",
+    "Badge 'Preview Gratuito' visível na página da aula e na sidebar",
+    "API retorna `videoId` para aulas preview mesmo para usuários sem autenticação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Ajustar `checkLessonAccess` para previews",
+      "details": "Em `src/lib/access.ts`: se `lesson.isPreview === true`, retornar `{ allowed: true, reason: 'preview' }` antes de qualquer verificação de assinatura. Isso aplica tanto na API quanto na UI.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Ajustar API GET /api/courses/[slug]",
+      "details": "Incluir `videoId` na resposta de aulas preview mesmo sem autenticação. Adicionar campo `isPreview` na resposta para que a UI exiba o badge.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Badge e UX de preview",
+      "details": "Na página da aula e na sidebar: se `lesson.isPreview`, exibir badge 'Preview Gratuito' (ex: Badge verde). Abaixo do player: CTA suave 'Gostou? Assine para acessar todos os cursos' com link para `/planos`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-43", "TASK-44"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

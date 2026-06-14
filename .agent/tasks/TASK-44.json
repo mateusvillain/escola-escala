@@ -1,0 +1,40 @@
+{
+  "id": "TASK-44",
+  "title": "Página de aula com player Bunny Stream embedado UI",
+  "category": "ui-ux",
+  "description": "Página `/cursos/[slug]/aulas/[lessonId]` com o player de vídeo Bunny Stream, título da aula, conteúdo textual complementar e sidebar de navegação.",
+  "acceptanceCriteria": [
+    "Player Bunny Stream em iframe responsivo (aspect-ratio 16:9) no centro da página",
+    "Título da aula exibido acima do player",
+    "Conteúdo markdown renderizado abaixo do player (se existir)",
+    "Sidebar à direita (desktop) ou abaixo (mobile) com navegação de módulos/aulas — TASK-45",
+    "Usuário sem acesso vê banner de upgrade em vez do player",
+    "Aulas preview exibem player para qualquer usuário"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página da aula",
+      "details": "Criar `src/app/cursos/[slug]/aulas/[lessonId]/page.tsx`. Buscar dados da aula via `GET /api/courses/[slug]` e encontrar a aula pelo ID. Verificar acesso. Se tem acesso: renderizar player. Se não tem: renderizar `UpgradePrompt`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Componente do player Bunny Stream",
+      "details": "Criar `src/components/player/BunnyPlayer.tsx` como Client Component. Renderizar `<iframe src={'https://{CDN_HOSTNAME}/{videoId}/play'} style={{ aspectRatio: '16/9', width: '100%' }} allowFullScreen allowTransparency referrerPolicy='no-referrer-when-downgrade' />`. Reportar progresso via `window.addEventListener('message', ...)` para eventos do player.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Renderizar conteúdo markdown",
+      "details": "Se `lesson.content` existe: renderizar com `react-markdown`. Instalar: `npm install react-markdown`. Usar prose classes do Tailwind Typography plugin.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-40", "TASK-43", "TASK-17"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Bunny Stream player emite eventos via `postMessage` — usar `window.addEventListener('message')` para capturar `percentageWatched`.",
+    "Instalar: `npm install react-markdown @tailwindcss/typography` e adicionar plugin ao `tailwind.config.ts`."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "TASK-79",
+  "title": "Rate limiting nas rotas de autenticação (máx. 10 req/min por IP)",
+  "category": "security",
+  "description": "Implementar rate limiting nas rotas de login, register e forgot-password para prevenir ataques de força bruta.",
+  "acceptanceCriteria": [
+    "Máximo 10 requisições por minuto por IP nas rotas `/api/auth/*`",
+    "Excedido limite: retorna 429 com header `Retry-After`",
+    "Implementação simples sem Redis para Fase 1 (in-memory ou biblioteca leve)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Instalar e configurar rate limiter",
+      "details": "Instalar `npm install @upstash/ratelimit @upstash/redis` para rate limiting com Redis, ou usar `lru-cache` para solução in-memory simples. Para MVP sem Redis: criar helper `src/lib/rate-limit.ts` usando `Map<string, { count: number; resetAt: number }>` em memória (reinicia com cada deploy, adequado para Fase 1).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar nas rotas de auth",
+      "details": "No início dos handlers de `/api/auth/login`, `/api/auth/register` e `/api/auth/forgot-password`: extrair IP via `request.headers.get('x-forwarded-for') || request.ip`. Chamar `rateLimit(ip, { limit: 10, windowMs: 60000 })`. Se excedido: retornar `NextResponse.json({ error: 'Muitas tentativas. Tente novamente em 1 minuto.' }, { status: 429, headers: { 'Retry-After': '60' } })`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-9", "TASK-10"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Rate limiting in-memory não persiste entre instâncias/deploys — adequado para Fase 1. Para produção com múltiplas instâncias, usar Upstash Redis."
+  ]
+}

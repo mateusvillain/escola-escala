@@ -1,0 +1,31 @@
+{
+  "id": "TASK-55",
+  "title": "Detecção de curso 100% concluído e disparo de geração de certificado",
+  "category": "functional",
+  "description": "Após cada atualização de progresso de aula, verificar se o aluno concluiu 100% do curso e, em caso positivo, disparar a geração do certificado.",
+  "acceptanceCriteria": [
+    "Função `checkCourseCompletion(userId, courseId)` verifica se todas as aulas estão concluídas",
+    "Se 100%: atualizar `CourseEnrollment.completedAt` e disparar geração do certificado",
+    "Certificado não é gerado duas vezes (verificar se já existe `Certificate` para o par userId/courseId)",
+    "Disparo é assíncrono — não bloqueia a resposta do endpoint de progresso"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar função checkCourseCompletion",
+      "details": "Em `src/lib/progress.ts`: `async function checkCourseCompletion(userId: string, courseId: string)`. Chamar `getCourseProgress()`. Se `percentage === 100`: atualizar `enrollment.completedAt`. Verificar se `Certificate` já existe: `prisma.certificate.findUnique({ where: { userId_courseId } })`. Se não existe: chamar `generateAndStoreCertificate(userId, courseId)` (TASK-62).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Integrar no endpoint de progresso",
+      "details": "Em `POST /api/progress/[lessonId]`: após marcar aula como concluída, chamar `checkCourseCompletion(userId, courseId)`. Fazer de forma assíncrona com `setImmediate(() => checkCourseCompletion(...).catch(console.error))` para não bloquear a resposta.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-53", "TASK-62"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "O certificado deve ser gerado apenas uma vez — verificar existência antes de criar."
+  ]
+}

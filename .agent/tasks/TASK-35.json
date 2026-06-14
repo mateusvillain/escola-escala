@@ -1,0 +1,22 @@
+{
+  "id": "TASK-35",
+  "title": "GET /api/admin/subscriptions — listar assinaturas ativas",
+  "category": "api-endpoint",
+  "description": "Endpoint admin para listar assinaturas com filtros por status e plano.",
+  "acceptanceCriteria": [
+    "Retorna lista paginada com: user (nome, email), plan (nome, tipo), status, billingCycle, currentPeriodEnd, stripeSubscriptionId",
+    "Filtros: ?status=active|past_due|canceled, ?planType=basic|premium",
+    "Ordenação padrão: mais recentes primeiro"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/admin/subscriptions/route.ts`. Query Prisma com `include: { user: { select: { name, email } }, plan: true }`. Aplicar filtros de status e planType. Ordenar por `createdAt desc`. Paginação.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-8", "TASK-5"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

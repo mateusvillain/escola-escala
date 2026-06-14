@@ -1,0 +1,39 @@
+{
+  "id": "TASK-71",
+  "title": "Webhook: checkout.session.completed → ativar assinatura no banco",
+  "category": "integration",
+  "description": "Handler do evento checkout.session.completed que cria o registro de UserSubscription no banco e libera acesso do aluno ao conteúdo.",
+  "acceptanceCriteria": [
+    "Cria UserSubscription com status `active` e planId correto",
+    "Associa stripeSubscriptionId e stripeCustomerId ao registro",
+    "Determina planId a partir do priceId via Price IDs do .env",
+    "Idempotente: não cria duplicata se webhook for re-enviado",
+    "Atualiza stripeCustomerId no registro User se não existia"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler handleCheckoutCompleted",
+      "details": "Em `src/lib/stripe-handlers.ts`: `async function handleCheckoutCompleted(session: Stripe.Checkout.Session)`. Extrair: `customerId`, `subscriptionId`, `metadata.userId` (ou buscar por email). Resolver `planId` a partir do `priceId` via mapa de Price IDs → planType. Usar `prisma.userSubscription.upsert()` com `where: { stripeSubscriptionId }` para garantir idempotência.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Incluir metadata no checkout",
+      "details": "No POST /api/subscriptions/checkout (TASK-68): ao criar a Session, incluir `metadata: { userId: user.id }` para que o webhook possa identificar o usuário.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar fluxo completo",
+      "details": "Completar checkout com cartão de teste 4242... Verificar no banco que UserSubscription foi criado com status `active`. Verificar que aluno agora tem acesso ao conteúdo do plano.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-70"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Sempre usar `session.metadata.userId` para associar ao usuário — não confiar apenas no email.",
+    "Buscar `currentPeriodStart` e `currentPeriodEnd` da subscription via `stripe.subscriptions.retrieve(subscriptionId)`."
+  ]
+}

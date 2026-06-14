@@ -1,0 +1,23 @@
+{
+  "id": "TASK-63",
+  "title": "GET /api/certificates/[courseId]/download — download do PDF do certificado",
+  "category": "api-endpoint",
+  "description": "Endpoint que retorna o PDF do certificado para download direto pelo aluno.",
+  "acceptanceCriteria": [
+    "Retorna PDF com headers corretos para download: `Content-Type: application/pdf` e `Content-Disposition: attachment; filename='certificado-[curso].pdf'`",
+    "Apenas o próprio aluno pode baixar seu certificado (verifica userId)",
+    "Retorna 404 se certificado não existe",
+    "Se `fileUrl` é URL externa (Vercel Blob): redireciona para a URL"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler de download",
+      "details": "Criar `src/app/api/certificates/[courseId]/download/route.ts` (GET). Verificar autenticação. Buscar Certificate pelo userId e courseId. Se não existe: 404. Se `fileUrl` é URL: `NextResponse.redirect(fileUrl)`. Se é base64: decodificar e retornar como `new NextResponse(buffer, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': ... } })`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-62"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

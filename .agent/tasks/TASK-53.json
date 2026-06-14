@@ -1,0 +1,31 @@
+{
+  "id": "TASK-53",
+  "title": "Cálculo de progresso por curso (% de aulas concluídas)",
+  "category": "functional",
+  "description": "Helper/query que calcula o percentual de progresso de um aluno em um curso baseado na contagem de aulas concluídas.",
+  "acceptanceCriteria": [
+    "Função `getCourseProgress(userId, courseId)` retorna `{ completedLessons, totalLessons, percentage }`",
+    "percentage = (completedLessons / totalLessons) * 100, arredondado para inteiro",
+    "Considera apenas aulas do curso (via módulos)",
+    "Performance: queries otimizadas com count em vez de carregar todas as aulas"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper de progresso",
+      "details": "Criar `src/lib/progress.ts` com função `getCourseProgress(userId: string, courseId: string)`. Query 1: `prisma.lesson.count({ where: { module: { courseId } } })` → totalLessons. Query 2: `prisma.lessonProgress.count({ where: { userId, isCompleted: true, lesson: { module: { courseId } } } })` → completedLessons. Retornar objeto com percentage calculado.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Integrar no endpoint de dashboard",
+      "details": "No `GET /api/dashboard` (TASK-56): para cada curso matriculado, chamar `getCourseProgress()` e incluir resultado no response. Usar `Promise.all()` para calcular progresso de múltiplos cursos em paralelo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-49"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Usar duas queries de `count` é mais eficiente do que buscar todos os registros e contar em memória."
+  ]
+}

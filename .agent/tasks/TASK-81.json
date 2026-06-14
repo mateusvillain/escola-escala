@@ -1,0 +1,30 @@
+{
+  "id": "TASK-81",
+  "title": "Configurar restrição de domínio no Bunny Stream (whitelist)",
+  "category": "security",
+  "description": "Configurar o Bunny Stream para restringir o embed do player apenas ao domínio da plataforma, prevenindo uso não autorizado dos vídeos em outros sites.",
+  "acceptanceCriteria": [
+    "Bunny Stream configurado com domínios permitidos: domínio de produção e localhost (desenvolvimento)",
+    "Tentativa de embed em domínio não autorizado: player não carrega",
+    "Configuração documentada no PRD e comunicada ao cliente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Configurar whitelist no Bunny Stream",
+      "details": "Acessar Bunny Stream Dashboard → Library → Security. Em 'Allowed Referrer Domains', adicionar: o domínio de produção (ex: `plataforma.com.br`, `www.plataforma.com.br`) e `localhost` para desenvolvimento. Salvar configurações.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Testar restrição",
+      "details": "Pegar o embed iframe de uma aula e tentar abri-lo em outro domínio (ex: CodePen ou Netlify). Confirmar que player não carrega. No domínio autorizado: confirmar que player funciona normalmente.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-1"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Esta é uma configuração no painel do Bunny Stream — não requer código."
+  ]
+}

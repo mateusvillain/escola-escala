@@ -1,0 +1,31 @@
+{
+  "id": "TASK-29",
+  "title": "Admin — formulário de criação e edição de curso UI",
+  "category": "ui-ux",
+  "description": "Página `/admin/cursos/novo` e `/admin/cursos/[id]` com formulário para criar ou editar os dados gerais de um curso.",
+  "acceptanceCriteria": [
+    "Campos: Título (obrigatório), Descrição (textarea com markdown), Thumbnail (URL ou upload), Instrutor (select), Plano de acesso (Básico/Premium), Status",
+    "Preview do thumbnail ao inserir URL",
+    "Em edição: campos pré-preenchidos com dados atuais",
+    "Botão 'Salvar rascunho' sempre disponível",
+    "Botão 'Publicar' disponível apenas quando há ao menos 1 módulo com 1 aula",
+    "Slug exibido como texto informativo (não editável)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar formulário de dados gerais",
+      "details": "Criar `src/app/(admin)/cursos/novo/page.tsx` e `src/app/(admin)/cursos/[id]/page.tsx`. Em criação: formulário vazio. Em edição: carregar dados via `GET /api/admin/courses/[id]`. Usar React Hook Form. Submit chama POST ou PATCH conforme o caso.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Select de instrutores",
+      "details": "Criar `GET /api/admin/users?role=instructor` para popular o select de instrutores. Exibir nome e e-mail de cada instrutor na opção.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-21", "TASK-22", "TASK-28"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}

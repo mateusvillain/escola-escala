@@ -1,0 +1,38 @@
+{
+  "id": "TASK-45",
+  "title": "Sidebar de navegação do curso — módulos e aulas com estado de conclusão UI",
+  "category": "ui-ux",
+  "description": "Componente sidebar que exibe a estrutura completa do curso (módulos e aulas) com indicadores de progresso e a aula atual destacada.",
+  "acceptanceCriteria": [
+    "Sidebar exibe todos os módulos com suas aulas em ordem",
+    "Aula atual destacada visualmente (background diferente)",
+    "Aulas concluídas exibem ícone de check",
+    "Aulas não assistidas exibem ícone de play",
+    "Clique em aula navega para `/cursos/[slug]/aulas/[lessonId]`",
+    "Em mobile: sidebar colapsável via botão toggle",
+    "Progresso geral do curso exibido no topo (ex: '3 de 10 aulas concluídas')"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar componente CourseSidebar",
+      "details": "Criar `src/components/course/CourseSidebar.tsx`. Receber: `modules` (com aulas), `currentLessonId`, `progress` (map de lessonId → isCompleted). Renderizar accordion por módulo. Link para cada aula. Ícone condicional: ✓ (concluída), ▶ (atual), ○ (não assistida).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Barra de progresso geral",
+      "details": "Calcular: `completedCount / totalLessons * 100`. Exibir componente `Progress` do design system e texto `'{n} de {total} aulas concluídas'`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Layout com sidebar",
+      "details": "Na página da aula: layout de 2 colunas — player/conteúdo (70%) e sidebar (30%) em desktop. Em mobile: sidebar abaixo do conteúdo com toggle para colapsar.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-44", "TASK-53"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}
