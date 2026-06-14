@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "prd-creator": {
+      "source": "pageai-pro/ralph-loop",
+      "sourceType": "github",
+      "skillPath": ".agent/skills/prd-creator/SKILL.md",
+      "computedHash": "477ec93dd3a70cc1903eba145f73dbb0d7aef233e73a77660bb1ef38a5be9bc6"
+    }
+  }
+}
