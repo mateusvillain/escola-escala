@@ -99,7 +99,7 @@ export async function GET(
         videoDuration: lesson.videoDuration,
         isPreview: lesson.isPreview,
         order: lesson.order,
-        ...(hasAccess ? { videoId: lesson.videoId } : {}),
+        ...(hasAccess || lesson.isPreview ? { videoId: lesson.videoId } : {}),
         ...(user && hasAccess
           ? {
               progress: progress

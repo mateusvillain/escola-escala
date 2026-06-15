@@ -1,0 +1,62 @@
+import { prisma } from '@/lib/prisma'
+
+export type AccessReason =
+  | 'not_authenticated'
+  | 'no_subscription'
+  | 'plan_upgrade_required'
+  | 'subscription_inactive'
+
+export interface AccessResult {
+  allowed: boolean
+  reason?: AccessReason
+}
+
+/**
+ * Verifica se um usuário tem acesso a uma aula específica.
+ * Aulas com isPreview=true são liberadas para qualquer usuário, incluindo não autenticados.
+ */
+export async function checkLessonAccess(
+  userId: string | null,
+  lessonId: string
+): Promise<AccessResult> {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: {
+      isPreview: true,
+      module: {
+        select: {
+          course: {
+            select: { planAccess: true },
+          },
+        },
+      },
+    },
+  })
+
+  if (!lesson) return { allowed: false }
+
+  // Preview lessons are always accessible — no auth required
+  if (lesson.isPreview) return { allowed: true }
+
+  if (!userId) return { allowed: false, reason: 'not_authenticated' }
+
+  const subscription = await prisma.userSubscription.findFirst({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    include: { plan: true },
+  })
+
+  if (!subscription) return { allowed: false, reason: 'no_subscription' }
+
+  if (subscription.status !== 'active') {
+    return { allowed: false, reason: 'subscription_inactive' }
+  }
+
+  const planType = subscription.plan.type
+  const courseAccess = lesson.module.course.planAccess
+
+  if (planType === 'premium') return { allowed: true }
+  if (planType === 'basic' && courseAccess === 'basic') return { allowed: true }
+
+  return { allowed: false, reason: 'plan_upgrade_required' }
+}
