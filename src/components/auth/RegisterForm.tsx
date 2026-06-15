@@ -110,76 +110,72 @@ export function RegisterForm() {
 
   return (
     <lui-card aria-label="Criar conta">
-      <div slot="header">
-        <lui-heading level="2">Criar conta</lui-heading>
-      </div>
+      <lui-heading level="2">Criar conta</lui-heading>
 
-      <div slot="body">
-        <lui-stack space="md">
-          {submitError && (
-            <Alert variant="danger" title="Erro ao criar conta" content={submitError} />
-          )}
+      <lui-stack space="md">
+        {submitError && (
+          <Alert variant="danger" title="Erro ao criar conta" content={submitError} />
+        )}
 
-          <form ref={formRef} onSubmit={handleSubmit}>
-            <lui-stack space="lg">
-              <lui-input
-                label="Nome"
-                name="name"
-                placeholder="Seu nome completo"
-                required
-                error={!!fieldErrors.name}
-                error-text={fieldErrors.name}
-                onInput={handleFormInput}
-              />
-              <lui-input
-                label="E-mail"
-                type="email"
-                name="email"
-                placeholder="email@exemplo.com"
-                required
-                error={!!fieldErrors.email}
-                error-text={fieldErrors.email}
-                onInput={handleFormInput}
-              />
-              <lui-input
-                label="Senha"
-                type="password"
-                name="password"
-                placeholder="Mínimo 8 caracteres"
-                required
-                error={!!fieldErrors.password}
-                error-text={fieldErrors.password}
-                onInput={handleFormInput}
-              />
-              <lui-input
-                label="Confirmar Senha"
-                type="password"
-                name="confirmPassword"
-                placeholder="Repita a senha"
-                required
-                error={!!fieldErrors.confirmPassword}
-                error-text={fieldErrors.confirmPassword}
-                onInput={handleFormInput}
-              />
-              <Button
-                label="Criar conta"
-                type="submit"
-                loading={loading}
-                loadingText="Criando conta..."
-                disabled={!isFormValid || loading}
-                block
-                onClick={() => formRef.current?.requestSubmit()}
-              />
-            </lui-stack>
-          </form>
+        <form ref={formRef} onSubmit={handleSubmit}>
+          <lui-stack space="lg">
+            <lui-input
+              label="Nome"
+              name="name"
+              placeholder="Seu nome completo"
+              required
+              error={!!fieldErrors.name}
+              error-text={fieldErrors.name}
+              onInput={handleFormInput}
+            />
+            <lui-input
+              label="E-mail"
+              type="email"
+              name="email"
+              placeholder="email@exemplo.com"
+              required
+              error={!!fieldErrors.email}
+              error-text={fieldErrors.email}
+              onInput={handleFormInput}
+            />
+            <lui-input
+              label="Senha"
+              type="password"
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              required
+              error={!!fieldErrors.password}
+              error-text={fieldErrors.password}
+              onInput={handleFormInput}
+            />
+            <lui-input
+              label="Confirmar Senha"
+              type="password"
+              name="confirmPassword"
+              placeholder="Repita a senha"
+              required
+              error={!!fieldErrors.confirmPassword}
+              error-text={fieldErrors.confirmPassword}
+              onInput={handleFormInput}
+            />
+            <Button
+              label="Criar conta"
+              type="submit"
+              loading={loading}
+              loadingText="Criando conta..."
+              disabled={!isFormValid || loading}
+              block
+              onClick={() => formRef.current?.requestSubmit()}
+            />
+          </lui-stack>
+        </form>
 
-          <lui-flex justify="center">
-            <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
-              Já tem conta? Faça login
-            </Link>
-          </lui-flex>
-        </lui-stack>
-      </div>
+        <lui-flex justify="center">
+          <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+            Já tem conta? Faça login
+          </Link>
+        </lui-flex>
+      </lui-stack>
     </lui-card>
   )
 }
