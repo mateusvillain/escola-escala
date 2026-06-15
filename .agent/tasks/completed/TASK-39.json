@@ -1,0 +1,31 @@
+{
+  "id": "TASK-39",
+  "title": "GET /api/courses — catálogo público de cursos publicados",
+  "category": "api-endpoint",
+  "description": "Endpoint público que retorna cursos publicados para exibição no catálogo. Se o usuário estiver autenticado, inclui informação de acesso (se o plano do aluno cobre o curso).",
+  "acceptanceCriteria": [
+    "Endpoint público (sem autenticação obrigatória)",
+    "Retorna apenas cursos com status `published`",
+    "Cada curso: id, title, slug, description, thumbnailUrl, planAccess, instructor (nome, avatar), _count (módulos, aulas)",
+    "Se usuário autenticado: incluir `hasAccess: boolean` baseado no plano do aluno",
+    "Filtros: ?planAccess=basic|premium, ?search=titulo",
+    "Sem paginação na Fase 1 (< 100 cursos esperados)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler público",
+      "details": "Criar `src/app/api/courses/route.ts`. NÃO usar middleware de auth obrigatório. Opcionalmente ler cookie para checar usuário. Query: `prisma.course.findMany({ where: { status: 'published', ...filtros }, include: { instructor: { select: { user: { select: { name, avatarUrl } } } }, _count: { select: { modules: true } } } })`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Calcular hasAccess",
+      "details": "Se usuário autenticado, buscar assinatura ativa: `prisma.userSubscription.findFirst({ where: { userId, status: 'active' }, include: { plan: true } })`. Para cada curso, calcular `hasAccess`: Premium acessa tudo; Básico acessa apenas cursos basic; sem assinatura: `hasAccess = false`.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-5"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}
