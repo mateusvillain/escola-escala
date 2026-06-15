@@ -1,0 +1,31 @@
+{
+  "id": "TASK-34",
+  "title": "Admin — lista de usuários com busca, filtro por role e ações UI",
+  "category": "ui-ux",
+  "description": "Página `/admin/usuarios` com tabela de usuários, busca, filtros por role e ações para alterar role ou desativar usuário.",
+  "acceptanceCriteria": [
+    "Tabela: avatar, nome, e-mail, role (badge), status assinatura, data de cadastro, ações",
+    "Busca por nome ou e-mail com debounce",
+    "Filtro por role (Todos, Admin, Instrutor, Aluno)",
+    "Ação: alterar role (dropdown select) com confirmação",
+    "Ação: desativar/reativar usuário com confirmação",
+    "Paginação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página e tabela",
+      "details": "Criar `src/app/(admin)/usuarios/page.tsx`. Tabela `UserTable` com colunas definidas. Busca e filtros via query params na URL.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Ações de usuário",
+      "details": "Alterar role: exibir modal de confirmação com novo role. Em confirmação: PATCH /api/admin/users/[id] com `{ role }`. Desativar: modal de confirmação → PATCH com `{ isActive: false }`. Atualizar tabela após ação.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-33", "TASK-28"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}
