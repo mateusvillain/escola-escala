@@ -58,9 +58,10 @@ export async function sendEmail({
 }
 
 export async function sendPasswordResetEmail(email: string, resetLink: string) {
+  const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Plataforma de Cursos";
   await sendEmail({
     to: email,
-    subject: "Redefinir sua senha",
+    subject: `Redefinição de senha — ${appName}`,
     html: passwordResetEmailHtml(resetLink),
   });
 }

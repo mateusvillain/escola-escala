@@ -48,9 +48,13 @@ export async function POST(request: NextRequest) {
     });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const resetLink = `${appUrl}/reset-password?token=${token}`;
+    const resetLink = `${appUrl}/redefinir-senha?token=${token}`;
 
-    await sendPasswordResetEmail(email, resetLink);
+    try {
+      await sendPasswordResetEmail(email, resetLink);
+    } catch (err) {
+      console.error("[forgot-password] Falha ao enviar e-mail:", err);
+    }
   }
 
   return NextResponse.json(
