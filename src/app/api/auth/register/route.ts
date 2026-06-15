@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     select: { id: true, name: true, email: true, role: true },
   });
 
-  const token = signToken({ userId: user.id, email: user.email, role: user.role });
+  const token = signToken({ userId: user.id, name: user.name, email: user.email, role: user.role });
 
   const response = NextResponse.json({ user }, { status: 201 });
   response.cookies.set("auth-token", token, {

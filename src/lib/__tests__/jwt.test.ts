@@ -6,7 +6,7 @@ beforeAll(() => {
   process.env.JWT_SECRET = "test-secret-that-is-at-least-32-characters-long";
 });
 
-const payload = { userId: "user-123", email: "test@example.com", role: "STUDENT" };
+const payload = { userId: "user-123", name: "Test User", email: "test@example.com", role: "STUDENT" };
 
 describe("signToken", () => {
   it("retorna uma string", () => {

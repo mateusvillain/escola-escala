@@ -21,28 +21,28 @@ describe("requireRole", () => {
   });
 
   it("retorna 403 quando usuário tem role incorreto (student → admin)", async () => {
-    const token = signToken({ userId: "u1", email: "student@test.com", role: "student" });
+    const token = signToken({ userId: "u1", name: "Student", email: "student@test.com", role: "student" });
     const result = requireRole(makeRequest(token), ["admin"]);
     expect(result).toBeInstanceOf(NextResponse);
     expect((result as NextResponse).status).toBe(403);
   });
 
   it("retorna 403 quando usuário tem role incorreto (instructor → admin)", async () => {
-    const token = signToken({ userId: "u2", email: "instructor@test.com", role: "instructor" });
+    const token = signToken({ userId: "u2", name: "Instructor", email: "instructor@test.com", role: "instructor" });
     const result = requireRole(makeRequest(token), ["admin"]);
     expect(result).toBeInstanceOf(NextResponse);
     expect((result as NextResponse).status).toBe(403);
   });
 
   it("retorna { user } quando usuário tem role correto (admin)", async () => {
-    const token = signToken({ userId: "u3", email: "admin@test.com", role: "admin" });
+    const token = signToken({ userId: "u3", name: "Admin", email: "admin@test.com", role: "admin" });
     const result = requireRole(makeRequest(token), ["admin"]);
     expect(result).not.toBeInstanceOf(NextResponse);
     expect((result as { user: { role: string } }).user.role).toBe("admin");
   });
 
   it("aceita múltiplos roles permitidos", async () => {
-    const token = signToken({ userId: "u4", email: "inst@test.com", role: "instructor" });
+    const token = signToken({ userId: "u4", name: "Inst", email: "inst@test.com", role: "instructor" });
     const result = requireRole(makeRequest(token), ["admin", "instructor"]);
     expect(result).not.toBeInstanceOf(NextResponse);
   });

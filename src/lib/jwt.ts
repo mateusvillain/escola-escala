@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 
 export type JwtPayload = {
   userId: string;
+  name: string;
   email: string;
   role: string;
 };

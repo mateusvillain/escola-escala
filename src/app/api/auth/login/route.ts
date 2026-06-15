@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, name: true, email: true, role: true, passwordHash: true, isActive: true },
+    select: { id: true, name: true, email: true, role: true, passwordHash: true, isActive: true  },
   });
 
   if (!user) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Conta desativada" }, { status: 403 });
   }
 
-  const token = signToken({ userId: user.id, email: user.email, role: user.role });
+  const token = signToken({ userId: user.id, name: user.name, email: user.email, role: user.role });
 
   const response = NextResponse.json(
     { user: { id: user.id, name: user.name, email: user.email, role: user.role } },

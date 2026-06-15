@@ -1,0 +1,42 @@
+{
+  "id": "TASK-17",
+  "title": "Layout responsivo base — header, footer e navegação principal",
+  "category": "ui-ux",
+  "description": "Criar o layout base da aplicação com header (logo, navegação, avatar do usuário), footer e estrutura responsiva. Usado por todas as páginas autenticadas.",
+  "acceptanceCriteria": [
+    "Header: logo à esquerda, links de navegação principais, avatar/menu do usuário à direita",
+    "Menu do usuário: exibe nome e e-mail, links para Perfil e Minha Assinatura, botão Sair",
+    "Header colapsa para menu hamburguer em mobile (< 768px)",
+    "Footer com links institucionais e copyright",
+    "Layout aplica corretamente em desktop, tablet e mobile",
+    "Usuário não autenticado é redirecionado para `/login` ao acessar rotas protegidas"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar layout autenticado",
+      "details": "Criar `src/app/(app)/layout.tsx` como wrapper das rotas autenticadas (dashboard, curso, perfil). Incluir `Header` e `Footer`. Criar `src/components/layout/Header.tsx` e `src/components/layout/Footer.tsx`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Implementar Header com menu responsivo",
+      "details": "Header com: Logo (link para `/`), links principais (Catálogo, Dashboard), UserMenu (Client Component com estado de abertura). UserMenu mostra nome/e-mail, links Perfil e Assinatura, e botão que chama `POST /api/auth/logout` e redireciona para `/login`. Em mobile: hamburger que abre drawer/menu lateral.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Verificar responsividade",
+      "details": "Testar no browser em 375px (mobile): menu hamburguer visível. Em 768px (tablet): verificar layout adaptado. Em 1280px (desktop): navegação completa no header. Usar DevTools para simular dispositivos.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-3"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "JWT payload agora inclui `name` — login e register atualizados para assinar o token com o nome do usuário.",
+    "Usar `<div role='navigation'>` em vez de `<nav>` para o desktop nav — Let's UI sobrescreve estilos de elementos HTML semânticos sem @layer, quebrando o `hidden` do Tailwind.",
+    "O Header usa `usePathname()` para destacar o link ativo.",
+    "Criar contexto `AuthContext` ou usar Server Component para ler o usuário autenticado e passar para componentes filho."
+  ]
+}
