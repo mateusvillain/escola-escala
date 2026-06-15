@@ -15,13 +15,13 @@
       "step": 1,
       "description": "Criar schema e route handler",
       "details": "Criar `src/app/api/auth/login/route.ts`. Validar body com `loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })`. Buscar usuário por email. Se não encontrado: retornar 401 com `{ error: 'Credenciais inválidas' }`. Comparar senha com `bcrypt.compare(password, user.passwordHash)`. Se falso: retornar 401. Se `user.isActive === false`: retornar 403. Gerar JWT e setar cookie.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Verificar com usuários de teste",
       "details": "Fazer login com `admin@test.com / Test@12345` → 200 com cookie. Tentar com senha errada → 401. Tentar com e-mail inexistente → 401. Verificar que tempo de resposta é similar em ambos os casos (proteção contra timing attack via bcrypt).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-9"],

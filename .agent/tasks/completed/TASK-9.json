@@ -16,19 +16,19 @@
       "step": 1,
       "description": "Criar schema de validação Zod",
       "details": "Criar `src/lib/schemas/auth.ts` com `registerSchema = z.object({ name: z.string().min(2).max(100), email: z.string().email(), password: z.string().min(8).max(100) })`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar route handler",
       "details": "Criar `src/app/api/auth/register/route.ts`. Validar body com `registerSchema.safeParse()`. Se inválido, retornar 400 com erros Zod. Verificar se email já existe no banco via `prisma.user.findUnique({ where: { email } })`. Se existir, retornar 409. Gerar hash com `bcrypt.hash(password, 12)`. Criar usuário com `prisma.user.create()`. Gerar JWT com `signToken()`. Setar cookie `auth-token` HttpOnly, SameSite=Strict, Secure.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Verificar com teste manual",
       "details": "Usar curl: `curl -X POST http://localhost:3000/api/auth/register -H 'Content-Type: application/json' -d '{\"name\":\"Teste\",\"email\":\"novo@test.com\",\"password\":\"Senha@123\"}' -v`. Verificar: status 201, header `Set-Cookie` com `auth-token HttpOnly`. Verificar no banco que senha está hasheada.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-5", "TASK-6"],

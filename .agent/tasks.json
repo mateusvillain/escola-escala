@@ -59,15 +59,15 @@
     "id": "TASK-9",
     "title": "POST /api/auth/register — cadastro de novo aluno",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-9.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-9.json",
+    "passes": true
   },
   {
     "id": "TASK-10",
     "title": "POST /api/auth/login — login com e-mail e senha",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-10.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-10.json",
+    "passes": true
   },
   {
     "id": "TASK-11",
