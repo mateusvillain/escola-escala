@@ -1,0 +1,55 @@
+{
+  "id": "TASK-5",
+  "title": "Executar migrations e criar seed de usuários e planos de teste",
+  "category": "setup",
+  "description": "Rodar as migrations do Prisma para criar as tabelas no banco de dados e popular com dados iniciais necessários para testes: usuários de teste (admin, instrutor, alunos) e planos de assinatura.",
+  "acceptanceCriteria": [
+    "`npx prisma migrate dev` executa sem erros e cria todas as tabelas",
+    "Tabela `subscription_plans` contém 2 registros: Básico e Premium com Price IDs preenchidos",
+    "Usuário admin@test.com criado com role `admin`",
+    "Usuário instrutor@test.com criado com role `instructor` e perfil de instrutor",
+    "Usuário aluno.basico@test.com com assinatura ativa no plano Básico",
+    "Usuário aluno.premium@test.com com assinatura ativa no plano Premium",
+    "Senha de todos os usuários de teste é `Test@12345` (hash bcrypt no banco)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Executar migration inicial",
+      "details": "Executar `npx prisma migrate dev --name init`. Todas as tabelas criadas no Neon (sa-east-1).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar script de seed",
+      "details": "Criado `prisma/seed.ts` com PrismaClient usando @prisma/adapter-pg (necessário no Prisma v7). Popula: 2 SubscriptionPlans, 4 Users, 1 Instructor, 2 UserSubscriptions.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Configurar comando de seed",
+      "details": "Prisma v7 usa `prisma.config.ts` para seed (não package.json). Adicionado `migrations.seed: 'tsx prisma/seed.ts'` no prisma.config.ts. Instalado `tsx` como devDependency.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Executar seed",
+      "details": "`npx prisma db seed` executado com sucesso. Registros criados no banco Neon.",
+      "pass": true
+    },
+    {
+      "step": 5,
+      "description": "Verificar Prisma Studio",
+      "details": "Seed concluído com sucesso conforme output do comando.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-4"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Prisma v7 requer driver adapter explícito: `new PrismaClient({ adapter: new PrismaPg({ connectionString }) })`.",
+    "Seed configurado via `migrations.seed` no prisma.config.ts, não via `prisma.seed` no package.json.",
+    "tsx usado no lugar de ts-node para evitar problemas com aspas no --compiler-options.",
+    "Os Price IDs do Stripe são lidos via process.env — vazios no seed de desenvolvimento."
+  ]
+}
