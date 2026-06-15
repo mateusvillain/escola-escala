@@ -1,0 +1,23 @@
+{
+  "id": "TASK-26",
+  "title": "GET + PATCH + DELETE /api/admin/lessons/[id]",
+  "category": "api-endpoint",
+  "description": "Endpoints para ler detalhe, editar e remover uma aula específica.",
+  "acceptanceCriteria": [
+    "GET retorna todos os campos da aula",
+    "PATCH atualiza title, description, videoId, videoDuration, content, order, isPreview",
+    "DELETE remove a aula do banco",
+    "Retorna 404 se aula não encontrada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/admin/lessons/[id]/route.ts`. GET: `prisma.lesson.findUnique()`. PATCH: `prisma.lesson.update()`. DELETE: `prisma.lesson.delete()`.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-25"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

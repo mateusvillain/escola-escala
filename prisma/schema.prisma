@@ -99,7 +99,7 @@ model Module {
 model Lesson {
   id            String   @id @default(uuid())
   moduleId      String
-  module        Module   @relation(fields: [moduleId], references: [id])
+  module        Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   title         String
   description   String?
   videoId       String?
@@ -160,7 +160,7 @@ model LessonProgress {
   userId          String
   user            User      @relation(fields: [userId], references: [id])
   lessonId        String
-  lesson          Lesson    @relation(fields: [lessonId], references: [id])
+  lesson          Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   watchPercentage Float     @default(0)
   isCompleted     Boolean   @default(false)
   completedAt     DateTime?
