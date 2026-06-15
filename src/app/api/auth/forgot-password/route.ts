@@ -1,0 +1,51 @@
+import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { sendPasswordResetEmail } from "@/lib/email";
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export async function POST(request: NextRequest) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Body inválido" }, { status: 400 });
+  }
+
+  const parsed = forgotPasswordSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", issues: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const { email } = parsed.data;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (user) {
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const expiry = new Date(Date.now() + 3600000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken: tokenHash, resetTokenExpiry: expiry },
+    });
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const resetLink = `${appUrl}/reset-password?token=${token}`;
+
+    await sendPasswordResetEmail(email, resetLink);
+  }
+
+  return NextResponse.json(
+    { message: "Se esse e-mail estiver cadastrado, você receberá um link de redefinição em breve." },
+    { status: 200 }
+  );
+}

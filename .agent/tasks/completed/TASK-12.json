@@ -1,0 +1,39 @@
+{
+  "id": "TASK-12",
+  "title": "POST /api/auth/forgot-password — enviar link de recuperação por e-mail",
+  "category": "api-endpoint",
+  "description": "Endpoint que recebe um e-mail, gera um token de recuperação de senha com expiração de 1 hora e envia e-mail com link de redefinição.",
+  "acceptanceCriteria": [
+    "POST com e-mail válido e existente retorna 200 e envia e-mail com link",
+    "POST com e-mail inexistente retorna 200 com mesma mensagem (sem revelar se e-mail existe)",
+    "Token gerado tem expiração de 1 hora",
+    "Link no e-mail aponta para `/reset-password?token=<TOKEN>`",
+    "Token é armazenado hasheado no banco (campo `resetToken` e `resetTokenExpiry` no modelo User)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar campos de reset ao modelo User",
+      "details": "Adicionar ao model `User` no Prisma: `resetToken String?` e `resetTokenExpiry DateTime?`. Criar e executar migration: `npx prisma migrate dev --name add_reset_token`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/auth/forgot-password/route.ts`. Gerar token seguro com `crypto.randomBytes(32).toString('hex')`. Calcular expiração: `new Date(Date.now() + 3600000)` (1 hora). Hashear token com `crypto.createHash('sha256').update(token).digest('hex')`. Salvar hash e expiração no user. Chamar utilitário de e-mail (TASK-64) para enviar link.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Verificar envio de e-mail",
+      "details": "Chamar endpoint com `email: admin@test.com`. Confirmar que e-mail é recebido com link correto. Verificar que banco tem `resetToken` (hash) e `resetTokenExpiry` populados para o usuário.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-10", "TASK-64"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Armazenar SHA-256 do token no banco (não o token original) — se o banco vazar, tokens não podem ser usados diretamente.",
+    "Retornar sempre 200 independentemente se o e-mail existe ou não — previne enumeração."
+  ]
+}
