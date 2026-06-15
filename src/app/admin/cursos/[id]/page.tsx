@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { CourseForm } from '@/components/admin/CourseForm'
+import { ModuleList } from '@/components/admin/ModuleList'
 
 interface EditCursoPageProps {
   params: Promise<{ id: string }>
@@ -37,7 +38,7 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
         Editar curso
       </lui-heading>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <CourseForm
           courseId={course.id}
           slug={course.slug}
@@ -49,6 +50,16 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
             instructorId: course.instructorId,
             planAccess: course.planAccess as 'basic' | 'premium',
           }}
+        />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <ModuleList
+          courseId={course.id}
+          initialModules={course.modules.map(m => ({
+            ...m,
+            description: m.description ?? null,
+          }))}
         />
       </div>
     </div>
