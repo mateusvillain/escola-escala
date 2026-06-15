@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation'
 
 interface Instructor {
   id: string
-  user: { name: string; email: string }
+  name: string
+  email: string
+  instructorId: string | null
 }
 
 type FormData = {
@@ -59,9 +61,9 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
   const thumbnailUrl = watch('thumbnailUrl')
 
   useEffect(() => {
-    fetch('/api/admin/users?role=instructor')
+    fetch('/api/admin/users?role=instructor&limit=100')
       .then(r => r.json())
-      .then(d => setInstructors(d.users ?? []))
+      .then(d => setInstructors((d.data ?? []).filter((u: Instructor) => u.instructorId)))
       .catch(() => {})
       .finally(() => setLoadingInstructors(false))
   }, [])
@@ -208,8 +210,8 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
               {loadingInstructors ? 'Carregando...' : 'Selecione um instrutor'}
             </option>
             {instructors.map(inst => (
-              <option key={inst.id} value={inst.id}>
-                {inst.user.name} — {inst.user.email}
+              <option key={inst.instructorId!} value={inst.instructorId!}>
+                {inst.name} — {inst.email}
               </option>
             ))}
           </select>
