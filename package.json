@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
   },
@@ -46,6 +47,7 @@
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.8"
   }
 }
