@@ -15,37 +15,37 @@
       "step": 1,
       "description": "Definir enums",
       "details": "Adicionar em `prisma/schema.prisma`: `enum Role { admin instructor student }`, `enum PlanType { basic premium }`, `enum CourseStatus { draft published archived }`, `enum BillingCycle { monthly annual }`, `enum SubscriptionStatus { active past_due canceled trialing }`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Definir modelo User",
       "details": "Criar model `User` com campos: `id String @id @default(uuid())`, `email String @unique`, `name String`, `passwordHash String`, `role Role @default(student)`, `avatarUrl String?`, `isActive Boolean @default(true)`, `createdAt DateTime @default(now())`, `updatedAt DateTime @updatedAt`. Adicionar relações com `Instructor`, `UserSubscription`, `CourseEnrollment`, `LessonProgress`, `Certificate`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Definir modelos de conteúdo",
       "details": "Criar models: `Instructor` (userId, bio, slug @unique), `Course` (id, title, slug @unique, description, thumbnailUrl, instructorId, planAccess PlanType, status CourseStatus @default(draft), createdAt, updatedAt), `Module` (id, courseId, title, description, order, createdAt), `Lesson` (id, moduleId, title, description, videoId, videoDuration, content, order, isPreview @default(false), createdAt, updatedAt).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Definir modelos de assinatura",
       "details": "Criar models: `SubscriptionPlan` (id, name, type PlanType @unique, description, priceMonthly, priceAnnual, stripePriceIdMonthly, stripePriceIdAnnual, isActive @default(true)), `UserSubscription` (id, userId, planId, stripeSubscriptionId @unique, stripeCustomerId, status SubscriptionStatus, billingCycle BillingCycle, currentPeriodStart, currentPeriodEnd, createdAt, updatedAt).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 5,
       "description": "Definir modelos de progresso e certificado",
       "details": "Criar models: `CourseEnrollment` (id, userId, courseId, enrolledAt @default(now()), completedAt?, @@unique([userId, courseId])), `LessonProgress` (id, userId, lessonId, watchPercentage @default(0), isCompleted @default(false), completedAt?, lastWatchedAt @default(now()), @@unique([userId, lessonId])), `Certificate` (id, userId, courseId, issuedAt @default(now()), fileUrl?, @@unique([userId, courseId])).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 6,
       "description": "Validar schema",
       "details": "Executar `npx prisma validate` e corrigir quaisquer erros. Executar `npx prisma format` para formatar o arquivo. Revisar que todos os relacionamentos bidirecionais estão corretos.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-2"],
