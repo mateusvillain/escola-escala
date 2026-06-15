@@ -15,13 +15,13 @@
       "step": 1,
       "description": "Criar cliente Nodemailer",
       "details": "Criar `src/lib/email.ts`. Importar `nodemailer`. Criar transporter: `nodemailer.createTransport({ host: SMTP_HOST, port: SMTP_PORT, auth: { user: SMTP_USER, pass: SMTP_PASSWORD } })`. Função `sendEmail({ to, subject, html, text? })` que chama `transporter.sendMail()`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar templates de e-mail",
       "details": "Criar `src/lib/email-templates.ts`. Template `passwordResetEmailHtml(resetLink: string)`: HTML simples com título 'Redefinir sua senha', parágrafo explicativo, botão com link. Template `welcomeEmailHtml(name: string)`: boas-vindas com nome do aluno e link para o dashboard.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
@@ -34,6 +34,7 @@
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Em produção: usar Resend, SendGrid ou Brevo em vez de SMTP direto para melhor deliverability.",
-    "Nunca bloquear o fluxo principal por falha no envio de e-mail — usar try/catch e logar o erro."
+    "Nunca bloquear o fluxo principal por falha no envio de e-mail — usar try/catch e logar o erro.",
+    "DEPENDÊNCIA EXTERNA: requer credenciais SMTP configuradas no .env.local antes de marcar como concluída. Opções: Mailtrap ou Ethereal para dev; Resend/Brevo/SendGrid para produção."
   ]
 }
