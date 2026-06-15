@@ -1,0 +1,33 @@
+{
+  "id": "TASK-21",
+  "title": "POST /api/admin/courses — criar novo curso",
+  "category": "api-endpoint",
+  "description": "Endpoint admin para criar um novo curso em estado `draft`.",
+  "acceptanceCriteria": [
+    "POST com dados válidos retorna 201 com o curso criado",
+    "Campos obrigatórios: title, planAccess (basic|premium)",
+    "Campos opcionais: description, thumbnailUrl, instructorId",
+    "Slug gerado automaticamente a partir do título (kebab-case, único)",
+    "Status inicial sempre `draft`",
+    "Slug duplicado: incrementar sufixo (ex: `meu-curso-2`)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper de geração de slug",
+      "details": "Criar `src/lib/utils/slug.ts` com função `generateSlug(title: string): string` usando `title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')`. Criar `getUniqueSlug(title: string, prisma: PrismaClient): Promise<string>` que verifica unicidade e adiciona sufixo numérico se necessário.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler",
+      "details": "Criar POST em `src/app/api/admin/courses/route.ts`. Validar body. Gerar slug único. Criar via `prisma.course.create()`. Retornar 201 com curso.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-20"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Slugs em português: `título` → `titulo` (normalizar acentos com `normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')`."
+  ]
+}

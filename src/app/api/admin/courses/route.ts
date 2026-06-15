@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUniqueSlug } from "@/lib/utils/slug";
 
 export async function GET(request: NextRequest) {
   const auth = requireRole(request, ["admin"]);
@@ -70,4 +72,68 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
     },
   });
+}
+
+const createSchema = z.object({
+  title: z.string().min(1).max(255),
+  planAccess: z.enum(["basic", "premium"]),
+  description: z.string().optional(),
+  thumbnailUrl: z.string().url().nullable().optional(),
+  instructorId: z.string().uuid().optional(),
+});
+
+export async function POST(request: NextRequest) {
+  const auth = requireRole(request, ["admin"]);
+  if (auth instanceof NextResponse) return auth;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Body inválido" }, { status: 400 });
+  }
+
+  const parsed = createSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", issues: parsed.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const { title, planAccess, description, thumbnailUrl, instructorId } = parsed.data;
+
+  if (!instructorId) {
+    return NextResponse.json(
+      { error: "instructorId é obrigatório" },
+      { status: 400 }
+    );
+  }
+
+  const slug = await getUniqueSlug(title, prisma);
+
+  const course = await prisma.course.create({
+    data: {
+      title,
+      slug,
+      description: description ?? "",
+      thumbnailUrl: thumbnailUrl ?? null,
+      instructorId,
+      planAccess,
+      status: "draft",
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      description: true,
+      thumbnailUrl: true,
+      planAccess: true,
+      status: true,
+      instructorId: true,
+      createdAt: true,
+    },
+  });
+
+  return NextResponse.json({ course }, { status: 201 });
 }
