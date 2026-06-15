@@ -1,0 +1,32 @@
+{
+  "id": "TASK-18",
+  "title": "GET + PATCH /api/users/me — perfil do usuário autenticado",
+  "category": "api-endpoint",
+  "description": "Endpoints para ler e atualizar o perfil do usuário autenticado (nome, avatar). Atualização de senha com verificação da senha atual.",
+  "acceptanceCriteria": [
+    "GET /api/users/me retorna `{ id, name, email, role, avatarUrl, createdAt }` sem passwordHash",
+    "PATCH /api/users/me aceita `{ name?, avatarUrl?, currentPassword?, newPassword? }",
+    "Atualização de nome/avatar sem senha funciona normalmente",
+    "Troca de senha requer `currentPassword` correto; se incorreto, retorna 400",
+    "E-mail não pode ser alterado via este endpoint"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler GET",
+      "details": "Criar `src/app/api/users/me/route.ts`. Chamar `getAuthUser(request)`. Buscar usuário via `prisma.user.findUnique({ where: { id: user.userId }, select: { id, name, email, role, avatarUrl, createdAt } })`. Retornar 200 com dados.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler PATCH",
+      "details": "Validar body com Zod. Se `newPassword` fornecido: buscar usuário com passwordHash, comparar `currentPassword` com bcrypt.compare(). Se inválido: 400. Fazer hash da nova senha. Atualizar campos permitidos via `prisma.user.update()`. Retornar usuário atualizado (sem passwordHash).",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-7", "TASK-5"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Avatar upload não está no escopo desta task — `avatarUrl` é apenas uma URL de string (ex: para Vercel Blob ou URL externa)."
+  ]
+}
