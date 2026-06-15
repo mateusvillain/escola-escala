@@ -1,0 +1,23 @@
+{
+  "id": "TASK-36",
+  "title": "Admin — página de assinaturas ativas UI",
+  "category": "ui-ux",
+  "description": "Página `/admin/assinaturas` com tabela de assinaturas e filtros.",
+  "acceptanceCriteria": [
+    "Tabela: nome do aluno, e-mail, plano, ciclo (mensal/anual), status (badge colorido), próxima renovação",
+    "Filtros: status e tipo de plano",
+    "Status coloridos: active (verde), past_due (amarelo), canceled (vermelho)",
+    "Link para perfil do usuário em cada linha"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página e tabela",
+      "details": "Criar `src/app/(admin)/assinaturas/page.tsx`. Tabela `SubscriptionTable`. Formatar `currentPeriodEnd` como data legível (ex: `15/07/2026`). Badge de status com cores do design system.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-35", "TASK-28"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}
