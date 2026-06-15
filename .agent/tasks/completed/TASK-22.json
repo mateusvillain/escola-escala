@@ -1,0 +1,32 @@
+{
+  "id": "TASK-22",
+  "title": "GET + PATCH + DELETE /api/admin/courses/[id]",
+  "category": "api-endpoint",
+  "description": "Endpoints admin para ler detalhe, editar e remover (ou arquivar) um curso específico.",
+  "acceptanceCriteria": [
+    "GET retorna curso com módulos e aulas aninhados",
+    "PATCH atualiza campos enviados (title, description, thumbnailUrl, instructorId, planAccess, status)",
+    "PATCH com status `published` valida que curso tem ao menos 1 módulo e 1 aula",
+    "DELETE arquiva o curso (status = `archived`) em vez de deletar fisicamente",
+    "Curso não encontrado retorna 404"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler [id]",
+      "details": "Criar `src/app/api/admin/courses/[id]/route.ts`. GET: `prisma.course.findUnique({ where: { id }, include: { modules: { include: { lessons: true }, orderBy: { order: 'asc' } }, instructor: true } })`. PATCH: atualizar campos via `prisma.course.update()`. Se status muda para `published`, verificar contagem de módulos/aulas. DELETE: `prisma.course.update({ data: { status: 'archived' } })`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Testar CRUD",
+      "details": "Criar curso (TASK-21). GET pelo ID → verificar estrutura. PATCH description e status. Tentar publicar curso sem módulos → 400. Adicionar módulo/aula, publicar → 200. DELETE → status archived, curso não aparece no catálogo público.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-21"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Soft delete (arquivamento) preserva histórico de matrículas e progresso dos alunos."
+  ]
+}

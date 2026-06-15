@@ -61,9 +61,25 @@ export async function PATCH(
     );
   }
 
-  const existing = await prisma.course.findUnique({ where: { id } });
+  const existing = await prisma.course.findUnique({
+    where: { id },
+    include: { _count: { select: { modules: true } } },
+  });
   if (!existing) {
     return NextResponse.json({ error: "Curso não encontrado" }, { status: 404 });
+  }
+
+  if (parsed.data.status === "published") {
+    const [moduleCount, lessonCount] = await Promise.all([
+      prisma.module.count({ where: { courseId: id } }),
+      prisma.lesson.count({ where: { module: { courseId: id } } }),
+    ]);
+    if (moduleCount === 0 || lessonCount === 0) {
+      return NextResponse.json(
+        { error: "O curso precisa ter ao menos 1 módulo e 1 aula para ser publicado" },
+        { status: 400 }
+      );
+    }
   }
 
   const course = await prisma.course.update({
@@ -77,6 +93,29 @@ export async function PATCH(
       planAccess: true,
       updatedAt: true,
     },
+  });
+
+  return NextResponse.json({ course });
+}
+
+export async function DELETE(
+  request: NextRequest,
+  ctx: RouteContext<"/api/admin/courses/[id]">
+) {
+  const auth = requireRole(request, ["admin"]);
+  if (auth instanceof NextResponse) return auth;
+
+  const { id } = await ctx.params;
+
+  const existing = await prisma.course.findUnique({ where: { id } });
+  if (!existing) {
+    return NextResponse.json({ error: "Curso não encontrado" }, { status: 404 });
+  }
+
+  const course = await prisma.course.update({
+    where: { id },
+    data: { status: "archived" },
+    select: { id: true, slug: true, status: true },
   });
 
   return NextResponse.json({ course });

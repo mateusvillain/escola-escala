@@ -1,0 +1,23 @@
+{
+  "id": "TASK-23",
+  "title": "POST /api/admin/courses/[id]/modules — criar módulo em curso",
+  "category": "api-endpoint",
+  "description": "Endpoint para criar um novo módulo dentro de um curso, com ordenação automática.",
+  "acceptanceCriteria": [
+    "POST com title válido retorna 201 com módulo criado",
+    "Campo `order` calculado automaticamente (último + 1)",
+    "Retorna erro 404 se courseId não existe",
+    "Módulo criado com `description` opcional"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/admin/courses/[id]/modules/route.ts`. Verificar que curso existe. Contar módulos existentes para calcular `order`: `prisma.module.count({ where: { courseId: id } })` + 1. Criar módulo com `prisma.module.create({ data: { courseId, title, description, order } })`. Retornar 201.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-22"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}
