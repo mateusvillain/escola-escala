@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar route handler",
       "details": "Criar `src/app/api/auth/logout/route.ts`. Retornar `NextResponse.json({ success: true })` com header `Set-Cookie: auth-token=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`. Isso remove o cookie no browser.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Verificar logout",
       "details": "Fazer login, confirmar cookie presente. Chamar POST /api/auth/logout. Confirmar que cookie é removido (header `Set-Cookie` com Max-Age=0). Tentar acessar `/api/dashboard` após logout → 401.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-10"],
