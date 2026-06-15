@@ -1,0 +1,42 @@
+{
+  "id": "TASK-14",
+  "title": "Página de cadastro UI — formulário de registro de aluno",
+  "category": "ui-ux",
+  "description": "Página `/cadastro` com formulário de registro contendo campos de nome, e-mail e senha, validação client-side e integração com o endpoint POST /api/auth/register.",
+  "acceptanceCriteria": [
+    "Formulário exibe campos: Nome, E-mail, Senha, Confirmar Senha",
+    "Validação client-side: campos obrigatórios, formato de e-mail, senha mínimo 8 caracteres, senhas devem coincidir",
+    "Botão de submit desabilitado enquanto formulário é inválido",
+    "Spinner/loading exibido durante a requisição",
+    "Sucesso: redireciona para `/dashboard`",
+    "Erro de e-mail duplicado: exibe mensagem 'Este e-mail já está cadastrado'",
+    "Página é responsiva (mobile e desktop)",
+    "Link para `/login` para usuários já cadastrados"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página e componente de formulário",
+      "details": "Criar `src/app/(auth)/cadastro/page.tsx`. Criar `src/components/auth/RegisterForm.tsx` como Client Component (`'use client'`). Usar React Hook Form com zodResolver e `registerSchema` para validação. Campos: name, email, password, confirmPassword (validação: password === confirmPassword).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Integrar com API e tratar respostas",
+      "details": "No submit: chamar `fetch('/api/auth/register', { method: 'POST', body: JSON.stringify(data) })`. Em sucesso (201): usar `router.push('/dashboard')`. Em 409: exibir erro no campo de e-mail. Em outros erros: exibir Alert genérico. Gerenciar estado de loading para desabilitar o botão e exibir spinner.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Verificar responsividade e acessibilidade",
+      "details": "Testar no browser: mobile (375px), tablet (768px) e desktop (1280px). Verificar navegação por teclado (Tab, Enter). Confirmar que labels estão associados aos inputs via `htmlFor`. Verificar contraste de cores conforme design system.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-9", "TASK-3", "TASK-17"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Instalar: `npm install react-hook-form @hookform/resolvers`.",
+    "Usar layout de auth (`src/app/(auth)/layout.tsx`) sem header/sidebar para páginas de cadastro e login."
+  ]
+}
