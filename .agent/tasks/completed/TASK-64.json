@@ -27,14 +27,14 @@
       "step": 3,
       "description": "Testar envio",
       "details": "Em desenvolvimento, usar Mailtrap ou Ethereal Email (`nodemailer.createTestAccount()`) para interceptar e-mails sem enviar de verdade. Configurar no `.env.local` com credenciais de teste. Chamar `sendWelcomeEmail('teste@example.com', 'Maria')` e verificar no Mailtrap.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-2"],
   "estimatedComplexity": "low",
   "technicalNotes": [
-    "Em produção: usar Resend, SendGrid ou Brevo em vez de SMTP direto para melhor deliverability.",
+    "Usando Resend via SMTP (smtp.resend.com:587). Em produção, verificar domínio próprio no dashboard do Resend para enviar para qualquer destinatário.",
     "Nunca bloquear o fluxo principal por falha no envio de e-mail — usar try/catch e logar o erro.",
-    "DEPENDÊNCIA EXTERNA: requer credenciais SMTP configuradas no .env.local antes de marcar como concluída. Opções: Mailtrap ou Ethereal para dev; Resend/Brevo/SendGrid para produção."
+    "Com onboarding@resend.dev como sender, só é possível enviar para o e-mail da conta Resend. Verificar domínio para remover essa restrição."
   ]
 }
