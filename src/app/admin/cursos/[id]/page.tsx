@@ -15,7 +15,13 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
     where: { id },
     include: {
       modules: {
-        include: { lessons: { select: { id: true } } },
+        include: {
+          lessons: {
+            select: { id: true, title: true, order: true, videoId: true, isPreview: true },
+            orderBy: { order: 'asc' },
+          },
+        },
+        orderBy: { order: 'asc' },
       },
     },
   })

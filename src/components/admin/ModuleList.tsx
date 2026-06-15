@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useCallback, useRef } from 'react'
-
-interface Lesson {
-  id: string
-}
+import { LessonList, type Lesson } from './LessonList'
 
 interface Module {
   id: string
@@ -26,6 +23,9 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
   )
   const [mutating, setMutating] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Expand/collapse state
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   // Add module state
   const [addingModule, setAddingModule] = useState(false)
@@ -50,6 +50,15 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
     }
   }, [courseId])
 
+  const toggleExpand = (moduleId: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(moduleId)) next.delete(moduleId)
+      else next.add(moduleId)
+      return next
+    })
+  }
+
   // ── Add module ────────────────────────────────────────────────────────────
   const handleOpenAdd = () => {
     setAddingModule(true)
@@ -72,7 +81,10 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
         body: JSON.stringify({ title }),
       })
       if (!res.ok) throw new Error()
+      const data = await res.json()
       await refetch()
+      // Auto-expand the new module
+      setExpandedIds(prev => new Set([...prev, data.module.id]))
       setNewTitle('')
       setAddingModule(false)
     } catch {
@@ -91,7 +103,8 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
   }
 
   // ── Inline edit ───────────────────────────────────────────────────────────
-  const handleEditStart = (mod: Module) => {
+  const handleEditStart = (mod: Module, e: React.MouseEvent) => {
+    e.stopPropagation()
     setEditingId(mod.id)
     setEditTitle(mod.title)
   }
@@ -129,7 +142,8 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
   }
 
   // ── Reorder ───────────────────────────────────────────────────────────────
-  const handleMove = async (mod: Module, direction: 'up' | 'down') => {
+  const handleMove = async (mod: Module, direction: 'up' | 'down', e: React.MouseEvent) => {
+    e.stopPropagation()
     const newOrder = direction === 'up' ? mod.order - 1 : mod.order + 1
     if (newOrder < 1 || newOrder > modules.length) return
 
@@ -162,6 +176,11 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
         method: 'DELETE',
       })
       if (!res.ok && res.status !== 204) throw new Error()
+      setExpandedIds(prev => {
+        const next = new Set(prev)
+        next.delete(mod.id)
+        return next
+      })
       await refetch()
     } catch {
       setError('Erro ao excluir módulo.')
@@ -196,7 +215,7 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
       )}
 
       {/* Module list */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         {modules.length === 0 && !addingModule && (
           <p className="text-sm text-gray-400 py-4 text-center">
             Nenhum módulo ainda. Adicione o primeiro módulo acima.
@@ -208,91 +227,115 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
           const isLast = idx === modules.length - 1
           const isMutating = mutating === mod.id
           const isEditing = editingId === mod.id
+          const isExpanded = expandedIds.has(mod.id)
 
           return (
-            <div
-              key={mod.id}
-              className={[
-                'flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg transition-opacity',
-                isMutating ? 'opacity-50' : '',
-              ].join(' ')}
-            >
-              {/* Order badge */}
-              <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">
-                {mod.order}
-              </span>
+            <div key={mod.id} className={isMutating ? 'opacity-50' : ''}>
+              {/* Module row */}
+              <div
+                className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                onClick={() => !isEditing && toggleExpand(mod.id)}
+              >
+                {/* Expand chevron */}
+                <svg
+                  className={[
+                    'w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-150',
+                    isExpanded ? 'rotate-90' : '',
+                  ].join(' ')}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
 
-              {/* Title — inline editable */}
-              <div className="flex-1 min-w-0">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editTitle}
-                    autoFocus
-                    onChange={e => setEditTitle(e.target.value)}
-                    onBlur={() => handleEditSave(mod.id)}
-                    onKeyDown={e => handleEditKeyDown(e, mod.id)}
-                    className="w-full px-2 py-0.5 text-sm border border-blue-400 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  />
-                ) : (
+                {/* Order badge */}
+                <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">
+                  {mod.order}
+                </span>
+
+                {/* Title — inline editable */}
+                <div className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editTitle}
+                      autoFocus
+                      onChange={e => setEditTitle(e.target.value)}
+                      onBlur={() => handleEditSave(mod.id)}
+                      onKeyDown={e => handleEditKeyDown(e, mod.id)}
+                      className="w-full px-2 py-0.5 text-sm border border-blue-400 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={e => handleEditStart(mod, e)}
+                      disabled={isMutating || mutating !== null}
+                      className="text-sm font-medium text-gray-800 hover:text-blue-600 text-left truncate max-w-full disabled:cursor-default"
+                      title="Clique para editar o título"
+                    >
+                      {mod.title}
+                    </button>
+                  )}
+                </div>
+
+                {/* Lesson count */}
+                <span className="flex-shrink-0 text-xs text-gray-500 bg-white border border-gray-200 rounded-full px-2 py-0.5">
+                  {mod.lessons.length} {mod.lessons.length === 1 ? 'aula' : 'aulas'}
+                </span>
+
+                {/* Actions */}
+                <div
+                  className="flex items-center gap-1 flex-shrink-0"
+                  onClick={e => e.stopPropagation()}
+                >
                   <button
                     type="button"
-                    onClick={() => handleEditStart(mod)}
-                    disabled={isMutating || mutating !== null}
-                    className="text-sm font-medium text-gray-800 hover:text-blue-600 text-left truncate max-w-full disabled:cursor-default"
-                    title="Clique para editar"
+                    onClick={e => handleMove(mod, 'up', e)}
+                    disabled={isFirst || mutating !== null}
+                    title="Mover para cima"
+                    className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
-                    {mod.title}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
                   </button>
-                )}
+
+                  <button
+                    type="button"
+                    onClick={e => handleMove(mod, 'down', e)}
+                    disabled={isLast || mutating !== null}
+                    title="Mover para baixo"
+                    className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setDeleteTarget(mod) }}
+                    disabled={mutating !== null}
+                    title="Excluir módulo"
+                    className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
-              {/* Lesson count */}
-              <span className="flex-shrink-0 text-xs text-gray-500 bg-white border border-gray-200 rounded-full px-2 py-0.5">
-                {mod.lessons.length} {mod.lessons.length === 1 ? 'aula' : 'aulas'}
-              </span>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {/* Move up */}
-                <button
-                  type="button"
-                  onClick={() => handleMove(mod, 'up')}
-                  disabled={isFirst || mutating !== null}
-                  title="Mover para cima"
-                  className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                  </svg>
-                </button>
-
-                {/* Move down */}
-                <button
-                  type="button"
-                  onClick={() => handleMove(mod, 'down')}
-                  disabled={isLast || mutating !== null}
-                  title="Mover para baixo"
-                  className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {/* Delete */}
-                <button
-                  type="button"
-                  onClick={() => setDeleteTarget(mod)}
-                  disabled={mutating !== null}
-                  title="Excluir módulo"
-                  className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors ml-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
+              {/* Expanded lesson list */}
+              {isExpanded && (
+                <LessonList
+                  moduleId={mod.id}
+                  courseId={courseId}
+                  initialLessons={mod.lessons}
+                  onUpdate={refetch}
+                />
+              )}
             </div>
           )
         })}
