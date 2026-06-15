@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 const createSchema = z.object({
   title: z.string().min(1).max(255),
   planAccess: z.enum(["basic", "premium"]),
-  description: z.string().optional(),
+  description: z.string().max(5000).optional(),
   thumbnailUrl: z.string().url().nullable().optional(),
   instructorId: z.string().uuid().optional(),
 });

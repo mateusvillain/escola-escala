@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 const patchSchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  description: z.string().nullable().optional(),
-  videoId: z.string().nullable().optional(),
+  description: z.string().max(2000).nullable().optional(),
+  videoId: z.string().max(255).nullable().optional(),
   videoDuration: z.number().int().positive().nullable().optional(),
-  content: z.string().nullable().optional(),
+  content: z.string().max(50000).nullable().optional(),
   order: z.number().int().positive().optional(),
   isPreview: z.boolean().optional(),
 });

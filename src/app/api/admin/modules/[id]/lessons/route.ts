@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 const createSchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.string().optional(),
-  videoId: z.string().optional(),
+  description: z.string().max(2000).optional(),
+  videoId: z.string().max(255).optional(),
   videoDuration: z.number().int().positive().optional(),
-  content: z.string().optional(),
+  content: z.string().max(50000).optional(),
   isPreview: z.boolean().optional(),
 });
 

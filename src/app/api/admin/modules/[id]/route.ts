@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 const patchSchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  description: z.string().nullable().optional(),
+  description: z.string().max(2000).nullable().optional(),
   order: z.number().int().positive().optional(),
 });
 

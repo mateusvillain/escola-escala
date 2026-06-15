@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 const patchSchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional(),
   title: z.string().min(1).max(255).optional(),
-  description: z.string().optional(),
+  description: z.string().max(5000).optional(),
   thumbnailUrl: z.string().url().nullable().optional(),
   planAccess: z.enum(["basic", "premium"]).optional(),
   instructorId: z.string().uuid().optional(),

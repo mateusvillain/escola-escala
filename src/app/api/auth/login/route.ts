@@ -3,8 +3,17 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/jwt";
 import { loginSchema } from "@/lib/schemas/auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const { limited, retryAfter } = rateLimit(getClientIp(request), { limit: 10, windowMs: 60_000 });
+  if (limited) {
+    return NextResponse.json(
+      { error: "Muitas tentativas. Tente novamente em 1 minuto." },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();

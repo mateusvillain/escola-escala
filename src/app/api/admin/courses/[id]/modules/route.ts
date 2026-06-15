@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 const createSchema = z.object({
   title: z.string().min(1).max(255),
-  description: z.string().optional(),
+  description: z.string().max(2000).optional(),
 });
 
 export async function POST(
