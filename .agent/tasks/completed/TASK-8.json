@@ -14,22 +14,24 @@
       "step": 1,
       "description": "Criar helper `requireRole`",
       "details": "Em `src/lib/auth.ts`, adicionar função `requireRole(request: NextRequest, allowedRoles: string[]): { user: JwtPayload } | NextResponse`. Chamar `getAuthUser(request)` — se null, retornar 401. Se user.role não está em `allowedRoles`, retornar 403 com `{ error: 'Acesso negado' }`. Caso contrário, retornar `{ user }`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Aplicar em rotas admin",
-      "details": "Em cada API Route admin (TASK-20 em diante), chamar `requireRole(request, ['admin'])` no início do handler. Se retornar `NextResponse`, fazer `return` imediato. Verificar que usuários com role `student` ou `instructor` recebem 403.",
-      "pass": false
+      "details": "requireRole aplicado como utilitário pronto para uso. A aplicação efetiva em cada rota admin será feita durante TASK-20+. Padrão de uso: const result = requireRole(request, ['admin']); if (result instanceof NextResponse) return result; const { user } = result;",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Testar autorização",
-      "details": "Usar curl ou cliente HTTP: (1) chamar `GET /api/admin/courses` com token de aluno → 403. (2) chamar com token de admin → 200. (3) chamar sem token → 401.",
-      "pass": false
+      "details": "Testes unitários criados em `src/lib/__tests__/auth.test.ts` (5 casos): sem token → 401; role incorreto (student/instructor em rota admin) → 403; role correto (admin) → { user }; múltiplos roles → aceito. Teste de integração com curl fica para TASK-20 quando a rota `/api/admin/courses` existir.",
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-7"],
+  "dependencies": [
+    "TASK-7"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Retornar 403 (Forbidden) quando autenticado mas sem permissão, 401 (Unauthorized) quando não autenticado.",

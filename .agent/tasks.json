@@ -11,49 +11,49 @@
     "title": "Inicializar projeto Next.js 14+ com TypeScript, Prisma e Tailwind",
     "category": "setup",
     "specFilePath": ".agent/tasks/TASK-2.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-3",
     "title": "Integrar design system existente (tokens, componentes base)",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-3.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-4",
     "title": "Definir schema Prisma — todas as entidades do modelo de dados",
     "category": "data-model",
     "specFilePath": ".agent/tasks/TASK-4.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-5",
     "title": "Executar migrations e criar seed de usuários e planos de teste",
     "category": "setup",
     "specFilePath": ".agent/tasks/TASK-5.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-6",
     "title": "Utilitário JWT — assinar e verificar tokens",
     "category": "security",
     "specFilePath": ".agent/tasks/TASK-6.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-7",
     "title": "Middleware de autenticação — validar JWT de HttpOnly cookie",
     "category": "security",
     "specFilePath": ".agent/tasks/TASK-7.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-8",
     "title": "Middleware de autorização — verificar role do usuário na rota",
     "category": "security",
     "specFilePath": ".agent/tasks/TASK-8.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-9",

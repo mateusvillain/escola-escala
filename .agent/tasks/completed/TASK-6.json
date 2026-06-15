@@ -16,16 +16,18 @@
       "step": 1,
       "description": "Criar `src/lib/jwt.ts`",
       "details": "Importar `jsonwebtoken`. Definir tipo `JwtPayload { userId: string; email: string; role: string }`. Implementar `signToken(payload: JwtPayload): string` usando `jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' })`. Implementar `verifyToken(token: string): JwtPayload` usando `jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar teste unitário",
       "details": "Criar `src/lib/__tests__/jwt.test.ts`. Testar: (1) `signToken` retorna string, (2) `verifyToken(signToken(payload))` retorna payload correto, (3) `verifyToken('token-invalido')` lança erro, (4) token com `expiresIn: '1ms'` lança `TokenExpiredError` após delay.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-2"],
+  "dependencies": [
+    "TASK-2"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Usar HS256 (HMAC-SHA256) com `JWT_SECRET` de pelo menos 32 caracteres aleatórios.",

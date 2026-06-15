@@ -32,16 +32,18 @@
       "step": 4,
       "description": "Instalar ou criar componentes base",
       "details": "Se o design system tem uma biblioteca npm, instalá-la. Caso contrário, criar componentes base em `src/components/ui/`: `Button.tsx`, `Input.tsx`, `Card.tsx`, `Badge.tsx`, `Progress.tsx`, `Modal.tsx`, `Alert.tsx` — usando tokens do Tailwind.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 5,
       "description": "Criar página de teste visual",
       "details": "Criar `src/app/design-system/page.tsx` exibindo todos os componentes base com suas variantes (tamanhos, estados). Verificar visualmente que os componentes seguem o design do Figma.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-2"],
+  "dependencies": [
+    "TASK-2"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "Se o design system usa Shadcn/ui como base, executar `npx shadcn@latest init` para configurar e depois adicionar os tokens customizados por cima.",

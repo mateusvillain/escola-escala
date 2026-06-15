@@ -14,13 +14,13 @@
       "step": 1,
       "description": "Criar helper de autenticação para API Routes",
       "details": "Criar `src/lib/auth.ts` com função `getAuthUser(request: NextRequest): JwtPayload | null` que lê o cookie `auth-token` da request e chama `verifyToken()`. Retorna null se token ausente ou inválido.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar middleware Next.js",
       "details": "Criar `src/middleware.ts`. Usar `NextRequest` e `NextResponse`. Definir `config.matcher` com padrões das rotas protegidas. Na função `middleware()`: ler cookie `auth-token`, chamar `verifyToken()`. Se inválido: para rotas `/api/*` retornar `NextResponse.json({ error: 'Não autorizado' }, { status: 401 })`; para páginas: `NextResponse.redirect(new URL('/login', request.url))`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
@@ -29,7 +29,9 @@
       "pass": false
     }
   ],
-  "dependencies": ["TASK-6"],
+  "dependencies": [
+    "TASK-6"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "HttpOnly cookies não são acessíveis via `document.cookie` — protegem contra XSS.",
