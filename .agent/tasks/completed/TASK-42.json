@@ -1,0 +1,31 @@
+{
+  "id": "TASK-42",
+  "title": "Página de detalhe do curso UI — descrição, módulos, CTA de assinatura",
+  "category": "ui-ux",
+  "description": "Página `/cursos/[slug]` com detalhe completo do curso: descrição, instrutor, lista de módulos/aulas e CTA de assinatura para usuários sem acesso.",
+  "acceptanceCriteria": [
+    "Seção hero: thumbnail, título, descrição, instrutor, contagem de módulos/aulas/duração total",
+    "Lista de módulos colapsável com aulas listadas — aulas de preview com botão 'Assistir grátis'",
+    "CTA para usuários sem assinatura: banner/seção 'Assine para acessar' com link para `/planos`",
+    "CTA para usuários com acesso mas sem matrícula: botão 'Começar curso'",
+    "CTA para usuários com matrícula: botão 'Continuar — última aula: [título]'",
+    "Badge de plano requerido (Básico ou Premium) visível"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página de detalhe",
+      "details": "Criar `src/app/cursos/[slug]/page.tsx` como Server Component. Buscar dados via `GET /api/courses/[slug]`. Renderizar hero, módulos e aulas. Implementar lógica condicional de CTA baseada no estado do usuário.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Accordion de módulos",
+      "details": "Criar componente `CourseAccordion`. Cada módulo colapsável. Aulas listadas com: ícone de play, título, duração formatada (ex: '12:34'), badge Preview se `isPreview`. Preview items são links clicáveis sem restrição de acesso.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-40", "TASK-41"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}
