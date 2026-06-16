@@ -1,0 +1,39 @@
+{
+  "id": "TASK-50",
+  "title": "Event listener do player Bunny Stream para rastrear percentual assistido",
+  "category": "integration",
+  "description": "No componente BunnyPlayer, escutar eventos de progresso do player via window.postMessage e reportar periodicamente ao backend.",
+  "acceptanceCriteria": [
+    "Player envia atualizações de progresso ao backend a cada 10 segundos durante reprodução",
+    "Evento `percentageWatched` do Bunny Stream capturado via `window.addEventListener('message')`",
+    "Throttle/debounce para não chamar API mais que 1x a cada 10 segundos",
+    "Para ao pausar/terminar o vídeo, envia update final de progresso"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar listener de eventos ao BunnyPlayer",
+      "details": "Em `BunnyPlayer.tsx`, usar `useEffect` para adicionar `window.addEventListener('message', handlePlayerMessage)`. A função `handlePlayerMessage` recebe eventos do player Bunny Stream. Verificar `event.origin` contra o CDN hostname para segurança. Extrair `percentageWatched` dos dados do evento. [Nota: validei empiricamente contra o embed real (https://iframe.mediadelivery.net) — não existe evento 'percentageWatched' nem 'onPercentageWatched'. O player usa o protocolo player.js: emite 'ready' uma vez, e só envia outros eventos depois que o pai manda explicitamente {context:'player.js', method:'addEventListener', value:'<evento>'}. Usei o evento 'timeupdate' (payload {seconds, duration}) para calcular o percentual — o evento 'progress' existe mas mede buffer/carregamento, não posição de reprodução (confirmado: um vídeo de 20s reportava progress.percent=1 em ~3s). origin validado contra https://iframe.mediadelivery.net, que é o host real do embed (não o CDN_HOSTNAME customizado).]",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Reportar progresso com throttle",
+      "details": "Usar `useRef` para rastrear o último timestamp de envio. Criar função `reportProgress(percentage: number)` que chama `POST /api/progress/[lessonId]` com `{ watchPercentage: percentage }`. Chamar apenas se `Date.now() - lastReportedAt > 10000` (10 segundos). Testado com player real: 3 chamadas em 24s de reprodução, ~10s entre cada (confirmado via interceptação de requests no Playwright).",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Cleanup e report final",
+      "details": "No `useEffect` cleanup (unmount), enviar um update final com o percentual atual. Isso garante que progresso seja salvo ao navegar para outra página. Também reporta no evento 'pause'/'ended' do player, com dedup de 1s para evitar chamadas duplicadas quando ambos disparam juntos ao fim do vídeo.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-44", "TASK-49"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Bunny Stream player emite evento `onPercentageWatched` via postMessage. Verificar documentação de eventos do player em https://docs.bunny.net/docs/stream-player-api.",
+    "Validar `event.origin` para evitar injeção de mensagens de outros iframes.",
+    "[Correção pós-implementação] A URL acima retorna 404. A documentação correta é https://docs.bunny.net/stream/playback-api — o player usa o padrão player.js (https://github.com/embedly/player.js). Não existe 'onPercentageWatched'; eventos reais: ready, play, pause, ended, timeupdate ({seconds,duration}), progress ({percent} = buffer, não posição), seeked, error. É necessário inscrever-se via postMessage {context:'player.js', method:'addEventListener', value:'<evento>'} depois do 'ready' — o player não emite nada automaticamente."
+  ]
+}

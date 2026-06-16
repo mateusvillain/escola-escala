@@ -100,7 +100,7 @@ export default async function AulaPage({
 
         {access.allowed ? (
           lesson.videoId ? (
-            <BunnyPlayer videoId={lesson.videoId} />
+            <BunnyPlayer videoId={lesson.videoId} lessonId={lesson.id} />
           ) : (
             <div
               className="w-full rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center"

@@ -346,8 +346,8 @@
     "id": "TASK-50",
     "title": "Event listener do player Bunny Stream para rastrear percentual assistido",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-50.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-50.json",
+    "passes": true
   },
   {
     "id": "TASK-51",
