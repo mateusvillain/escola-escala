@@ -388,8 +388,8 @@
     "id": "TASK-56",
     "title": "GET /api/dashboard — cursos matriculados com progresso e última aula",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-56.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-56.json",
+    "passes": true
   },
   {
     "id": "TASK-57",
