@@ -103,6 +103,7 @@ export default async function CursoDetalhe({
 
     const planType = subscription?.plan.type ?? null
     hasAccess =
+      user.role === 'admin' ||
       planType === 'premium' ||
       (planType === 'basic' && course.planAccess === 'basic')
     hasEnrollment = enrollment !== null

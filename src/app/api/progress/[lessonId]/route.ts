@@ -21,7 +21,7 @@ export async function GET(
   const { user } = auth
   const { lessonId } = await ctx.params
 
-  const access = await checkLessonAccess(user.userId, lessonId)
+  const access = await checkLessonAccess(user.userId, lessonId, user.role)
   if (!access.allowed) {
     return NextResponse.json({ error: 'Acesso negado a esta aula' }, { status: 403 })
   }
@@ -49,7 +49,7 @@ export async function POST(
   const { user } = auth
   const { lessonId } = await ctx.params
 
-  const access = await checkLessonAccess(user.userId, lessonId)
+  const access = await checkLessonAccess(user.userId, lessonId, user.role)
   if (!access.allowed) {
     return NextResponse.json({ error: 'Acesso negado a esta aula' }, { status: 403 })
   }
@@ -103,7 +103,7 @@ export async function POST(
     select: { watchPercentage: true, isCompleted: true, completedAt: true },
   })
 
-  await ensureEnrollment(user.userId, lesson.module.courseId)
+  await ensureEnrollment(user.userId, lesson.module.courseId, user.role)
 
   setImmediate(() => {
     checkCourseCompletion(user.userId, lesson.module.courseId).catch(console.error)

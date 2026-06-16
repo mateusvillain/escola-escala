@@ -18,7 +18,8 @@ export interface AccessResult {
  */
 export async function checkLessonAccess(
   userId: string | null,
-  lessonId: string
+  lessonId: string,
+  role?: string
 ): Promise<AccessResult> {
   const lesson = await prisma.lesson.findUnique({
     where: { id: lessonId },
@@ -38,6 +39,8 @@ export async function checkLessonAccess(
 
   // Preview lessons are always accessible — no auth required
   if (lesson.isPreview) return { allowed: true, reason: 'preview' }
+
+  if (role === 'admin') return { allowed: true }
 
   if (!userId) return { allowed: false, reason: 'not_authenticated' }
 

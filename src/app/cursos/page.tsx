@@ -140,10 +140,13 @@ export default async function CursosPage({
     enrolledCourseIds = new Set(enrollments.map(e => e.courseId))
   }
 
+  const isAdmin = user?.role === 'admin'
+  const hasFullCatalogAccess = userPlanType === 'premium' || isAdmin
+
   const courses = await prisma.course.findMany({
     where: {
       status: 'published',
-      ...(userPlanType !== 'premium' && (planAccess === 'basic' || planAccess === 'premium')
+      ...(!hasFullCatalogAccess && (planAccess === 'basic' || planAccess === 'premium')
         ? { planAccess }
         : {}),
       ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
@@ -177,7 +180,7 @@ export default async function CursosPage({
       </div>
 
       <Suspense>
-        <CatalogFilters userPlanType={userPlanType} />
+        <CatalogFilters hidePlanFilter={hasFullCatalogAccess} />
       </Suspense>
 
       {courses.length === 0 ? (
@@ -187,7 +190,7 @@ export default async function CursosPage({
           {courses.map(course => {
             const totalLessons = course.modules.reduce((sum, m) => sum + m._count.lessons, 0)
             const hasAccess =
-              userPlanType === 'premium' ||
+              hasFullCatalogAccess ||
               (userPlanType === 'basic' && course.planAccess === 'basic')
             const hasEnrollment = enrolledCourseIds.has(course.id)
 

@@ -22,7 +22,7 @@ export async function POST(
     return NextResponse.json({ error: 'Curso não encontrado' }, { status: 404 })
   }
 
-  const enrolled = await ensureEnrollment(user.userId, course.id)
+  const enrolled = await ensureEnrollment(user.userId, course.id, user.role)
 
   if (!enrolled) {
     return NextResponse.json(

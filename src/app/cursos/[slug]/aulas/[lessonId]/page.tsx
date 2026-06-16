@@ -57,7 +57,7 @@ export default async function AulaPage({
     } catch {}
   }
 
-  const access = await checkLessonAccess(user?.userId ?? null, lessonId)
+  const access = await checkLessonAccess(user?.userId ?? null, lessonId, user?.role)
   const upgradeReason: UpgradeReason | undefined =
     access.reason && access.reason !== 'not_authenticated' && access.reason !== 'preview'
       ? access.reason

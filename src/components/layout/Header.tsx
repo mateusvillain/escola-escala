@@ -14,6 +14,8 @@ const NAV_LINKS = [
 export function Header({ user }: { user: JwtPayload }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const navLinks =
+    user.role === 'admin' ? [...NAV_LINKS, { href: '/admin', label: 'Admin' }] : NAV_LINKS
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -27,7 +29,7 @@ export function Header({ user }: { user: JwtPayload }) {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1" role="navigation" aria-label="Navegação principal">
-            {NAV_LINKS.map(link => (
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -74,7 +76,7 @@ export function Header({ user }: { user: JwtPayload }) {
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <nav className="px-4 pt-2 pb-3 space-y-1">
-            {NAV_LINKS.map(link => (
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}

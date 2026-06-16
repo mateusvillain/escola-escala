@@ -10,10 +10,10 @@ const PLAN_FILTERS = [
 ]
 
 interface CatalogFiltersProps {
-  userPlanType: 'basic' | 'premium' | null
+  hidePlanFilter: boolean
 }
 
-export function CatalogFilters({ userPlanType }: CatalogFiltersProps) {
+export function CatalogFilters({ hidePlanFilter }: CatalogFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -40,7 +40,7 @@ export function CatalogFilters({ userPlanType }: CatalogFiltersProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-8">
-      {userPlanType !== 'premium' && (
+      {!hidePlanFilter && (
         <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
           {PLAN_FILTERS.map(f => (
             <button
