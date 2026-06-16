@@ -64,8 +64,30 @@ export async function handleCheckoutSessionCompleted(
 export async function handleInvoicePaymentSucceeded(
   event: Stripe.InvoicePaymentSucceededEvent
 ): Promise<void> {
-  // TASK-72: renovar currentPeriodStart/End no banco
-  console.log('[stripe] invoice.payment_succeeded — not yet implemented', event.id)
+  const invoice = event.data.object
+
+  // Em Stripe API v2026+, subscription fica em invoice.parent.subscription_details
+  const subDetails = invoice.parent?.subscription_details
+  if (!subDetails) return
+
+  const stripeSubscriptionId =
+    typeof subDetails.subscription === 'string'
+      ? subDetails.subscription
+      : subDetails.subscription.id
+
+  const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+  const item = subscription.items.data[0]
+
+  await prisma.userSubscription.updateMany({
+    where: { stripeSubscriptionId },
+    data: {
+      status: 'active',
+      currentPeriodStart: new Date(item.current_period_start * 1000),
+      currentPeriodEnd: new Date(item.current_period_end * 1000),
+    },
+  })
+
+  console.log(`[stripe] invoice.payment_succeeded: período renovado para subscription ${stripeSubscriptionId}`)
 }
 
 export async function handleInvoicePaymentFailed(
