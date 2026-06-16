@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { checkLessonAccess, type AccessReason } from '@/lib/access'
+import { getAdjacentLessons } from '@/lib/utils/lessons'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 
 const UPGRADE_MESSAGES: Record<AccessReason, { title: string; description: string; ctaLabel: string; ctaHref: string }> = {
@@ -41,22 +42,29 @@ export default async function AulaPage({
 }) {
   const { slug, lessonId } = await params
 
-  const lesson = await prisma.lesson.findFirst({
-    where: { id: lessonId, module: { course: { slug, status: 'published' } } },
+  const course = await prisma.course.findFirst({
+    where: { slug, status: 'published' },
     select: {
-      id: true,
+      slug: true,
       title: true,
-      content: true,
-      videoId: true,
-      module: {
+      modules: {
+        orderBy: { order: 'asc' },
         select: {
-          course: { select: { slug: true, title: true } },
+          lessons: {
+            orderBy: { order: 'asc' },
+            select: { id: true, title: true, content: true, videoId: true },
+          },
         },
       },
     },
   })
 
+  if (!course) notFound()
+
+  const lesson = course.modules.flatMap(m => m.lessons).find(l => l.id === lessonId)
   if (!lesson) notFound()
+
+  const { prev, next } = getAdjacentLessons(course.modules, lessonId)
 
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
@@ -78,7 +86,7 @@ export default async function AulaPage({
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        {lesson.module.course.title}
+        {course.title}
       </Link>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-4">{lesson.title}</h1>
@@ -103,6 +111,41 @@ export default async function AulaPage({
           <ReactMarkdown>{lesson.content}</ReactMarkdown>
         </div>
       )}
+
+      <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+        {prev ? (
+          <Link
+            href={`/cursos/${slug}/aulas/${prev.id}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Aula Anterior
+          </Link>
+        ) : (
+          <span />
+        )}
+
+        {next ? (
+          <Link
+            href={`/cursos/${slug}/aulas/${next.id}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Próxima Aula
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        ) : (
+          <Link
+            href={`/cursos/${slug}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Voltar ao Curso
+          </Link>
+        )}
+      </div>
     </div>
   )
 }
