@@ -353,8 +353,8 @@
     "id": "TASK-51",
     "title": "Marcação automática de aula concluída ao atingir 80% do vídeo",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-51.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-51.json",
+    "passes": true
   },
   {
     "id": "TASK-52",

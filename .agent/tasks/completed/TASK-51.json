@@ -13,14 +13,14 @@
     {
       "step": 1,
       "description": "Implementar lógica no endpoint de progresso",
-      "details": "No handler `POST /api/progress/[lessonId]`: após ler `watchPercentage` do body, verificar se `watchPercentage >= 80`. Se sim E o progresso atual ainda tem `isCompleted = false` (ou não existe): incluir `isCompleted: true` e `completedAt: new Date()` no upsert. Nunca resetar `isCompleted` para false se já era true.",
-      "pass": false
+      "details": "No handler `POST /api/progress/[lessonId]`: após ler `watchPercentage` do body, verificar se `watchPercentage >= 80`. Se sim E o progresso atual ainda tem `isCompleted = false` (ou não existe): incluir `isCompleted: true` e `completedAt: new Date()` no upsert. Nunca resetar `isCompleted` para false se já era true. Já implementado na TASK-49.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Verificar no banco",
-      "details": "Após implementação: simular sequência: POST com watchPercentage=50 → isCompleted false. POST com watchPercentage=80 → isCompleted true, completedAt preenchido. POST com watchPercentage=60 (usuário volta) → isCompleted continua true.",
-      "pass": false
+      "details": "Após implementação: simular sequência: POST com watchPercentage=50 → isCompleted false. POST com watchPercentage=80 → isCompleted true, completedAt preenchido. POST com watchPercentage=60 (usuário volta) → isCompleted continua true. Testado via curl: sequência exata confirmada, completedAt preservado. Sidebar (TASK-45) e dashboard (TASK-56) confirmados refletindo a conclusão após refresh.",
+      "pass": true
     }
   ],
   "dependencies": ["TASK-49"],
