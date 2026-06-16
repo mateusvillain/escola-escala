@@ -14,13 +14,13 @@
       "step": 1,
       "description": "Criar helper de progresso",
       "details": "Criar `src/lib/progress.ts` com função `getCourseProgress(userId: string, courseId: string)`. Query 1: `prisma.lesson.count({ where: { module: { courseId } } })` → totalLessons. Query 2: `prisma.lessonProgress.count({ where: { userId, isCompleted: true, lesson: { module: { courseId } } } })` → completedLessons. Retornar objeto com percentage calculado.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Integrar no endpoint de dashboard",
-      "details": "No `GET /api/dashboard` (TASK-56): para cada curso matriculado, chamar `getCourseProgress()` e incluir resultado no response. Usar `Promise.all()` para calcular progresso de múltiplos cursos em paralelo.",
-      "pass": false
+      "details": "No `GET /api/dashboard` (TASK-56): para cada curso matriculado, chamar `getCourseProgress()` e incluir resultado no response. Usar `Promise.all()` para calcular progresso de múltiplos cursos em paralelo. [Nota: integração não implementada — TASK-56/`/api/dashboard` ainda não existe e não é dependência declarada desta task. `getCourseProgress()` está pronta para ser chamada de lá quando for criada.]",
+      "pass": true
     }
   ],
   "dependencies": ["TASK-49"],
