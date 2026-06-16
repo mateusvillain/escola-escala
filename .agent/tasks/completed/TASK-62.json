@@ -1,0 +1,40 @@
+{
+  "id": "TASK-62",
+  "title": "POST /api/certificates/[courseId] — gerar e armazenar certificado",
+  "category": "api-endpoint",
+  "description": "Endpoint que gera o PDF do certificado, armazena em storage e registra no banco de dados.",
+  "acceptanceCriteria": [
+    "Verifica que aluno concluiu 100% do curso antes de gerar",
+    "Gera PDF via `generateCertificatePDF()`",
+    "Armazena PDF em Vercel Blob ou como base64 no banco (para MVP)",
+    "Cria registro em `Certificate` com `fileUrl` e `issuedAt`",
+    "Idempotente: se certificado já existe, retorna o existente sem gerar novo",
+    "Retorna `{ certificateId, fileUrl, issuedAt }`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criar `src/app/api/certificates/[courseId]/route.ts` (POST). Verificar autenticação. Verificar enrollment e `completedAt` preenchido. Verificar se Certificate já existe (retornar existente se sim). Chamar `generateCertificatePDF()`. Salvar PDF. Lógica de geração/idempotência delegada a `generateAndStoreCertificate()` (src/lib/certificate.ts, criada na TASK-55 para resolver a dependência circular entre as duas tasks).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Armazenar PDF",
+      "details": "Para MVP: instalar `@vercel/blob` e usar `put('certificates/{userId}-{courseId}.pdf', buffer, { access: 'public' })` → retorna URL. Alternativa simples: armazenar base64 no campo `fileUrl` do banco (apenas para MVP com PDFs pequenos < 1MB). [Usada a alternativa base64 — não há BLOB_READ_WRITE_TOKEN configurado no .env.local. PDF de teste: ~1.3KB, bem abaixo do limite de 1MB.]",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Criar registro no banco",
+      "details": "`prisma.certificate.create({ data: { userId, courseId, fileUrl, issuedAt: new Date() } })`. Retornar dados do certificado. Testado via curl: 403 sem conclusão, geração com PDF válido (header %PDF-1.7, conteúdo correto), idempotência confirmada (mesmo certificateId/issuedAt em chamada repetida).",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-61", "TASK-55"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Vercel Blob é a opção mais simples para armazenamento em projetos Vercel. Alternativa: Supabase Storage.",
+    "Adicionar `BLOB_READ_WRITE_TOKEN` ao `.env.local` se usar Vercel Blob."
+  ]
+}

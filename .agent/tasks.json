@@ -430,8 +430,8 @@
     "id": "TASK-62",
     "title": "POST /api/certificates/[courseId] — gerar e armazenar certificado",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-62.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-62.json",
+    "passes": true
   },
   {
     "id": "TASK-63",
