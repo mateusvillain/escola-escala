@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { CursosHeader } from '@/components/cursos/CursosHeader'
-import { Footer } from '@/components/layout/Footer'
 
 export default async function CursosLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
@@ -21,8 +20,6 @@ export default async function CursosLayout({ children }: { children: React.React
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
-
-      <Footer />
     </div>
   )
 }

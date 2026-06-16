@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { Footer } from '@/components/layout/Footer'
 import { PlansClient } from './PlansClient'
 import Link from 'next/link'
 
@@ -85,8 +84,6 @@ export default async function PlanosPage() {
           activeSubscription={activeSubscription}
         />
       </main>
-
-      <Footer />
     </div>
   )
 }
