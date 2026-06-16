@@ -24,8 +24,8 @@ interface Props {
 
 // Update these to match your Stripe product prices
 const PRICES = {
-  basic: { monthly: 29.9, annual: 249.9 },
-  premium: { monthly: 59.9, annual: 479.9 },
+  basic: { monthly: 80, annual: 800 },
+  premium: { monthly: 100, annual: 1000 },
 }
 
 const BASIC_FEATURES = [
