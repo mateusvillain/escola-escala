@@ -1,0 +1,36 @@
+{
+  "id": "TASK-69",
+  "title": "Página de planos e preços UI — comparativo Básico vs. Premium",
+  "category": "ui-ux",
+  "description": "Página `/planos` pública com comparativo visual dos planos de assinatura, toggle mensal/anual e botão de checkout.",
+  "acceptanceCriteria": [
+    "Toggle mensal/anual altera preços exibidos e destaca desconto anual (ex: 'Economize 30%')",
+    "Dois cards: Básico e Premium, com lista de benefícios de cada plano",
+    "Card Premium destacado visualmente (borda, badge 'Mais popular')",
+    "Botão 'Assinar' chama POST /api/subscriptions/checkout com priceId correto",
+    "Após sucesso do checkout, Stripe redireciona para `/dashboard?checkout=success`",
+    "Para usuários com assinatura ativa: exibir plano atual e botão 'Gerenciar assinatura'"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página de planos",
+      "details": "Criado `src/app/planos/page.tsx` (Server Component) e `src/app/planos/PlansClient.tsx` (Client Component). Toggle mensal/anual com desconto calculado dinamicamente. Cards de plano com lista de features. Price IDs passados do servidor via props. Botão Assinar chama checkout e redireciona para checkoutUrl.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Estado para usuário com assinatura",
+      "details": "Server Component verifica assinatura ativa via Prisma e passa para o client. Banner com plano atual e botão Gerenciar assinatura (link para /dashboard/assinatura). Botões de assinar ficam desabilitados/substituídos.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-68", "TASK-17"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Preços hardcoded em PRICES em PlansClient.tsx — atualizar para refletir valores reais do Stripe.",
+    "Página pública fora do grupo (app)/ — possui header próprio simplificado.",
+    "Price IDs são server-only (sem NEXT_PUBLIC_) — passados como props do Server Component.",
+    "Botão Gerenciar assinatura aponta para /dashboard/assinatura (TASK-77) — atualizar para portal Stripe quando TASK-76 estiver pronto."
+  ]
+}
