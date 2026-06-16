@@ -4,9 +4,53 @@ config({ path: '.env.local' })
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient, Role, PlanType, BillingCycle, SubscriptionStatus } from '../src/generated/prisma/client'
 import bcrypt from 'bcryptjs'
+import { stripe } from '../src/lib/stripe'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter })
+
+async function seedSubscriber({
+  email,
+  name,
+  passwordHash,
+  planId,
+  stripeSubscriptionId,
+}: {
+  email: string
+  name: string
+  passwordHash: string
+  planId: string
+  stripeSubscriptionId: string
+}) {
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: { email, name, passwordHash, role: Role.student },
+  })
+
+  // Real Stripe test-mode customer — needed for the billing portal button to
+  // work with these seed accounts. Reused on re-seed via User.stripeCustomerId.
+  const stripeCustomerId = user.stripeCustomerId ?? (await stripe.customers.create({ email, name })).id
+
+  if (!user.stripeCustomerId) {
+    await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId } })
+  }
+
+  await prisma.userSubscription.upsert({
+    where: { stripeSubscriptionId },
+    update: { stripeCustomerId },
+    create: {
+      userId: user.id,
+      planId,
+      stripeSubscriptionId,
+      stripeCustomerId,
+      status: SubscriptionStatus.active,
+      billingCycle: BillingCycle.monthly,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  })
+}
 
 async function main() {
   const passwordHash = await bcrypt.hash('Test@12345', 12)
@@ -71,56 +115,20 @@ async function main() {
     },
   })
 
-  const alunoBasico = await prisma.user.upsert({
-    where: { email: 'aluno.basico@test.com' },
-    update: {},
-    create: {
-      email: 'aluno.basico@test.com',
-      name: 'Aluno Básico',
-      passwordHash,
-      role: Role.student,
-    },
+  await seedSubscriber({
+    email: 'aluno.basico@test.com',
+    name: 'Aluno Básico',
+    passwordHash,
+    planId: basicPlan.id,
+    stripeSubscriptionId: 'sub_test_basic',
   })
 
-  await prisma.userSubscription.upsert({
-    where: { stripeSubscriptionId: 'sub_test_basic' },
-    update: {},
-    create: {
-      userId: alunoBasico.id,
-      planId: basicPlan.id,
-      stripeSubscriptionId: 'sub_test_basic',
-      stripeCustomerId: 'cus_test_basic',
-      status: SubscriptionStatus.active,
-      billingCycle: BillingCycle.monthly,
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    },
-  })
-
-  const alunoPremium = await prisma.user.upsert({
-    where: { email: 'aluno.premium@test.com' },
-    update: {},
-    create: {
-      email: 'aluno.premium@test.com',
-      name: 'Aluno Premium',
-      passwordHash,
-      role: Role.student,
-    },
-  })
-
-  await prisma.userSubscription.upsert({
-    where: { stripeSubscriptionId: 'sub_test_premium' },
-    update: {},
-    create: {
-      userId: alunoPremium.id,
-      planId: premiumPlan.id,
-      stripeSubscriptionId: 'sub_test_premium',
-      stripeCustomerId: 'cus_test_premium',
-      status: SubscriptionStatus.active,
-      billingCycle: BillingCycle.monthly,
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    },
+  await seedSubscriber({
+    email: 'aluno.premium@test.com',
+    name: 'Aluno Premium',
+    passwordHash,
+    planId: premiumPlan.id,
+    stripeSubscriptionId: 'sub_test_premium',
   })
 
   console.log('Seed concluído.')
