@@ -7,7 +7,7 @@ import type { JwtPayload } from '@/lib/jwt'
 import { UserMenu } from './UserMenu'
 
 const NAV_LINKS = [
-  { href: '/catalogo', label: 'Catálogo' },
+  { href: '/cursos', label: 'Catálogo' },
   { href: '/dashboard', label: 'Dashboard' },
 ]
 
