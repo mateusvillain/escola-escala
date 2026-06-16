@@ -1,0 +1,29 @@
+{
+  "id": "TASK-77",
+  "title": "Página 'Minha Assinatura' com plano ativo e botão de gerenciar UI",
+  "category": "ui-ux",
+  "description": "Página `/dashboard/assinatura` onde o aluno visualiza detalhes da sua assinatura ativa e acessa o Stripe Customer Portal.",
+  "acceptanceCriteria": [
+    "Exibe: nome do plano, ciclo de cobrança (mensal/anual), status (badge), próxima renovação, valor",
+    "Botão 'Gerenciar Assinatura' chama POST /api/subscriptions/portal e redireciona para URL retornada",
+    "Status past_due: exibir alerta 'Pagamento pendente — sua assinatura está temporariamente suspensa'",
+    "Sem assinatura: exibir CTA 'Assinar agora' com link para /planos"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar página de assinatura",
+      "details": "Criado `src/app/(app)/dashboard/assinatura/page.tsx` como Server Component. Busca UserSubscription via Prisma com include do plan. Renderiza card com nome do plano, badge de status, ciclo, valor, datas de início e renovação. Estado sem assinatura exibe CTA para /planos.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Botão de gerenciar assinatura",
+      "details": "Criado `ManageSubscriptionButton.tsx` como Client Component. POST /api/subscriptions/portal → redireciona para portalUrl. Exibe spinner durante loading e mensagem de erro inline.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-76", "TASK-17"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}
