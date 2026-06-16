@@ -14,16 +14,19 @@
       "step": 1,
       "description": "Incluir lastLesson no endpoint de dashboard",
       "details": "Em `GET /api/dashboard` (TASK-56): para cursos `inProgress`, incluir `lastLesson: { lessonId, lessonTitle, lessonSlug? }` obtido via `prisma.lessonProgress.findFirst({ where: { userId, lesson: { module: { courseId } } }, orderBy: { lastWatchedAt: 'desc' }, include: { lesson: { select: { id, title, module: { select: { courseId } } } } } })`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Card de 'Continuar' no dashboard",
       "details": "Este card usa `lastLesson` do curso com `lastWatchedAt` mais recente dentre todos os cursos em andamento. É o card de destaque no topo do dashboard — ver TASK-57.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-56", "TASK-57"],
   "estimatedComplexity": "low",
-  "technicalNotes": []
+  "technicalNotes": [
+    "TASK-56/57 já tinham `lastLesson` por curso, mas a seleção de 'Continuar de onde parei' pegava o primeiro item de `inProgress` (ordem de enrollment), não o curso com `lastWatchedAt` mais recente entre todos. Corrigido em `GET /api/dashboard`: a query agora seleciona `lastWatchedAt` junto do `lastLesson`, ordena `inProgress` por ele (desc) e remove o campo antes de retornar — o front (`DashboardContent`) já pegava `inProgress.find(c => c.lastLesson)`, que passou a ficar correto automaticamente com o array pré-ordenado.",
+    "Verificado com fixture manual: curso com atividade mais antiga mas 100% concluído nas aulas (sem `enrollment.completedAt`) permanece em `inProgress` e não é confundido com a seção 'Concluídos' (AC4)."
+  ]
 }

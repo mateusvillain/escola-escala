@@ -14,10 +14,14 @@
       "step": 1,
       "description": "Implementar no endpoint de dashboard",
       "details": "Em `GET /api/dashboard`: buscar plano do aluno. Buscar IDs de cursos com enrollment do aluno. Buscar cursos publicados com planAccess compatível excluindo IDs com enrollment. Limitar a 6 com `take: 6`. Incluir em `available` no response.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-56", "TASK-57"],
   "estimatedComplexity": "low",
-  "technicalNotes": []
+  "technicalNotes": [
+    "TASK-56/57 já implementavam a lógica de plano e exclusão de enrollment, mas com `AVAILABLE_LIMIT = 10` (não 6) e sem `planAccess` no select — corrigido para `6` e incluído `planAccess` na query e no tipo de resposta.",
+    "Front-end: `CourseProgressCard` ganhou prop opcional `planAccess` que renderiza o badge (mesmo estilo de `/cursos`) só quando informado — usado apenas nos cards de 'Disponíveis'. `Section` ganhou prop `action` para o link 'Ver todos' (→ `/cursos`), exibido ao lado do título sempre que a seção 'Disponíveis' é renderizada.",
+    "Verificado com 7 cursos básicos temporários: API retorna exatamente 6 (mais recentes), badge 'Básico' renderiza em cada card, e o link 'Ver todos' navega para /cursos."
+  ]
 }
