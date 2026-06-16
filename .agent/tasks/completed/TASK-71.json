@@ -1,0 +1,40 @@
+{
+  "id": "TASK-71",
+  "title": "Webhook: checkout.session.completed → ativar assinatura no banco",
+  "category": "integration",
+  "description": "Handler do evento checkout.session.completed que cria o registro de UserSubscription no banco e libera acesso do aluno ao conteúdo.",
+  "acceptanceCriteria": [
+    "Cria UserSubscription com status `active` e planId correto",
+    "Associa stripeSubscriptionId e stripeCustomerId ao registro",
+    "Determina planId a partir do priceId via Price IDs do .env",
+    "Idempotente: não cria duplicata se webhook for re-enviado",
+    "Atualiza stripeCustomerId no registro User se não existia"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler handleCheckoutCompleted",
+      "details": "Implementado em `src/lib/stripe-handlers.ts`. Extrai userId de session.metadata, stripeSubscriptionId e stripeCustomerId da session. Recupera subscription do Stripe para obter priceId (item.price.id) e períodos (item.current_period_start/end — em Stripe API v2026+ ficam no SubscriptionItem). Mapeia priceId para planType via env vars. Upsert em UserSubscription com idempotência via stripeSubscriptionId.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Incluir metadata no checkout",
+      "details": "O POST /api/subscriptions/checkout (TASK-68) já incluía `metadata: { userId: dbUser.id }` na Checkout Session — nenhuma alteração necessária.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Testar fluxo completo",
+      "details": "Completar checkout com cartão de teste 4242... Verificar no banco que UserSubscription foi criado com status active. Verificar que aluno agora tem acesso ao conteúdo do plano.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-70"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Stripe API v2026-05-27.dahlia: current_period_start e current_period_end estão em subscription.items.data[0] (SubscriptionItem), não no objeto Subscription raiz.",
+    "Usa updateMany com stripeCustomerId: null para atualizar o User sem sobrescrever valor existente (race condition segura).",
+    "buildPriceMap() cria o mapa em runtime para ler env vars corretamente no contexto do handler."
+  ]
+}

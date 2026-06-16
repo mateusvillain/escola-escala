@@ -1,14 +1,64 @@
 import type Stripe from 'stripe'
+import { stripe } from './stripe'
+import { prisma } from './prisma'
 
-// Handlers são implementados nas TASK-71 a TASK-75.
-// Cada função recebe o evento tipado e lança erro se falhar —
-// o webhook receiver captura e loga sem retornar 500.
+type PlanType = 'basic' | 'premium'
+type BillingCycle = 'monthly' | 'annual'
+
+function buildPriceMap(): Record<string, { type: PlanType; billingCycle: BillingCycle }> {
+  return {
+    [process.env.STRIPE_PRICE_ID_BASIC_MONTHLY!]: { type: 'basic', billingCycle: 'monthly' },
+    [process.env.STRIPE_PRICE_ID_BASIC_ANNUAL!]: { type: 'basic', billingCycle: 'annual' },
+    [process.env.STRIPE_PRICE_ID_PREMIUM_MONTHLY!]: { type: 'premium', billingCycle: 'monthly' },
+    [process.env.STRIPE_PRICE_ID_PREMIUM_ANNUAL!]: { type: 'premium', billingCycle: 'annual' },
+  }
+}
 
 export async function handleCheckoutSessionCompleted(
   event: Stripe.CheckoutSessionCompletedEvent
 ): Promise<void> {
-  // TASK-71: criar UserSubscription no banco
-  console.log('[stripe] checkout.session.completed — not yet implemented', event.id)
+  const session = event.data.object
+
+  const userId = session.metadata?.userId
+  if (!userId) throw new Error('userId ausente no metadata da session')
+
+  const stripeSubscriptionId = session.subscription as string
+  const stripeCustomerId = session.customer as string
+
+  const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+  const item = subscription.items.data[0]
+  const priceId = item.price.id
+
+  const planInfo = buildPriceMap()[priceId]
+  if (!planInfo) throw new Error(`priceId não mapeado para nenhum plano: ${priceId}`)
+
+  const plan = await prisma.subscriptionPlan.findFirstOrThrow({
+    where: { type: planInfo.type },
+  })
+
+  // Em Stripe API v2026+, current_period_start/end estão no SubscriptionItem
+  await prisma.userSubscription.upsert({
+    where: { stripeSubscriptionId },
+    update: {},
+    create: {
+      userId,
+      planId: plan.id,
+      stripeSubscriptionId,
+      stripeCustomerId,
+      status: 'active',
+      billingCycle: planInfo.billingCycle,
+      currentPeriodStart: new Date(item.current_period_start * 1000),
+      currentPeriodEnd: new Date(item.current_period_end * 1000),
+    },
+  })
+
+  // Garante que o User tem stripeCustomerId salvo (segurança contra race condition)
+  await prisma.user.updateMany({
+    where: { id: userId, stripeCustomerId: null },
+    data: { stripeCustomerId },
+  })
+
+  console.log(`[stripe] checkout.session.completed: assinatura ${stripeSubscriptionId} ativada para user ${userId}`)
 }
 
 export async function handleInvoicePaymentSucceeded(
