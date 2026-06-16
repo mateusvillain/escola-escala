@@ -110,7 +110,7 @@ export function Header({ user }: { user: JwtPayload }) {
                 Perfil
               </Link>
               <Link
-                href="/assinatura"
+                href="/dashboard/assinatura"
                 onClick={() => setMobileOpen(false)}
                 className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
               >
