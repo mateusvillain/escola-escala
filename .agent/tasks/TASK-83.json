@@ -1,0 +1,49 @@
+{
+  "id": "TASK-83",
+  "title": "Migrar upload de vídeo para TUS direto do navegador (sem proxy pelo servidor Next.js)",
+  "category": "integration",
+  "description": "Substituir o fluxo atual de upload de vídeo — onde o arquivo passa pelo servidor Next.js (POST /api/admin/videos/upload com formData) — por upload direto do navegador para o Bunny Stream via protocolo TUS. Necessário porque a Vercel limita o payload de Serverless/Edge Functions a 4.5MB em todos os planos, o que torna o endpoint atual inutilizável em produção para vídeos de aula reais.",
+  "acceptanceCriteria": [
+    "Novo endpoint server-side (ex: `POST /api/admin/videos/upload-init`) recebe apenas `{ title }` e retorna `{ videoId, libraryId, uploadEndpoint, authorizationSignature, authorizationExpire }` sem receber o arquivo de vídeo",
+    "`authorizationSignature` é calculada no servidor (SHA256 de libraryId + apiKey + expiration + videoId, conforme spec TUS do Bunny Stream) — a `BUNNY_STREAM_API_KEY` nunca é exposta ao cliente",
+    "Cliente usa `tus-js-client` para enviar o arquivo diretamente para `https://video.bunnycdn.com/tusupload`, sem passar pelo servidor Next.js",
+    "Barra de progresso de upload (já prevista em TASK-32) é alimentada pelos callbacks `onProgress` do `tus-js-client`",
+    "Upload de um arquivo de teste maior que 4.5MB funciona em ambiente local sem erro de payload — validando que o novo fluxo não depende do limite de Functions da Vercel",
+    "Endpoint antigo `POST /api/admin/videos/upload` (proxy direto do arquivo) é removido, já que não escala em produção",
+    "`uploadVideo()` em `src/lib/bunny.ts` é removida ou marcada como não utilizada; `createVideo()`, `getEmbedUrl()` e `getThumbnailUrl()` continuam em uso"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Implementar geração de credenciais TUS no servidor",
+      "details": "Adicionar em `src/lib/bunny.ts` uma função `generateTusCredentials(videoGuid: string)` que calcula `AuthorizationSignature` (SHA256 hex de `libraryId + apiKey + expirationTimestamp + videoGuid`) e `AuthorizationExpire` (timestamp Unix futuro, ex: +1h). Criar `src/app/api/admin/videos/upload-init/route.ts` (admin-only) que chama `createVideo(title)` e retorna o GUID junto das credenciais TUS.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Substituir upload via servidor por tus-js-client no LessonEditor",
+      "details": "Instalar `tus-js-client`. Na aba de Upload do `LessonEditor` (TASK-32), trocar o XMLHttpRequest/FormData contra `/api/admin/videos/upload` por: (1) chamar `/api/admin/videos/upload-init` para obter credenciais, (2) instanciar `new tus.Upload(file, { endpoint, headers: { AuthorizationSignature, AuthorizationExpire, VideoId, LibraryId }, metadata: { filetype, title }, onProgress, onSuccess })`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Remover endpoint e função antigos de upload direto",
+      "details": "Deletar `src/app/api/admin/videos/upload/route.ts` e a função `uploadVideo()` de `src/lib/bunny.ts`. Remover `experimental.serverActions.bodySizeLimit` de `next.config.ts` se não for mais usado por outra feature.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testar upload de arquivo grande localmente",
+      "details": "Subir um arquivo de vídeo de teste maior que 4.5MB pela UI e confirmar: progresso reportado corretamente, vídeo aparece na biblioteca Bunny Stream com status de processamento, `videoId` é salvo na aula após conclusão.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-27", "TASK-32"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Limite de payload de Serverless Functions na Vercel é 4.5MB em todos os planos (Hobby e Pro) — não configurável via next.config.ts.",
+    "Spec do upload TUS do Bunny Stream: https://docs.bunny.net/docs/stream-uploading#tus-resumable-uploads — endpoint fixo `https://video.bunnycdn.com/tusupload`.",
+    "Não requer nenhuma credencial nova: usa as mesmas BUNNY_STREAM_API_KEY e BUNNY_STREAM_LIBRARY_ID já configuradas (TASK-1).",
+    "Esta task deveria ser pré-requisito do deploy de produção (TASK-82) sempre que vídeos de aula reais (>4.5MB) forem enviados via admin."
+  ]
+}

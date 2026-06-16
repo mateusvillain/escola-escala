@@ -17,19 +17,19 @@
       "step": 1,
       "description": "Criar componente LessonEditor",
       "details": "Criar `src/components/admin/LessonEditor.tsx` como modal ou página em `/admin/aulas/[id]`. Campos: título, descrição, content (textarea), isPreview (Switch). Seção de vídeo com tabs.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Implementar upload de vídeo",
       "details": "Aba Upload: usar `<input type='file' accept='video/*'>`. Ao selecionar arquivo: POST /api/admin/videos/upload com FormData. Mostrar barra de progresso (usar XMLHttpRequest para `onprogress`). Após conclusão: setar videoId no formulário e exibir player.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Implementar ID manual e preview",
       "details": "Aba ID Manual: input de texto para Video ID. Botão 'Verificar': criar URL de embed e exibir iframe do Bunny Stream: `https://{CDN_HOSTNAME}/{videoId}/play`. Ao salvar, setar videoId no formulário.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-26", "TASK-27", "TASK-31"],
