@@ -14,14 +14,14 @@
     {
       "step": 1,
       "description": "Componente de marcação manual",
-      "details": "Criar `src/components/course/LessonCompletionToggle.tsx`. Checkbox estilizado com label 'Marcar como concluída'. Ao clicar: otimistic update do estado local, POST /api/progress/[lessonId] com novo estado. Em erro: reverter estado local e exibir toast de erro.",
-      "pass": false
+      "details": "Criar `src/components/course/LessonCompletionToggle.tsx`. Checkbox estilizado com label 'Marcar como concluída'. Ao clicar: otimistic update do estado local, POST /api/progress/[lessonId] com novo estado. Em erro: reverter estado local e exibir toast de erro. [Nota: usado o componente Alert (lui-alert) já existente no projeto como feedback de erro inline, em vez de um sistema de toast flutuante novo.]",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Ajustar endpoint para desmarcação manual",
-      "details": "No POST /api/progress: se `body.isCompleted === false` (explicitamente enviado pelo cliente): permitir reverter `isCompleted` para false e limpar `completedAt`. Isso é diferente do auto-complete que nunca reverte.",
-      "pass": false
+      "details": "No POST /api/progress: se `body.isCompleted === false` (explicitamente enviado pelo cliente): permitir reverter `isCompleted` para false e limpar `completedAt`. Isso é diferente do auto-complete que nunca reverte. `watchPercentage` tornado opcional no schema para suportar o body `{isCompleted:false}` sem percentual — quando omitido, preserva o valor existente. Testado via curl: marcar/desmarcar, e desmarcar manualmente mesmo após auto-complete a 85%.",
+      "pass": true
     }
   ],
   "dependencies": ["TASK-49", "TASK-44"],

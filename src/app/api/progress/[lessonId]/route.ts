@@ -6,7 +6,7 @@ import { checkLessonAccess } from '@/lib/access'
 import { ensureEnrollment } from '@/lib/enrollment'
 
 const postSchema = z.object({
-  watchPercentage: z.number().min(0).max(100),
+  watchPercentage: z.number().min(0).max(100).optional(),
   isCompleted: z.boolean().optional(),
 })
 
@@ -78,12 +78,22 @@ export async function POST(
 
   const existing = await prisma.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: user.userId, lessonId } },
-    select: { isCompleted: true, completedAt: true },
+    select: { watchPercentage: true, isCompleted: true, completedAt: true },
   })
 
-  const { watchPercentage, isCompleted: requestedCompleted } = parsed.data
-  const isCompleted = existing?.isCompleted || requestedCompleted === true || watchPercentage >= 80
-  const completedAt = isCompleted ? existing?.completedAt ?? new Date() : null
+  const { watchPercentage: requestedPercentage, isCompleted: requestedCompleted } = parsed.data
+  const watchPercentage = requestedPercentage ?? existing?.watchPercentage ?? 0
+
+  let isCompleted: boolean
+  let completedAt: Date | null
+  if (requestedCompleted === false) {
+    // Desmarcação manual explícita — sempre permitida, mesmo após auto-complete
+    isCompleted = false
+    completedAt = null
+  } else {
+    isCompleted = existing?.isCompleted || requestedCompleted === true || watchPercentage >= 80
+    completedAt = isCompleted ? existing?.completedAt ?? new Date() : null
+  }
 
   const progress = await prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId: user.userId, lessonId } },

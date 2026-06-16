@@ -10,6 +10,7 @@ import { getCourseProgress } from '@/lib/progress'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { UpgradePrompt, type UpgradeReason } from '@/components/course/UpgradePrompt'
+import { LessonCompletionToggle } from '@/components/course/LessonCompletionToggle'
 
 export default async function AulaPage({
   params,
@@ -113,6 +114,10 @@ export default async function AulaPage({
           <LoginPrompt />
         ) : (
           <UpgradePrompt reason={upgradeReason ?? 'no_subscription'} thumbnailUrl={course.thumbnailUrl} />
+        )}
+
+        {user && access.allowed && (
+          <LessonCompletionToggle lessonId={lesson.id} initialCompleted={progress[lesson.id] ?? false} />
         )}
 
         {lesson.isPreview && (

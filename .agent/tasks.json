@@ -360,8 +360,8 @@
     "id": "TASK-52",
     "title": "Marcação manual de aula concluída/não concluída pelo aluno",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-52.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-52.json",
+    "passes": true
   },
   {
     "id": "TASK-53",
