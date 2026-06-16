@@ -1,10 +1,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+const PLAN_LABELS = { basic: 'Básico', premium: 'Premium' } as const
+const PLAN_VARIANTS = { basic: 'bg-blue-50 text-blue-700', premium: 'bg-amber-50 text-amber-700' } as const
+
 interface CourseProgressCardProps {
   title: string
   thumbnailUrl: string | null
   progress?: number
+  planAccess?: 'basic' | 'premium'
   ctaLabel: string
   ctaHref: string
   action?: React.ReactNode
@@ -14,6 +18,7 @@ export function CourseProgressCard({
   title,
   thumbnailUrl,
   progress,
+  planAccess,
   ctaLabel,
   ctaHref,
   action,
@@ -35,6 +40,11 @@ export function CourseProgressCard({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
+        )}
+        {planAccess && (
+          <span className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-semibold ${PLAN_VARIANTS[planAccess]}`}>
+            {PLAN_LABELS[planAccess]}
+          </span>
         )}
       </div>
 

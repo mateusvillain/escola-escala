@@ -3,7 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getCourseProgress } from '@/lib/progress'
 
-const AVAILABLE_LIMIT = 10
+const AVAILABLE_LIMIT = 6
 
 export async function GET(request: NextRequest) {
   const auth = requireRole(request, ['student', 'instructor', 'admin'])
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
             prisma.lessonProgress.findFirst({
               where: { userId: user.userId, lesson: { module: { courseId: e.course.id } } },
               orderBy: { lastWatchedAt: 'desc' },
-              select: { lesson: { select: { id: true, title: true } } },
+              select: { lastWatchedAt: true, lesson: { select: { id: true, title: true } } },
             }),
           ])
           return {
@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
             thumbnailUrl: e.course.thumbnailUrl,
             progress: progress.percentage,
             lastLesson: lastProgress?.lesson ?? null,
+            lastWatchedAt: lastProgress?.lastWatchedAt ?? null,
           }
         })
     ),
@@ -66,9 +67,25 @@ export async function GET(request: NextRequest) {
     ),
   ])
 
-  const inProgress = inProgressItems.filter(item => item.progress > 0)
+  const inProgress = inProgressItems
+    .filter(item => item.progress > 0)
+    .sort((a, b) => (b.lastWatchedAt?.getTime() ?? 0) - (a.lastWatchedAt?.getTime() ?? 0))
+    .map(item => ({
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      thumbnailUrl: item.thumbnailUrl,
+      progress: item.progress,
+      lastLesson: item.lastLesson,
+    }))
 
-  let available: Array<{ id: string; title: string; slug: string; thumbnailUrl: string | null }> = []
+  let available: Array<{
+    id: string
+    title: string
+    slug: string
+    thumbnailUrl: string | null
+    planAccess: 'basic' | 'premium'
+  }> = []
   if (planType) {
     available = await prisma.course.findMany({
       where: {
@@ -76,7 +93,7 @@ export async function GET(request: NextRequest) {
         id: { notIn: enrolledCourseIds },
         ...(planType === 'basic' ? { planAccess: 'basic' } : {}),
       },
-      select: { id: true, title: true, slug: true, thumbnailUrl: true },
+      select: { id: true, title: true, slug: true, thumbnailUrl: true, planAccess: true },
       orderBy: { createdAt: 'desc' },
       take: AVAILABLE_LIMIT,
     })

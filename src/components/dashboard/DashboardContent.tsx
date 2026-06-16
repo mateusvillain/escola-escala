@@ -34,6 +34,7 @@ interface AvailableCourse {
   title: string
   slug: string
   thumbnailUrl: string | null
+  planAccess: 'basic' | 'premium'
 }
 
 interface DashboardData {
@@ -42,12 +43,23 @@ interface DashboardData {
   available: AvailableCourse[]
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
   return (
     <section>
-      <lui-heading level="2" size="lg" className="mb-4">
-        {title}
-      </lui-heading>
+      <div className="flex items-center justify-between mb-4">
+        <lui-heading level="2" size="lg">
+          {title}
+        </lui-heading>
+        {action}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{children}</div>
     </section>
   )
@@ -138,12 +150,20 @@ export function DashboardContent() {
       )}
 
       {available.length > 0 && (
-        <Section title="Disponíveis para você">
+        <Section
+          title="Disponíveis para você"
+          action={
+            <Link href="/cursos" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+              Ver todos →
+            </Link>
+          }
+        >
           {available.map(course => (
             <CourseProgressCard
               key={course.id}
               title={course.title}
               thumbnailUrl={course.thumbnailUrl}
+              planAccess={course.planAccess}
               ctaLabel="Começar"
               ctaHref={`/cursos/${course.slug}`}
             />
