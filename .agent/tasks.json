@@ -311,8 +311,8 @@
     "id": "TASK-45",
     "title": "Sidebar de navegação do curso — módulos e aulas com estado de conclusão UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-45.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-45.json",
+    "passes": true
   },
   {
     "id": "TASK-46",

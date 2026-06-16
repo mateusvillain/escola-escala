@@ -16,20 +16,20 @@
     {
       "step": 1,
       "description": "Criar componente CourseSidebar",
-      "details": "Criar `src/components/course/CourseSidebar.tsx`. Receber: `modules` (com aulas), `currentLessonId`, `progress` (map de lessonId → isCompleted). Renderizar accordion por módulo. Link para cada aula. Ícone condicional: ✓ (concluída), ▶ (atual), ○ (não assistida).",
-      "pass": false
+      "details": "Criar `src/components/course/CourseSidebar.tsx`. Receber: `modules` (com aulas), `currentLessonId`, `progress` (map de lessonId → isCompleted). Renderizar accordion por módulo. Link para cada aula. Ícone condicional: ✓ (concluída), ▶ (atual), ○ (não assistida). [Nota: essa descrição contradiz o critério de aceite \"Aulas não assistidas exibem ícone de play\" — implementado conforme o critério de aceite: ✓ concluída / ▶ não concluída (azul quando atual, cinza quando não), aula atual destacada via background.]",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Barra de progresso geral",
-      "details": "Calcular: `completedCount / totalLessons * 100`. Exibir componente `Progress` do design system e texto `'{n} de {total} aulas concluídas'`.",
-      "pass": false
+      "details": "Calcular: `completedCount / totalLessons * 100`. Exibir componente `Progress` do design system e texto `'{n} de {total} aulas concluídas'`. [Nota: LetsUI não tem componente Progress — implementada barra com Tailwind, mesmo padrão já usado em LessonEditor.tsx.]",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Layout com sidebar",
       "details": "Na página da aula: layout de 2 colunas — player/conteúdo (70%) e sidebar (30%) em desktop. Em mobile: sidebar abaixo do conteúdo com toggle para colapsar.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-44", "TASK-53"],
