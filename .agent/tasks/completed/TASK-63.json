@@ -14,10 +14,14 @@
       "step": 1,
       "description": "Criar route handler de download",
       "details": "Criar `src/app/api/certificates/[courseId]/download/route.ts` (GET). Verificar autenticação. Buscar Certificate pelo userId e courseId. Se não existe: 404. Se `fileUrl` é URL: `NextResponse.redirect(fileUrl)`. Se é base64: decodificar e retornar como `new NextResponse(buffer, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': ... } })`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-62"],
   "estimatedComplexity": "low",
-  "technicalNotes": []
+  "technicalNotes": [
+    "Ownership (AC 'verifica userId') é garantido pela própria query: `prisma.certificate.findUnique({ where: { userId_courseId: { userId: user.userId, courseId } } })` só pode retornar o certificado do usuário autenticado — outro usuário pedindo o mesmo courseId recebe 404, nunca o certificado de terceiros.",
+    "Detecção de base64 vs URL externa: `fileUrl.startsWith('data:')` — hoje sempre é base64 (sem credenciais de blob storage configuradas, ver `src/lib/certificate.ts`), mas o caminho de redirect já está implementado e testado manualmente trocando o `fileUrl` no banco por uma URL https — retornou 307 com `Location` correta.",
+    "Testado manualmente: download retorna PDF válido com Content-Disposition correto; courseId sem certificado → 404; certificado de outro usuário → 404; sem autenticação → 401."
+  ]
 }
