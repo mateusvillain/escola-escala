@@ -1,0 +1,34 @@
+{
+  "id": "TASK-70",
+  "title": "POST /api/webhooks/stripe — receptor de eventos Stripe com verificação de assinatura",
+  "category": "integration",
+  "description": "Endpoint webhook que recebe eventos do Stripe, verifica a assinatura do payload e despacha para handlers específicos por tipo de evento.",
+  "acceptanceCriteria": [
+    "Lê raw body (não parsed JSON) e verifica assinatura via `stripe.webhooks.constructEvent()`",
+    "Header `Stripe-Signature` ausente ou inválido retorna 400",
+    "Despacha para handler correto baseado em `event.type`",
+    "Retorna 200 rapidamente (processamento assíncrono se necessário)",
+    "Erros em handlers individuais logados sem retornar 500 (Stripe re-envia em falha)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler de webhook",
+      "details": "Criado `src/app/api/webhooks/stripe/route.ts`. Usa `request.text()` para raw body (App Router não precisa de bodyParser:false). Lê header `stripe-signature`. Chama `stripe.webhooks.constructEvent()`. Retorna 400 em erro de verificação.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Switch de eventos",
+      "details": "Switch em `event.type` com cases para: checkout.session.completed, invoice.payment_succeeded, invoice.payment_failed, customer.subscription.deleted, customer.subscription.updated. Cada case chama handler tipado de `src/lib/stripe-handlers.ts`. Erros capturados e logados sem retornar 500. Retorna 200 com `{ received: true }`.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-68"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "App Router: `request.text()` já entrega raw body sem configuração adicional.",
+    "Handlers em `src/lib/stripe-handlers.ts` — stubs implementados em TASK-71 a TASK-75.",
+    "Em desenvolvimento: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`."
+  ]
+}
