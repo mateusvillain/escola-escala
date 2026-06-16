@@ -1,0 +1,22 @@
+{
+  "id": "TASK-65",
+  "title": "E-mail de boas-vindas disparado após primeira assinatura ativa",
+  "category": "functional",
+  "description": "Enviar e-mail de boas-vindas ao aluno quando a primeira assinatura é ativada (webhook checkout.session.completed).",
+  "acceptanceCriteria": [
+    "E-mail enviado após webhook `checkout.session.completed` ativar a assinatura",
+    "Conteúdo: boas-vindas com nome do aluno, plano ativado, link para o dashboard",
+    "Enviado apenas na primeira ativação (não em renovações)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Integrar envio no webhook",
+      "details": "Adicionado em `handleCheckoutSessionCompleted` em `src/lib/stripe-handlers.ts`. Após upsert da UserSubscription, conta registros do usuário — envia e-mail apenas se count === 1 (primeira assinatura). Envio em try/catch para não bloquear o processamento do webhook.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-64", "TASK-71"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

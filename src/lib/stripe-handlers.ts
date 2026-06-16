@@ -1,6 +1,7 @@
 import type Stripe from 'stripe'
 import { stripe } from './stripe'
 import { prisma } from './prisma'
+import { sendWelcomeEmail } from './email'
 
 type PlanType = 'basic' | 'premium'
 type BillingCycle = 'monthly' | 'annual'
@@ -53,10 +54,24 @@ export async function handleCheckoutSessionCompleted(
   })
 
   // Garante que o User tem stripeCustomerId salvo (segurança contra race condition)
-  await prisma.user.updateMany({
-    where: { id: userId, stripeCustomerId: null },
-    data: { stripeCustomerId },
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true, stripeCustomerId: true },
   })
+
+  if (dbUser && !dbUser.stripeCustomerId) {
+    await prisma.user.update({ where: { id: userId }, data: { stripeCustomerId } })
+  }
+
+  // E-mail de boas-vindas apenas na primeira assinatura (não em renovações)
+  const subscriptionCount = await prisma.userSubscription.count({ where: { userId } })
+  if (subscriptionCount === 1 && dbUser) {
+    try {
+      await sendWelcomeEmail(dbUser.email, dbUser.name)
+    } catch (err) {
+      console.error('[stripe] falha ao enviar e-mail de boas-vindas:', err)
+    }
+  }
 
   console.log(`[stripe] checkout.session.completed: assinatura ${stripeSubscriptionId} ativada para user ${userId}`)
 }
