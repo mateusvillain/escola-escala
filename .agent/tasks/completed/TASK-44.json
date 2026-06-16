@@ -16,19 +16,19 @@
       "step": 1,
       "description": "Criar página da aula",
       "details": "Criar `src/app/cursos/[slug]/aulas/[lessonId]/page.tsx`. Buscar dados da aula via `GET /api/courses/[slug]` e encontrar a aula pelo ID. Verificar acesso. Se tem acesso: renderizar player. Se não tem: renderizar `UpgradePrompt`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Componente do player Bunny Stream",
       "details": "Criar `src/components/player/BunnyPlayer.tsx` como Client Component. Renderizar `<iframe src={'https://{CDN_HOSTNAME}/{videoId}/play'} style={{ aspectRatio: '16/9', width: '100%' }} allowFullScreen allowTransparency referrerPolicy='no-referrer-when-downgrade' />`. Reportar progresso via `window.addEventListener('message', ...)` para eventos do player.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar conteúdo markdown",
       "details": "Se `lesson.content` existe: renderizar com `react-markdown`. Instalar: `npm install react-markdown`. Usar prose classes do Tailwind Typography plugin.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-40", "TASK-43", "TASK-17"],
