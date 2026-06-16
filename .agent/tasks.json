@@ -3,56 +3,56 @@
     "id": "TASK-1",
     "title": "Verificar pré-requisitos e acessos do projeto",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-1.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-1.json",
+    "passes": true
   },
   {
     "id": "TASK-2",
     "title": "Inicializar projeto Next.js 14+ com TypeScript, Prisma e Tailwind",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-2.json",
+    "specFilePath": ".agent/tasks/completed/TASK-2.json",
     "passes": true
   },
   {
     "id": "TASK-3",
     "title": "Integrar design system existente (tokens, componentes base)",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-3.json",
+    "specFilePath": ".agent/tasks/completed/TASK-3.json",
     "passes": true
   },
   {
     "id": "TASK-4",
     "title": "Definir schema Prisma — todas as entidades do modelo de dados",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-4.json",
+    "specFilePath": ".agent/tasks/completed/TASK-4.json",
     "passes": true
   },
   {
     "id": "TASK-5",
     "title": "Executar migrations e criar seed de usuários e planos de teste",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-5.json",
+    "specFilePath": ".agent/tasks/completed/TASK-5.json",
     "passes": true
   },
   {
     "id": "TASK-6",
     "title": "Utilitário JWT — assinar e verificar tokens",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-6.json",
+    "specFilePath": ".agent/tasks/completed/TASK-6.json",
     "passes": true
   },
   {
     "id": "TASK-7",
     "title": "Middleware de autenticação — validar JWT de HttpOnly cookie",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-7.json",
+    "specFilePath": ".agent/tasks/completed/TASK-7.json",
     "passes": true
   },
   {
     "id": "TASK-8",
     "title": "Middleware de autorização — verificar role do usuário na rota",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-8.json",
+    "specFilePath": ".agent/tasks/completed/TASK-8.json",
     "passes": true
   },
   {
@@ -73,239 +73,239 @@
     "id": "TASK-11",
     "title": "POST /api/auth/logout — invalidar sessão JWT",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-11.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-11.json",
+    "passes": true
   },
   {
     "id": "TASK-12",
     "title": "POST /api/auth/forgot-password — enviar link de recuperação por e-mail",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-12.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-12.json",
+    "passes": true
   },
   {
     "id": "TASK-13",
     "title": "POST /api/auth/reset-password — redefinir senha via token",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-13.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-13.json",
+    "passes": true
   },
   {
     "id": "TASK-14",
     "title": "Página de cadastro UI — formulário de registro de aluno",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-14.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-14.json",
+    "passes": true
   },
   {
     "id": "TASK-15",
     "title": "Página de login UI — formulário de e-mail e senha",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-15.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-15.json",
+    "passes": true
   },
   {
     "id": "TASK-16",
     "title": "Páginas de recuperação e redefinição de senha UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-16.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-16.json",
+    "passes": true
   },
   {
     "id": "TASK-17",
     "title": "Layout responsivo base — header, footer e navegação principal",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-17.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-17.json",
+    "passes": true
   },
   {
     "id": "TASK-18",
     "title": "GET + PATCH /api/users/me — perfil do usuário autenticado",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-18.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-18.json",
+    "passes": true
   },
   {
     "id": "TASK-19",
     "title": "Página de perfil do aluno UI — nome, e-mail, avatar, senha",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-19.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-19.json",
+    "passes": true
   },
   {
     "id": "TASK-20",
     "title": "GET /api/admin/courses — listar cursos no painel admin",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-20.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-20.json",
+    "passes": true
   },
   {
     "id": "TASK-21",
     "title": "POST /api/admin/courses — criar novo curso",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-21.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-21.json",
+    "passes": true
   },
   {
     "id": "TASK-22",
     "title": "GET + PATCH + DELETE /api/admin/courses/[id] — detalhe, edição e remoção",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-22.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-22.json",
+    "passes": true
   },
   {
     "id": "TASK-23",
     "title": "POST /api/admin/courses/[id]/modules — criar módulo em curso",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-23.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-23.json",
+    "passes": true
   },
   {
     "id": "TASK-24",
     "title": "PATCH + DELETE /api/admin/modules/[id] — editar e remover módulo",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-24.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-24.json",
+    "passes": true
   },
   {
     "id": "TASK-25",
     "title": "POST /api/admin/modules/[id]/lessons — criar aula em módulo",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-25.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-25.json",
+    "passes": true
   },
   {
     "id": "TASK-26",
     "title": "GET + PATCH + DELETE /api/admin/lessons/[id] — detalhe, edição e remoção de aula",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-26.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-26.json",
+    "passes": true
   },
   {
     "id": "TASK-27",
     "title": "POST /api/admin/videos/upload — upload de vídeo via Bunny Stream API",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-27.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-27.json",
+    "passes": true
   },
   {
     "id": "TASK-28",
     "title": "Admin — lista de cursos com filtros e ações rápidas UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-28.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-28.json",
+    "passes": true
   },
   {
     "id": "TASK-29",
     "title": "Admin — formulário de criação e edição de curso UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-29.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-29.json",
+    "passes": true
   },
   {
     "id": "TASK-30",
     "title": "Admin — editor de módulos dentro da página do curso UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-30.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-30.json",
+    "passes": true
   },
   {
     "id": "TASK-31",
     "title": "Admin — editor de aulas dentro do módulo (título, vídeo, conteúdo) UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-31.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-31.json",
+    "passes": true
   },
   {
     "id": "TASK-32",
     "title": "Admin — upload e vinculação de vídeo Bunny Stream na aula UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-32.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-32.json",
+    "passes": true
   },
   {
     "id": "TASK-33",
     "title": "GET /api/admin/users + PATCH /api/admin/users/[id] — gestão de usuários",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-33.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-33.json",
+    "passes": true
   },
   {
     "id": "TASK-34",
     "title": "Admin — lista de usuários com busca, filtro por role e ações UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-34.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-34.json",
+    "passes": true
   },
   {
     "id": "TASK-35",
     "title": "GET /api/admin/subscriptions — listar assinaturas ativas",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-35.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-35.json",
+    "passes": true
   },
   {
     "id": "TASK-36",
     "title": "Admin — página de assinaturas ativas UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-36.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-36.json",
+    "passes": true
   },
   {
     "id": "TASK-37",
     "title": "GET /api/admin/metrics — métricas gerais da plataforma",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-37.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-37.json",
+    "passes": true
   },
   {
     "id": "TASK-38",
     "title": "Admin — dashboard com KPIs (alunos, assinaturas, cursos publicados) UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-38.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-38.json",
+    "passes": true
   },
   {
     "id": "TASK-39",
     "title": "GET /api/courses — catálogo público de cursos publicados",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-39.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-39.json",
+    "passes": true
   },
   {
     "id": "TASK-40",
     "title": "GET /api/courses/[slug] — detalhe público de um curso",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-40.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-40.json",
+    "passes": true
   },
   {
     "id": "TASK-41",
     "title": "Página de catálogo público de cursos UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-41.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-41.json",
+    "passes": true
   },
   {
     "id": "TASK-42",
     "title": "Página de detalhe do curso UI — descrição, módulos, CTA de assinatura",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-42.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-42.json",
+    "passes": true
   },
   {
     "id": "TASK-43",
     "title": "Middleware de controle de acesso ao conteúdo por plano",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-43.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-43.json",
+    "passes": true
   },
   {
     "id": "TASK-44",
     "title": "Página de aula com player Bunny Stream embedado UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-44.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-44.json",
+    "passes": true
   },
   {
     "id": "TASK-45",
@@ -318,15 +318,15 @@
     "id": "TASK-46",
     "title": "Navegação entre aulas — botões Anterior e Próxima Aula",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-46.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-46.json",
+    "passes": true
   },
   {
     "id": "TASK-47",
     "title": "Preview gratuito de aulas marcadas como preview (sem assinatura)",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-47.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-47.json",
+    "passes": true
   },
   {
     "id": "TASK-48",
@@ -339,8 +339,8 @@
     "id": "TASK-49",
     "title": "GET + POST /api/progress/[lessonId] — ler e registrar progresso de aula",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-49.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-49.json",
+    "passes": true
   },
   {
     "id": "TASK-50",
@@ -367,15 +367,15 @@
     "id": "TASK-53",
     "title": "Cálculo de progresso por curso (% de aulas concluídas)",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-53.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-53.json",
+    "passes": true
   },
   {
     "id": "TASK-54",
     "title": "POST /api/enrollments/[courseId] — auto-matrícula na primeira aula assistida",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-54.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-54.json",
+    "passes": true
   },
   {
     "id": "TASK-55",
@@ -423,8 +423,8 @@
     "id": "TASK-61",
     "title": "Utilitário de geração de certificado em PDF (pdf-lib)",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-61.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-61.json",
+    "passes": true
   },
   {
     "id": "TASK-62",
@@ -444,99 +444,99 @@
     "id": "TASK-64",
     "title": "Utilitário de e-mail (Nodemailer + SMTP) com templates HTML",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-64.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-64.json",
+    "passes": true
   },
   {
     "id": "TASK-65",
     "title": "E-mail de boas-vindas disparado após primeira assinatura ativa",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-65.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-65.json",
+    "passes": true
   },
   {
     "id": "TASK-66",
     "title": "E-mail de link de recuperação de senha",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-66.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-66.json",
+    "passes": true
   },
   {
     "id": "TASK-67",
     "title": "Configurar produtos e preços dos planos no Stripe Dashboard",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-67.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-67.json",
+    "passes": true
   },
   {
     "id": "TASK-68",
     "title": "POST /api/subscriptions/checkout — criar Stripe Checkout Session",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-68.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-68.json",
+    "passes": true
   },
   {
     "id": "TASK-69",
     "title": "Página de planos e preços UI — comparativo Básico vs. Premium",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-69.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-69.json",
+    "passes": true
   },
   {
     "id": "TASK-70",
     "title": "POST /api/webhooks/stripe — receptor de eventos Stripe com verificação de assinatura",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-70.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-70.json",
+    "passes": true
   },
   {
     "id": "TASK-71",
     "title": "Webhook: checkout.session.completed → ativar assinatura no banco",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-71.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-71.json",
+    "passes": true
   },
   {
     "id": "TASK-72",
     "title": "Webhook: invoice.payment_succeeded → renovar período da assinatura",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-72.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-72.json",
+    "passes": true
   },
   {
     "id": "TASK-73",
     "title": "Webhook: invoice.payment_failed → marcar assinatura como past_due",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-73.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-73.json",
+    "passes": true
   },
   {
     "id": "TASK-74",
     "title": "Webhook: customer.subscription.deleted → cancelar assinatura",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-74.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-74.json",
+    "passes": true
   },
   {
     "id": "TASK-75",
     "title": "Webhook: customer.subscription.updated → atualizar plano (upgrade/downgrade)",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-75.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-75.json",
+    "passes": true
   },
   {
     "id": "TASK-76",
     "title": "POST /api/subscriptions/portal — criar sessão do Stripe Customer Portal",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-76.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-76.json",
+    "passes": true
   },
   {
     "id": "TASK-77",
     "title": "Página 'Minha Assinatura' com plano ativo e botão de gerenciar UI",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-77.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-77.json",
+    "passes": true
   },
   {
     "id": "TASK-78",
@@ -549,15 +549,15 @@
     "id": "TASK-79",
     "title": "Rate limiting nas rotas de autenticação (máx. 10 req/min por IP)",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-79.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-79.json",
+    "passes": true
   },
   {
     "id": "TASK-80",
     "title": "Validação e sanitização de inputs em todas as rotas de API",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-80.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-80.json",
+    "passes": true
   },
   {
     "id": "TASK-81",
@@ -571,6 +571,13 @@
     "title": "Deploy em produção na Vercel com variáveis de ambiente configuradas",
     "category": "setup",
     "specFilePath": ".agent/tasks/TASK-82.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-83",
+    "title": "Migrar upload de vídeo para TUS direto do navegador (sem proxy pelo servidor Next.js)",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-83.json",
     "passes": false
   }
 ]
