@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import type { JwtPayload } from '@/lib/jwt'
 import { UserMenu } from './UserMenu'
 
@@ -13,9 +13,15 @@ const NAV_LINKS = [
 
 export function Header({ user }: { user: JwtPayload }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const navLinks =
     user.role === 'admin' ? [...NAV_LINKS, { href: '/admin', label: 'Admin' }] : NAV_LINKS
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -118,6 +124,14 @@ export function Header({ user }: { user: JwtPayload }) {
               >
                 Minha Assinatura
               </Link>
+            </div>
+            <div className="border-t border-gray-100 mt-1 pt-1">
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Sair
+              </button>
             </div>
           </div>
         </div>

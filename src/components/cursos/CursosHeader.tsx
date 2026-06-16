@@ -2,11 +2,18 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { JwtPayload } from '@/lib/jwt'
 import { UserMenu } from '@/components/layout/UserMenu'
 
 export function CursosHeader({ user }: { user: JwtPayload | null }) {
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -132,6 +139,14 @@ export function CursosHeader({ user }: { user: JwtPayload | null }) {
                   >
                     Minha Assinatura
                   </Link>
+                </div>
+                <div className="border-t border-gray-100 mt-1 pt-1">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Sair
+                  </button>
                 </div>
               </>
             ) : (
