@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
-import { createVideo, uploadVideo, getEmbedUrl, getThumbnailUrl } from '@/lib/bunny'
+import { createVideo, uploadVideo, getVideoInfo, getEmbedUrl, getThumbnailUrl } from '@/lib/bunny'
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024 * 1024 // 2GB
 
@@ -44,10 +44,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Falha ao enviar vídeo para o Bunny Stream' }, { status: 502 })
   }
 
+  // Duração pode vir zerada se o Bunny ainda não terminou de processar o vídeo.
+  let videoDuration: number | null = null
+  try {
+    const info = await getVideoInfo(videoGuid)
+    videoDuration = info.length || null
+  } catch (err) {
+    console.error('[bunny] erro ao buscar duração do vídeo:', err)
+  }
+
   return NextResponse.json({
     videoId: videoGuid,
     embedUrl: getEmbedUrl(videoGuid),
     thumbnailUrl: getThumbnailUrl(videoGuid),
+    videoDuration,
     status: 'processing',
   })
 }

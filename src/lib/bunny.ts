@@ -9,6 +9,10 @@ interface BunnyVideo {
   status: number
 }
 
+interface BunnyVideoInfo extends BunnyVideo {
+  length: number
+}
+
 export async function createVideo(title: string): Promise<BunnyVideo> {
   const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos`, {
     method: 'POST',
@@ -41,6 +45,19 @@ export async function uploadVideo(videoGuid: string, buffer: ArrayBuffer): Promi
     const text = await res.text()
     throw new Error(`Bunny Stream uploadVideo falhou (${res.status}): ${text}`)
   }
+}
+
+export async function getVideoInfo(videoGuid: string): Promise<BunnyVideoInfo> {
+  const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos/${videoGuid}`, {
+    headers: { AccessKey: API_KEY },
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Bunny Stream getVideoInfo falhou (${res.status}): ${text}`)
+  }
+
+  return res.json()
 }
 
 export function getEmbedUrl(videoGuid: string): string {
