@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { ensureEnrollment } from '@/lib/enrollment'
 
 export async function POST(
   request: NextRequest,
@@ -14,35 +15,25 @@ export async function POST(
 
   const course = await prisma.course.findFirst({
     where: { id: courseId, status: 'published' },
-    select: { id: true, planAccess: true },
+    select: { id: true },
   })
 
   if (!course) {
     return NextResponse.json({ error: 'Curso não encontrado' }, { status: 404 })
   }
 
-  const subscription = await prisma.userSubscription.findFirst({
-    where: { userId: user.userId, status: 'active' },
-    include: { plan: true },
-  })
+  const enrolled = await ensureEnrollment(user.userId, course.id)
 
-  const planType = subscription?.plan.type ?? null
-  const hasAccess =
-    planType === 'premium' ||
-    (planType === 'basic' && course.planAccess === 'basic')
-
-  if (!hasAccess) {
+  if (!enrolled) {
     return NextResponse.json(
       { error: 'Acesso negado. Sua assinatura não cobre este curso.' },
       { status: 403 }
     )
   }
 
-  const enrollment = await prisma.courseEnrollment.upsert({
+  const enrollment = await prisma.courseEnrollment.findUniqueOrThrow({
     where: { userId_courseId: { userId: user.userId, courseId: course.id } },
-    create: { userId: user.userId, courseId: course.id },
-    update: {},
-    select: { id: true, enrolledAt: true },
+    select: { enrolledAt: true },
   })
 
   return NextResponse.json({ enrolled: true, enrolledAt: enrollment.enrolledAt })

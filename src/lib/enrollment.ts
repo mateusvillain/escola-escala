@@ -1,0 +1,33 @@
+import { prisma } from '@/lib/prisma'
+
+/**
+ * Cria a matrícula do usuário no curso se ele tiver acesso via assinatura
+ * ativa. Idempotente — não faz nada se já existir. Não matricula com base
+ * em acesso de preview (sem assinatura real ao curso).
+ */
+export async function ensureEnrollment(userId: string, courseId: string): Promise<boolean> {
+  const course = await prisma.course.findFirst({
+    where: { id: courseId, status: 'published' },
+    select: { id: true, planAccess: true },
+  })
+  if (!course) return false
+
+  const subscription = await prisma.userSubscription.findFirst({
+    where: { userId, status: 'active' },
+    include: { plan: true },
+  })
+
+  const planType = subscription?.plan.type ?? null
+  const hasAccess =
+    planType === 'premium' || (planType === 'basic' && course.planAccess === 'basic')
+
+  if (!hasAccess) return false
+
+  await prisma.courseEnrollment.upsert({
+    where: { userId_courseId: { userId, courseId: course.id } },
+    create: { userId, courseId: course.id },
+    update: {},
+  })
+
+  return true
+}

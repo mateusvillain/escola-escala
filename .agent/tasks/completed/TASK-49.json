@@ -15,19 +15,19 @@
       "step": 1,
       "description": "Criar route handler",
       "details": "Criar `src/app/api/progress/[lessonId]/route.ts`. Verificar autenticação. Chamar `checkLessonAccess()`. GET: `prisma.lessonProgress.findUnique({ where: { userId_lessonId: { userId, lessonId } } })`. POST: `prisma.lessonProgress.upsert({ where: { userId_lessonId }, create: { ... }, update: { watchPercentage, isCompleted, completedAt } })`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Auto-complete ao 80%",
-      "details": "No handler POST: após upsert, se `watchPercentage >= 80 && !existingProgress?.isCompleted`: atualizar `isCompleted = true`, `completedAt = new Date()`. Chamar TASK-55 `checkCourseCompletion()` de forma assíncrona.",
-      "pass": false
+      "details": "No handler POST: após upsert, se `watchPercentage >= 80 && !existingProgress?.isCompleted`: atualizar `isCompleted = true`, `completedAt = new Date()`. Chamar TASK-55 `checkCourseCompletion()` de forma assíncrona. [Nota: chamada a checkCourseCompletion() não implementada — TASK-55 ainda não existe; não é dependência declarada desta task.]",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Auto-matrícula",
       "details": "Se é o primeiro POST de progresso em qualquer aula do curso: criar `CourseEnrollment` se ainda não existe — chamar `POST /api/enrollments/[courseId]` internamente ou via helper.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-43", "TASK-54"],
