@@ -29,10 +29,10 @@ const LABEL_CLASS = 'block text-sm font-medium text-gray-700 mb-1'
 
 const ERROR_CLASS = 'mt-1 text-xs text-red-600'
 
-const CDN_HOSTNAME = process.env.NEXT_PUBLIC_BUNNY_STREAM_CDN_HOSTNAME
+const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_STREAM_LIBRARY_ID
 
 function getEmbedUrl(videoId: string): string {
-  return `https://${CDN_HOSTNAME}/${videoId}/play`
+  return `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}`
 }
 
 function formatDuration(seconds: number | null): string | null {

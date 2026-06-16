@@ -61,7 +61,7 @@ export async function getVideoInfo(videoGuid: string): Promise<BunnyVideoInfo> {
 }
 
 export function getEmbedUrl(videoGuid: string): string {
-  return `https://${CDN_HOSTNAME}/${videoGuid}/play`
+  return `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoGuid}`
 }
 
 export function getThumbnailUrl(videoGuid: string): string {

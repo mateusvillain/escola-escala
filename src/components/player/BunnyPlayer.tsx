@@ -7,10 +7,11 @@ interface BunnyPlayerProps {
   onProgress?: (percentage: number) => void
 }
 
-const CDN_HOSTNAME = process.env.NEXT_PUBLIC_BUNNY_STREAM_CDN_HOSTNAME
+const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_STREAM_LIBRARY_ID
+const EMBED_ORIGIN = 'https://iframe.mediadelivery.net'
 
 function getEmbedUrl(videoId: string): string {
-  return `https://${CDN_HOSTNAME}/${videoId}/play`
+  return `${EMBED_ORIGIN}/embed/${LIBRARY_ID}/${videoId}`
 }
 
 export function BunnyPlayer({ videoId, onProgress }: BunnyPlayerProps) {
@@ -19,7 +20,7 @@ export function BunnyPlayer({ videoId, onProgress }: BunnyPlayerProps) {
     const reportProgress = onProgress
 
     function handleMessage(event: MessageEvent) {
-      if (event.origin !== `https://${CDN_HOSTNAME}`) return
+      if (event.origin !== EMBED_ORIGIN) return
 
       let data: unknown
       try {
