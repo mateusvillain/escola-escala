@@ -10,6 +10,7 @@ export type AccessReason =
 export interface AccessResult {
   allowed: boolean
   reason?: AccessReason
+  subscriptionStatus?: string
 }
 
 /**
@@ -53,7 +54,7 @@ export async function checkLessonAccess(
   if (!subscription) return { allowed: false, reason: 'no_subscription' }
 
   if (subscription.status !== 'active') {
-    return { allowed: false, reason: 'subscription_inactive' }
+    return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
   }
 
   const planType = subscription.plan.type

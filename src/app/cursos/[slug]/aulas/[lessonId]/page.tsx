@@ -113,7 +113,11 @@ export default async function AulaPage({
         ) : access.reason === 'not_authenticated' ? (
           <LoginPrompt />
         ) : (
-          <UpgradePrompt reason={upgradeReason ?? 'no_subscription'} thumbnailUrl={course.thumbnailUrl} />
+          <UpgradePrompt
+            reason={upgradeReason ?? 'no_subscription'}
+            subscriptionStatus={access.subscriptionStatus}
+            thumbnailUrl={course.thumbnailUrl}
+          />
         )}
 
         {user && access.allowed && (

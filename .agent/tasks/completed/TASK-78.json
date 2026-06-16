@@ -14,16 +14,20 @@
       "step": 1,
       "description": "Atualizar checkLessonAccess",
       "details": "Em `src/lib/access.ts`: ao buscar assinatura, verificar que `status === 'active'`. Se `status === 'past_due'` ou `'canceled'`: retornar `{ allowed: false, reason: 'subscription_inactive' }`. Atualizar `AccessResult` type para incluir este reason.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Atualizar UpgradePrompt",
       "details": "Em `UpgradePrompt.tsx`: adicionar case para `reason === 'subscription_inactive'`. Diferenciar mensagem baseada se é past_due ou canceled (passar info adicional via props). Botão 'Gerenciar assinatura' com link para `/dashboard/assinatura`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-43", "TASK-48"],
   "estimatedComplexity": "low",
-  "technicalNotes": []
+  "technicalNotes": [
+    "AC1 já estava satisfeito pela TASK-43: `checkLessonAccess` já bloqueava qualquer `status !== 'active'` (past_due, canceled, trialing) com `reason: 'subscription_inactive'`. O que faltava era diferenciar a mensagem na UI — `reason` continua igual para os dois casos (por design, conforme AC1), então adicionei `subscriptionStatus` em `AccessResult` só para a UI decidir qual texto mostrar, sem mudar o contrato de `reason`.",
+    "`UpgradePrompt`: extraí `ctaLabel`/`ctaHref` para dentro de cada mensagem (antes era um único botão fixo 'Fazer Upgrade para Premium' → /planos para todos os reasons). Para `subscription_inactive` o CTA agora é 'Gerenciar assinatura' → `/dashboard/assinatura`, e a lista de benefícios Premium é ocultada (não cabe no contexto de 'corrigir assinatura existente'). Status sem case específico (ex.: trialing) cai no fallback `default` com a mensagem genérica anterior.",
+    "Testado manualmente trocando o status da assinatura de um usuário temporário entre `past_due` e `canceled`: mensagens e CTA corretos em ambos, e `/dashboard/assinatura` já trata os dois (banner de pagamento pendente vs. estado vazio 'assinar agora') sem mudança adicional, pois a query daquela página já filtra por status."
+  ]
 }
