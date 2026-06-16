@@ -8,7 +8,7 @@ import { checkLessonAccess, type AccessReason } from '@/lib/access'
 import { getAdjacentLessons } from '@/lib/utils/lessons'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 
-const UPGRADE_MESSAGES: Record<AccessReason, { title: string; description: string; ctaLabel: string; ctaHref: string }> = {
+const UPGRADE_MESSAGES: Record<Exclude<AccessReason, 'preview'>, { title: string; description: string; ctaLabel: string; ctaHref: string }> = {
   not_authenticated: {
     title: 'Faça login para assistir',
     description: 'Entre na sua conta para acessar esta aula.',
@@ -52,7 +52,7 @@ export default async function AulaPage({
         select: {
           lessons: {
             orderBy: { order: 'asc' },
-            select: { id: true, title: true, content: true, videoId: true },
+            select: { id: true, title: true, content: true, videoId: true, isPreview: true },
           },
         },
       },
@@ -89,7 +89,14 @@ export default async function AulaPage({
         {course.title}
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{lesson.title}</h1>
+      <div className="flex items-center gap-2.5 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
+        {lesson.isPreview && (
+          <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold flex-shrink-0">
+            Preview Gratuito
+          </span>
+        )}
+      </div>
 
       {access.allowed ? (
         lesson.videoId ? (
@@ -103,7 +110,19 @@ export default async function AulaPage({
           </div>
         )
       ) : (
-        <UpgradeBanner reason={access.reason ?? 'no_subscription'} />
+        <UpgradeBanner reason={access.reason && access.reason !== 'preview' ? access.reason : 'no_subscription'} />
+      )}
+
+      {lesson.isPreview && (
+        <div className="flex items-center justify-between gap-4 mt-4 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-800">Gostou? Assine para acessar todos os cursos.</p>
+          <Link
+            href="/planos"
+            className="flex-shrink-0 text-sm font-semibold text-green-700 hover:text-green-800 transition-colors"
+          >
+            Ver planos →
+          </Link>
+        </div>
       )}
 
       {lesson.content && (
@@ -150,7 +169,7 @@ export default async function AulaPage({
   )
 }
 
-function UpgradeBanner({ reason }: { reason: AccessReason }) {
+function UpgradeBanner({ reason }: { reason: Exclude<AccessReason, 'preview'> }) {
   const { title, description, ctaLabel, ctaHref } = UPGRADE_MESSAGES[reason]
 
   return (

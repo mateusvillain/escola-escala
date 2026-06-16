@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Ajustar `checkLessonAccess` para previews",
       "details": "Em `src/lib/access.ts`: se `lesson.isPreview === true`, retornar `{ allowed: true, reason: 'preview' }` antes de qualquer verificação de assinatura. Isso aplica tanto na API quanto na UI.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Ajustar API GET /api/courses/[slug]",
       "details": "Incluir `videoId` na resposta de aulas preview mesmo sem autenticação. Adicionar campo `isPreview` na resposta para que a UI exiba o badge.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Badge e UX de preview",
       "details": "Na página da aula e na sidebar: se `lesson.isPreview`, exibir badge 'Preview Gratuito' (ex: Badge verde). Abaixo do player: CTA suave 'Gostou? Assine para acessar todos os cursos' com link para `/planos`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-43", "TASK-44"],

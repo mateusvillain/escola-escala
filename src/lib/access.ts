@@ -5,6 +5,7 @@ export type AccessReason =
   | 'no_subscription'
   | 'plan_upgrade_required'
   | 'subscription_inactive'
+  | 'preview'
 
 export interface AccessResult {
   allowed: boolean
@@ -36,7 +37,7 @@ export async function checkLessonAccess(
   if (!lesson) return { allowed: false }
 
   // Preview lessons are always accessible — no auth required
-  if (lesson.isPreview) return { allowed: true }
+  if (lesson.isPreview) return { allowed: true, reason: 'preview' }
 
   if (!userId) return { allowed: false, reason: 'not_authenticated' }
 
