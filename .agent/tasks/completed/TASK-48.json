@@ -1,0 +1,29 @@
+{
+  "id": "TASK-48",
+  "title": "Prompt de upgrade para aluno Básico acessando conteúdo Premium",
+  "category": "ui-ux",
+  "description": "Componente exibido quando aluno Básico tenta acessar aula de curso Premium — bloqueia acesso e incentiva upgrade.",
+  "acceptanceCriteria": [
+    "Em vez do player: card/banner informando que o conteúdo é exclusivo do plano Premium",
+    "Botão 'Fazer Upgrade para Premium' com link para `/planos`",
+    "Descrição dos benefícios do Premium listados no card",
+    "Thumbnail do curso exibida como background desfocado (blur) no lugar do player"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar componente UpgradePrompt",
+      "details": "Criar `src/components/course/UpgradePrompt.tsx`. Props: `reason: 'plan_upgrade_required' | 'no_subscription' | 'subscription_inactive'`. Renderizar mensagem e CTA específicos para cada `reason`. Background: thumbnail do curso com `blur-sm opacity-50`. [Nota: testado visualmente apenas o fallback gradiente — todos os cursos no banco têm thumbnailUrl null; o caminho com Image/blur foi implementado seguindo o mesmo padrão já usado em cursos/[slug]/page.tsx, mas não há remotePatterns configurado em next.config.ts (condição pré-existente, fora do escopo desta task).]",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Integrar na página da aula",
+      "details": "Na página da aula: se `checkLessonAccess()` retornar `allowed: false`, renderizar `<UpgradePrompt reason={result.reason} />` no lugar do `<BunnyPlayer>`. [Nota: para reason 'not_authenticated' (fora do union de UpgradePrompt) mantido um LoginPrompt simples — UpgradePrompt cobre apenas os 3 reasons relacionados a plano/assinatura.]",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-43", "TASK-44"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

@@ -332,8 +332,8 @@
     "id": "TASK-48",
     "title": "Prompt de upgrade para aluno Básico acessando conteúdo Premium",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-48.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-48.json",
+    "passes": true
   },
   {
     "id": "TASK-49",

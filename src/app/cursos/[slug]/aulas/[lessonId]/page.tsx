@@ -4,38 +4,12 @@ import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { checkLessonAccess, type AccessReason } from '@/lib/access'
+import { checkLessonAccess } from '@/lib/access'
 import { getAdjacentLessons } from '@/lib/utils/lessons'
 import { getCourseProgress } from '@/lib/progress'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
-
-const UPGRADE_MESSAGES: Record<Exclude<AccessReason, 'preview'>, { title: string; description: string; ctaLabel: string; ctaHref: string }> = {
-  not_authenticated: {
-    title: 'Faça login para assistir',
-    description: 'Entre na sua conta para acessar esta aula.',
-    ctaLabel: 'Entrar',
-    ctaHref: '/login',
-  },
-  no_subscription: {
-    title: 'Assine para assistir',
-    description: 'Esta aula está disponível para alunos com assinatura ativa.',
-    ctaLabel: 'Ver planos',
-    ctaHref: '/planos',
-  },
-  subscription_inactive: {
-    title: 'Sua assinatura está inativa',
-    description: 'Reative sua assinatura para continuar assistindo este curso.',
-    ctaLabel: 'Ver planos',
-    ctaHref: '/planos',
-  },
-  plan_upgrade_required: {
-    title: 'Conteúdo exclusivo do plano Premium',
-    description: 'Faça upgrade do seu plano para acessar esta aula.',
-    ctaLabel: 'Ver planos',
-    ctaHref: '/planos',
-  },
-}
+import { UpgradePrompt, type UpgradeReason } from '@/components/course/UpgradePrompt'
 
 export default async function AulaPage({
   params,
@@ -50,6 +24,7 @@ export default async function AulaPage({
       id: true,
       slug: true,
       title: true,
+      thumbnailUrl: true,
       modules: {
         orderBy: { order: 'asc' },
         select: {
@@ -82,6 +57,10 @@ export default async function AulaPage({
   }
 
   const access = await checkLessonAccess(user?.userId ?? null, lessonId)
+  const upgradeReason: UpgradeReason | undefined =
+    access.reason && access.reason !== 'not_authenticated' && access.reason !== 'preview'
+      ? access.reason
+      : undefined
 
   let progress: Record<string, boolean> = {}
   let completedCount = 0
@@ -130,8 +109,10 @@ export default async function AulaPage({
               <p className="text-sm text-gray-400">Vídeo ainda não disponível para esta aula.</p>
             </div>
           )
+        ) : access.reason === 'not_authenticated' ? (
+          <LoginPrompt />
         ) : (
-          <UpgradeBanner reason={access.reason && access.reason !== 'preview' ? access.reason : 'no_subscription'} />
+          <UpgradePrompt reason={upgradeReason ?? 'no_subscription'} thumbnailUrl={course.thumbnailUrl} />
         )}
 
         {lesson.isPreview && (
@@ -202,21 +183,19 @@ export default async function AulaPage({
   )
 }
 
-function UpgradeBanner({ reason }: { reason: Exclude<AccessReason, 'preview'> }) {
-  const { title, description, ctaLabel, ctaHref } = UPGRADE_MESSAGES[reason]
-
+function LoginPrompt() {
   return (
     <div
       className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 flex flex-col items-center justify-center text-center px-6 gap-3"
       style={{ aspectRatio: '16 / 9' }}
     >
-      <p className="text-white font-semibold text-lg">{title}</p>
-      <p className="text-blue-100 text-sm max-w-sm">{description}</p>
+      <p className="text-white font-semibold text-lg">Faça login para assistir</p>
+      <p className="text-blue-100 text-sm max-w-sm">Entre na sua conta para acessar esta aula.</p>
       <Link
-        href={ctaHref}
+        href="/login"
         className="px-6 py-2.5 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors text-sm"
       >
-        {ctaLabel}
+        Entrar
       </Link>
     </div>
   )
