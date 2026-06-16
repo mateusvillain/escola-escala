@@ -1,0 +1,40 @@
+{
+  "id": "TASK-27",
+  "title": "POST /api/admin/videos/upload — upload de vídeo via Bunny Stream API",
+  "category": "integration",
+  "description": "Endpoint admin para fazer upload de arquivo de vídeo para o Bunny Stream. Cria o vídeo na biblioteca, retorna o Video ID e a URL do thumbnail.",
+  "acceptanceCriteria": [
+    "POST com arquivo de vídeo (multipart/form-data) retorna 200 com `{ videoId, thumbnailUrl, status }`",
+    "Vídeo é criado na biblioteca configurada (`BUNNY_STREAM_LIBRARY_ID`)",
+    "Upload usa TUS protocol ou direct upload via Bunny Stream API",
+    "Retorna erro 413 se arquivo maior que limite configurado (ex: 2GB)",
+    "Apenas admin pode acessar o endpoint"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar cliente Bunny Stream",
+      "details": "Criado `src/lib/bunny.ts` com: createVideo(title) → POST /library/{id}/videos; uploadVideo(guid, ArrayBuffer) → PUT /library/{id}/videos/{guid}; getEmbedUrl(guid) e getThumbnailUrl(guid) como helpers de URL.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar route handler de upload",
+      "details": "Criado `src/app/api/admin/videos/upload/route.ts`. Apenas admins. Lê multipart/form-data com request.formData(). Valida campo file e tamanho (413 se > 2GB). Chama createVideo → uploadVideo com ArrayBuffer. Retorna { videoId, embedUrl, thumbnailUrl, status: 'processing' }. next.config.ts atualizado com serverActions.bodySizeLimit: '2gb'.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Testar upload",
+      "details": "Testar com vídeo de teste via curl ou formulário admin (TASK-32). Confirmar vídeo na biblioteca Bunny Stream e videoId retornado.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-8", "TASK-1"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Usa ArrayBuffer como body do fetch para compatibilidade com TypeScript BodyInit.",
+    "next.config.ts: serverActions.bodySizeLimit = '2gb' — permite arquivos grandes via formData().",
+    "Em produção na Vercel, o limite de payload de Functions é 4.5MB (Hobby) ou 100MB (Pro). Para vídeos maiores: usar upload TUS direto do cliente com o GUID retornado pela API."
+  ]
+}
