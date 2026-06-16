@@ -143,7 +143,7 @@ export default async function CursosPage({
   const courses = await prisma.course.findMany({
     where: {
       status: 'published',
-      ...(planAccess === 'basic' || planAccess === 'premium'
+      ...(userPlanType !== 'premium' && (planAccess === 'basic' || planAccess === 'premium')
         ? { planAccess }
         : {}),
       ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
@@ -177,7 +177,7 @@ export default async function CursosPage({
       </div>
 
       <Suspense>
-        <CatalogFilters />
+        <CatalogFilters userPlanType={userPlanType} />
       </Suspense>
 
       {courses.length === 0 ? (

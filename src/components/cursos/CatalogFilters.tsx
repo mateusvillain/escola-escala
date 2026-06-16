@@ -9,7 +9,11 @@ const PLAN_FILTERS = [
   { value: 'premium', label: 'Premium' },
 ]
 
-export function CatalogFilters() {
+interface CatalogFiltersProps {
+  userPlanType: 'basic' | 'premium' | null
+}
+
+export function CatalogFilters({ userPlanType }: CatalogFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -36,22 +40,24 @@ export function CatalogFilters() {
 
   return (
     <div className="flex flex-wrap items-center gap-3 mb-8">
-      <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
-        {PLAN_FILTERS.map(f => (
-          <button
-            key={f.value}
-            onClick={() => router.push(buildUrl({ planAccess: f.value, search: currentSearch }))}
-            className={[
-              'px-4 py-2 text-sm font-medium transition-colors',
-              currentPlan === f.value
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 hover:bg-gray-50',
-            ].join(' ')}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {userPlanType !== 'premium' && (
+        <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
+          {PLAN_FILTERS.map(f => (
+            <button
+              key={f.value}
+              onClick={() => router.push(buildUrl({ planAccess: f.value, search: currentSearch }))}
+              className={[
+                'px-4 py-2 text-sm font-medium transition-colors',
+                currentPlan === f.value
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-50',
+              ].join(' ')}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <input
         type="text"
