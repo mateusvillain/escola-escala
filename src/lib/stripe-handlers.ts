@@ -93,20 +93,61 @@ export async function handleInvoicePaymentSucceeded(
 export async function handleInvoicePaymentFailed(
   event: Stripe.InvoicePaymentFailedEvent
 ): Promise<void> {
-  // TASK-73: marcar assinatura como past_due
-  console.log('[stripe] invoice.payment_failed — not yet implemented', event.id)
+  const invoice = event.data.object
+
+  const subDetails = invoice.parent?.subscription_details
+  if (!subDetails) return
+
+  const stripeSubscriptionId =
+    typeof subDetails.subscription === 'string'
+      ? subDetails.subscription
+      : subDetails.subscription.id
+
+  await prisma.userSubscription.updateMany({
+    where: { stripeSubscriptionId },
+    data: { status: 'past_due' },
+  })
+
+  console.log(`[stripe] invoice.payment_failed: subscription ${stripeSubscriptionId} marcada como past_due`)
 }
 
 export async function handleCustomerSubscriptionDeleted(
   event: Stripe.CustomerSubscriptionDeletedEvent
 ): Promise<void> {
-  // TASK-74: cancelar assinatura no banco
-  console.log('[stripe] customer.subscription.deleted — not yet implemented', event.id)
+  const subscription = event.data.object
+
+  await prisma.userSubscription.updateMany({
+    where: { stripeSubscriptionId: subscription.id },
+    data: { status: 'canceled' },
+  })
+
+  console.log(`[stripe] customer.subscription.deleted: subscription ${subscription.id} cancelada`)
 }
 
 export async function handleCustomerSubscriptionUpdated(
   event: Stripe.CustomerSubscriptionUpdatedEvent
 ): Promise<void> {
-  // TASK-75: atualizar plano no banco (upgrade/downgrade)
-  console.log('[stripe] customer.subscription.updated — not yet implemented', event.id)
+  const subscription = event.data.object
+  const item = subscription.items.data[0]
+  const priceId = item.price.id
+
+  const planInfo = buildPriceMap()[priceId]
+  if (!planInfo) throw new Error(`priceId não mapeado para nenhum plano: ${priceId}`)
+
+  const plan = await prisma.subscriptionPlan.findFirstOrThrow({
+    where: { type: planInfo.type },
+  })
+
+  await prisma.userSubscription.updateMany({
+    where: { stripeSubscriptionId: subscription.id },
+    data: {
+      planId: plan.id,
+      billingCycle: planInfo.billingCycle,
+      status: 'active',
+      currentPeriodStart: new Date(item.current_period_start * 1000),
+      currentPeriodEnd: new Date(item.current_period_end * 1000),
+    },
+  })
+
+  console.log(`[stripe] customer.subscription.updated: subscription ${subscription.id} atualizada para plano ${planInfo.type}/${planInfo.billingCycle}`)
 }

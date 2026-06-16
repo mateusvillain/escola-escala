@@ -1,0 +1,23 @@
+{
+  "id": "TASK-76",
+  "title": "POST /api/subscriptions/portal — criar sessão do Stripe Customer Portal",
+  "category": "integration",
+  "description": "Endpoint que cria uma sessão do Stripe Customer Portal para o aluno gerenciar sua assinatura (cancelar, trocar plano, atualizar cartão).",
+  "acceptanceCriteria": [
+    "Retorna `{ portalUrl }` para redirecionar o aluno",
+    "Usa `stripeCustomerId` do usuário autenticado",
+    "Retorna 404 se usuário não tem stripeCustomerId (nunca assinou)",
+    "return_url aponta para `/dashboard/assinatura`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler",
+      "details": "Criado `src/app/api/subscriptions/portal/route.ts`. Autentica usuário, busca stripeCustomerId no banco, retorna 404 se ausente. Chama stripe.billingPortal.sessions.create() com return_url para /dashboard/assinatura. Retorna { portalUrl }.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-71"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

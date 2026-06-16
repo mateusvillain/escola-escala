@@ -1,0 +1,22 @@
+{
+  "id": "TASK-73",
+  "title": "Webhook: invoice.payment_failed → marcar assinatura como past_due",
+  "category": "integration",
+  "description": "Handler que marca a assinatura como past_due quando um pagamento falha, bloqueando o acesso ao conteúdo.",
+  "acceptanceCriteria": [
+    "Status da UserSubscription atualizado para `past_due`",
+    "Aluno com status past_due perde acesso ao conteúdo protegido",
+    "Se pagamento falhar 3 vezes, Stripe cancela a subscription (event handled em TASK-74)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler",
+      "details": "Implementado em `src/lib/stripe-handlers.ts`. Extrai subscription ID de `invoice.parent.subscription_details.subscription` (padrão v2026+). updateMany com status=past_due.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-72"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}

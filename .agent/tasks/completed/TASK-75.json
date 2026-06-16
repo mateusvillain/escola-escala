@@ -1,0 +1,22 @@
+{
+  "id": "TASK-75",
+  "title": "Webhook: customer.subscription.updated → atualizar plano (upgrade/downgrade)",
+  "category": "integration",
+  "description": "Handler que atualiza o plano da assinatura no banco quando o aluno faz upgrade ou downgrade via Stripe Customer Portal.",
+  "acceptanceCriteria": [
+    "Detecta mudança de priceId e atualiza planId no banco",
+    "Atualiza `billingCycle` se mudou (mensal ↔ anual)",
+    "Acesso ao novo plano liberado imediatamente após webhook"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler",
+      "details": "Implementado em `src/lib/stripe-handlers.ts`. Extrai priceId de `subscription.items.data[0].price.id`. Mapeia para planType/billingCycle via buildPriceMap(). Lookup do plano no banco. updateMany com planId, billingCycle, status=active e novos períodos do item.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-74"],
+  "estimatedComplexity": "low",
+  "technicalNotes": []
+}
