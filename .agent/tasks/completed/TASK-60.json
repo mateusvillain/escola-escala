@@ -15,16 +15,20 @@
       "step": 1,
       "description": "Criar card de curso concluído",
       "details": "Criar `src/components/dashboard/CompletedCourseCard.tsx`. Props: course (título, thumbnail, slug), completedAt, certificateUrl. Formatar data de conclusão. Botão 'Baixar Certificado': se `certificateUrl` existe, é link direto para download; se não, mostrar spinner.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Integrar seção no dashboard",
       "details": "No dashboard: se `completed.length > 0`, renderizar seção 'Concluídos' com `CompletedCourseCard` para cada item. Incluir `certificateUrl` no response de `GET /api/dashboard`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-57", "TASK-63"],
   "estimatedComplexity": "low",
-  "technicalNotes": []
+  "technicalNotes": [
+    "`GET /api/dashboard`: para cada curso `completed`, busca `prisma.certificate.findUnique({ userId_courseId })` em paralelo com `getCourseProgress`; `certificateUrl` vira `/api/certificates/[courseId]/download` (TASK-63) se existir, ou `null` se o certificado ainda não foi gerado (janela de corrida do `setImmediate` em `checkCourseCompletion`).",
+    "Substituiu o `CertificateButton` (POST + window.open de data URL, gambiarra documentada na TASK-57) por um link `<a href>` direto ao endpoint de download — o navegador já trata o `Content-Disposition: attachment` da TASK-63, sem JS. `CertificateButton.tsx` removido por estar sem uso.",
+    "Verificado manualmente: card com certificado existente baixa o PDF certo (nome de arquivo `certificado-[slug].pdf`, via evento de download real do Playwright); card com `enrollment.completedAt` setado mas sem `Certificate` ainda mostra spinner 'Gerando...'."
+  ]
 }

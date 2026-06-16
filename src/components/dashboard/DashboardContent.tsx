@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CourseProgressCard } from './CourseProgressCard'
 import { ContinueWatchingCard } from './ContinueWatchingCard'
-import { CertificateButton } from './CertificateButton'
+import { CompletedCourseCard } from './CompletedCourseCard'
 import { DashboardSkeleton } from './DashboardSkeleton'
 
 interface DashboardLesson {
@@ -27,6 +27,8 @@ interface CompletedCourse {
   slug: string
   thumbnailUrl: string | null
   progress: number
+  completedAt: string
+  certificateUrl: string | null
 }
 
 interface AvailableCourse {
@@ -174,14 +176,13 @@ export function DashboardContent() {
       {completed.length > 0 && (
         <Section title="Concluídos">
           {completed.map(course => (
-            <CourseProgressCard
+            <CompletedCourseCard
               key={course.id}
               title={course.title}
+              slug={course.slug}
               thumbnailUrl={course.thumbnailUrl}
-              progress={course.progress}
-              ctaLabel="Ver curso"
-              ctaHref={`/cursos/${course.slug}`}
-              action={<CertificateButton courseId={course.id} />}
+              completedAt={course.completedAt}
+              certificateUrl={course.certificateUrl}
             />
           ))}
         </Section>

@@ -55,13 +55,21 @@ export async function GET(request: NextRequest) {
       enrollments
         .filter(e => e.completedAt)
         .map(async e => {
-          const progress = await getCourseProgress(user.userId, e.course.id)
+          const [progress, certificate] = await Promise.all([
+            getCourseProgress(user.userId, e.course.id),
+            prisma.certificate.findUnique({
+              where: { userId_courseId: { userId: user.userId, courseId: e.course.id } },
+              select: { id: true },
+            }),
+          ])
           return {
             id: e.course.id,
             title: e.course.title,
             slug: e.course.slug,
             thumbnailUrl: e.course.thumbnailUrl,
             progress: progress.percentage,
+            completedAt: e.completedAt,
+            certificateUrl: certificate ? `/api/certificates/${e.course.id}/download` : null,
           }
         })
     ),
