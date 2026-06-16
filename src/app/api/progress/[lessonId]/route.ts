@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { checkLessonAccess } from '@/lib/access'
 import { ensureEnrollment } from '@/lib/enrollment'
+import { checkCourseCompletion } from '@/lib/progress'
 
 const postSchema = z.object({
   watchPercentage: z.number().min(0).max(100).optional(),
@@ -103,6 +104,10 @@ export async function POST(
   })
 
   await ensureEnrollment(user.userId, lesson.module.courseId)
+
+  setImmediate(() => {
+    checkCourseCompletion(user.userId, lesson.module.courseId).catch(console.error)
+  })
 
   return NextResponse.json({ lessonId, ...progress })
 }

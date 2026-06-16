@@ -1,4 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { prisma } from '@/lib/prisma'
 
 export interface CertificateData {
   studentName: string
@@ -69,4 +70,55 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
 
   const pdfBytes = await pdfDoc.save()
   return Buffer.from(pdfBytes)
+}
+
+export interface StoredCertificate {
+  certificateId: string
+  fileUrl: string | null
+  issuedAt: Date
+}
+
+/**
+ * Gera (se ainda não existir) e armazena o certificado de um curso para um
+ * usuário. Idempotente — retorna o certificado existente sem regenerar.
+ * Armazenamento: base64 em `fileUrl` (MVP — sem credenciais de blob storage
+ * configuradas no projeto).
+ */
+export async function generateAndStoreCertificate(
+  userId: string,
+  courseId: string
+): Promise<StoredCertificate> {
+  const existing = await prisma.certificate.findUnique({
+    where: { userId_courseId: { userId, courseId } },
+  })
+  if (existing) {
+    return { certificateId: existing.id, fileUrl: existing.fileUrl, issuedAt: existing.issuedAt }
+  }
+
+  const [user, course, enrollment] = await Promise.all([
+    prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true } }),
+    prisma.course.findUniqueOrThrow({
+      where: { id: courseId },
+      select: { title: true, instructor: { select: { user: { select: { name: true } } } } },
+    }),
+    prisma.courseEnrollment.findUnique({
+      where: { userId_courseId: { userId, courseId } },
+      select: { completedAt: true },
+    }),
+  ])
+
+  const pdfBuffer = await generateCertificatePDF({
+    studentName: user.name,
+    courseName: course.title,
+    instructorName: course.instructor.user.name,
+    completedAt: enrollment?.completedAt ?? new Date(),
+  })
+
+  const fileUrl = `data:application/pdf;base64,${pdfBuffer.toString('base64')}`
+
+  const certificate = await prisma.certificate.create({
+    data: { userId, courseId, fileUrl },
+  })
+
+  return { certificateId: certificate.id, fileUrl: certificate.fileUrl, issuedAt: certificate.issuedAt }
 }

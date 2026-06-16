@@ -381,8 +381,8 @@
     "id": "TASK-55",
     "title": "Detecção de curso 100% concluído e disparo de geração de certificado",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-55.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-55.json",
+    "passes": true
   },
   {
     "id": "TASK-56",
