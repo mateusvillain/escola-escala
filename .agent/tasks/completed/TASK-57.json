@@ -17,22 +17,25 @@
       "step": 1,
       "description": "Criar página de dashboard",
       "details": "Criar `src/app/(app)/dashboard/page.tsx` como Client Component. Buscar dados de `GET /api/dashboard`. Exibir seções condicionalmente (mostrar apenas seções com conteúdo). Criar componente `CourseProgressCard` com thumbnail, título, barra de progresso e CTA.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Card de última aula",
       "details": "Seção 'Continuar de onde parei': card grande destacado com thumbnail do curso, título do curso, título da última aula e botão 'Continuar aula'. Link para `/cursos/[slug]/aulas/[lessonId]`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Skeleton loader",
       "details": "Enquanto dados carregam: exibir 3 skeleton cards animados em cada seção. Usar `animate-pulse` do Tailwind.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-56", "TASK-17"],
   "estimatedComplexity": "medium",
-  "technicalNotes": []
+  "technicalNotes": [
+    "page.tsx é Server Component (lê JWT do cookie, igual a perfil/page.tsx) só para renderizar a saudação sem round-trip; o fetch de `GET /api/dashboard`, loading e seções ficam em `DashboardContent` (Client Component) em `src/components/dashboard/`.",
+    "Botão 'Ver certificado' chama `POST /api/certificates/[courseId]` (TASK-62) e abre o `fileUrl` (data URL) via `window.open` — no Chrome isso dispara download direto do PDF em vez de abrir aba. TASK-60 deve substituir por `GET /api/certificates/[courseId]/download` (TASK-63) com Content-Disposition e nome de arquivo apropriado."
+  ]
 }
