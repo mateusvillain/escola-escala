@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import type { JwtPayload } from '@/lib/jwt'
 import { UserMenu } from '@/components/layout/UserMenu'
 
-export function CursosHeader({ user }: { user: JwtPayload | null }) {
+export function CursosHeader({ user, showReviewsLink = false }: { user: JwtPayload | null; showReviewsLink?: boolean }) {
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -51,7 +51,7 @@ export function CursosHeader({ user }: { user: JwtPayload | null }) {
           <div className="flex items-center gap-3">
             <div className="hidden md:block">
               {user ? (
-                <UserMenu user={user} />
+                <UserMenu user={user} showReviewsLink={showReviewsLink} />
               ) : (
                 <Link
                   href="/login"
@@ -139,6 +139,15 @@ export function CursosHeader({ user }: { user: JwtPayload | null }) {
                   >
                     Minha Assinatura
                   </Link>
+                  {showReviewsLink && (
+                    <Link
+                      href="/dashboard/avaliacoes"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Minhas Avaliações
+                    </Link>
+                  )}
                 </div>
                 <div className="border-t border-gray-100 mt-1 pt-1">
                   <button

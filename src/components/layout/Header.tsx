@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
 ]
 
-export function Header({ user }: { user: JwtPayload }) {
+export function Header({ user, showReviewsLink = false }: { user: JwtPayload; showReviewsLink?: boolean }) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -54,7 +54,7 @@ export function Header({ user }: { user: JwtPayload }) {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <div className="hidden md:block">
-              <UserMenu user={user} />
+              <UserMenu user={user} showReviewsLink={showReviewsLink} />
             </div>
 
             {/* Hamburger */}
@@ -124,6 +124,15 @@ export function Header({ user }: { user: JwtPayload }) {
               >
                 Minha Assinatura
               </Link>
+              {showReviewsLink && (
+                <Link
+                  href="/dashboard/avaliacoes"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Minhas Avaliações
+                </Link>
+              )}
             </div>
             <div className="border-t border-gray-100 mt-1 pt-1">
               <button

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { JwtPayload } from '@/lib/jwt'
 
-export function UserMenu({ user }: { user: JwtPayload }) {
+export function UserMenu({ user, showReviewsLink = false }: { user: JwtPayload; showReviewsLink?: boolean }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -67,6 +67,15 @@ export function UserMenu({ user }: { user: JwtPayload }) {
             >
               Minha Assinatura
             </Link>
+            {showReviewsLink && (
+              <Link
+                href="/dashboard/avaliacoes"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Minhas Avaliações
+              </Link>
+            )}
           </div>
 
           <div className="border-t border-gray-100 py-1">

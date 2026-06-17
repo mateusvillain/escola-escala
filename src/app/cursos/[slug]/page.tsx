@@ -6,6 +6,7 @@ import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
 import { StarRating } from '@/components/cursos/StarRating'
+import { ReviewReminderBanner } from '@/components/cursos/ReviewReminderBanner'
 
 const PLAN_LABELS = { basic: 'Básico', premium: 'Premium' } as const
 const PLAN_STYLES = {
@@ -97,17 +98,19 @@ export default async function CursoDetalhe({
 
   let hasAccess = false
   let hasEnrollment = false
+  let isCompleted = false
+  let hasReview = false
   let lastWatchedLessonTitle: string | null = null
 
   if (user) {
-    const [subscription, enrollment, lastProgress] = await Promise.all([
+    const [subscription, enrollment, lastProgress, review] = await Promise.all([
       prisma.userSubscription.findFirst({
         where: { userId: user.userId, status: 'active' },
         include: { plan: true },
       }),
       prisma.courseEnrollment.findFirst({
         where: { userId: user.userId, courseId: course.id },
-        select: { id: true },
+        select: { id: true, completedAt: true },
       }),
       prisma.lessonProgress.findFirst({
         where: {
@@ -117,6 +120,10 @@ export default async function CursoDetalhe({
         orderBy: { lastWatchedAt: 'desc' },
         select: { lesson: { select: { title: true } } },
       }),
+      prisma.courseReview.findUnique({
+        where: { userId_courseId: { userId: user.userId, courseId: course.id } },
+        select: { id: true },
+      }),
     ])
 
     const planType = subscription?.plan.type ?? null
@@ -125,6 +132,8 @@ export default async function CursoDetalhe({
       planType === 'premium' ||
       (planType === 'basic' && course.planAccess === 'basic')
     hasEnrollment = enrollment !== null
+    isCompleted = enrollment?.completedAt != null
+    hasReview = review !== null
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null
   }
 
@@ -254,6 +263,8 @@ export default async function CursoDetalhe({
             Começar curso
           </Link>
         </div>
+      ) : isCompleted && !hasReview ? (
+        <ReviewReminderBanner courseSlug={course.slug} courseTitle={course.title} />
       ) : (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
