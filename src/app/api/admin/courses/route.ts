@@ -37,13 +37,15 @@ export async function GET(request: NextRequest) {
         _count: {
           select: {
             modules: true,
-            enrollments: true,
           },
         },
         modules: {
           select: {
             _count: { select: { lessons: true } },
           },
+        },
+        enrollments: {
+          select: { completedAt: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -53,15 +55,36 @@ export async function GET(request: NextRequest) {
     prisma.course.count({ where }),
   ]);
 
-  const data = courses.map(({ modules, _count, instructor, ...course }) => ({
-    ...course,
-    instructor: { name: instructor.user.name },
-    _count: {
-      modules: _count.modules,
-      lessons: modules.reduce((sum, m) => sum + m._count.lessons, 0),
-      enrollments: _count.enrollments,
-    },
-  }));
+  const courseIds = courses.map((c) => c.id);
+  const reviewStats = courseIds.length
+    ? await prisma.courseReview.groupBy({
+        by: ["courseId"],
+        where: { courseId: { in: courseIds } },
+        _avg: { rating: true },
+        _count: { rating: true },
+      })
+    : [];
+  const reviewStatsByCourseId = new Map(reviewStats.map((r) => [r.courseId, r]));
+
+  const data = courses.map(({ modules, _count, instructor, enrollments, ...course }) => {
+    const enrollmentCount = enrollments.length;
+    const completedCount = enrollments.filter((e) => e.completedAt !== null).length;
+    const completionRate = enrollmentCount === 0 ? 0 : Math.round((completedCount / enrollmentCount) * 100);
+    const stats = reviewStatsByCourseId.get(course.id);
+
+    return {
+      ...course,
+      instructor: { name: instructor.user.name },
+      _count: {
+        modules: _count.modules,
+        lessons: modules.reduce((sum, m) => sum + m._count.lessons, 0),
+        enrollments: enrollmentCount,
+      },
+      completionRate,
+      averageRating: stats?._avg.rating ?? 0,
+      reviewCount: stats?._count.rating ?? 0,
+    };
+  });
 
   return NextResponse.json({
     data,

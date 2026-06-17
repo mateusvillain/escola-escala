@@ -17,6 +17,9 @@ interface Course {
   instructor: { name: string }
   createdAt: string
   _count: { modules: number; lessons: number; enrollments: number }
+  completionRate: number
+  averageRating: number
+  reviewCount: number
 }
 
 interface Pagination {
@@ -211,6 +214,9 @@ export function CourseTable() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Instrutor</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Módulos / Aulas</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Matriculados</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Conclusão</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nota média</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Criado em</th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
@@ -269,6 +275,17 @@ export function CourseTable() {
                   <td className="px-4 py-3 text-gray-600">
                     {course._count.modules} módulo{course._count.modules !== 1 ? 's' : ''} ·{' '}
                     {course._count.lessons} aula{course._count.lessons !== 1 ? 's' : ''}
+                  </td>
+
+                  {/* Enrollments */}
+                  <td className="px-4 py-3 text-gray-600">{course._count.enrollments}</td>
+
+                  {/* Completion rate */}
+                  <td className="px-4 py-3 text-gray-600">{course.completionRate}%</td>
+
+                  {/* Average rating */}
+                  <td className="px-4 py-3 text-gray-600">
+                    {course.reviewCount > 0 ? `${course.averageRating.toFixed(1)} (${course.reviewCount})` : '—'}
                   </td>
 
                   {/* Created at */}
