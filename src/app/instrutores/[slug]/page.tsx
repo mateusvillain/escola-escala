@@ -1,28 +1,41 @@
-import { Suspense } from 'react'
+import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
+import Image from 'next/image'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { CatalogFilters } from '@/components/cursos/CatalogFilters'
 import { CourseCard } from '@/components/cursos/CourseCard'
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 text-gray-400 gap-3">
-      <svg className="w-16 h-16 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <p className="text-base font-medium text-gray-500">Nenhum curso encontrado</p>
-      <p className="text-sm">Tente ajustar os filtros ou a busca.</p>
-    </div>
-  )
-}
-
-export default async function CursosPage({
-  searchParams,
+export default async function InstructorPage({
+  params,
 }: {
-  searchParams: Promise<{ planAccess?: string; search?: string }>
+  params: Promise<{ slug: string }>
 }) {
-  const { planAccess, search } = await searchParams
+  const { slug } = await params
+
+  const instructor = await prisma.instructor.findUnique({
+    where: { slug },
+    select: {
+      bio: true,
+      user: { select: { name: true, avatarUrl: true } },
+      courses: {
+        where: { status: 'published' },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          description: true,
+          thumbnailUrl: true,
+          planAccess: true,
+          modules: {
+            select: { _count: { select: { lessons: true } } },
+          },
+        },
+      },
+    },
+  })
+
+  if (!instructor) notFound()
 
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
@@ -54,51 +67,39 @@ export default async function CursosPage({
   const isAdmin = user?.role === 'admin'
   const hasFullCatalogAccess = userPlanType === 'premium' || isAdmin
 
-  const courses = await prisma.course.findMany({
-    where: {
-      status: 'published',
-      ...(!hasFullCatalogAccess && (planAccess === 'basic' || planAccess === 'premium')
-        ? { planAccess }
-        : {}),
-      ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
-    },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      thumbnailUrl: true,
-      planAccess: true,
-      instructor: {
-        select: {
-          user: { select: { name: true } },
-        },
-      },
-      modules: {
-        select: {
-          _count: { select: { lessons: true } },
-        },
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-
   return (
     <div>
-      <div className="mb-6">
-        <lui-heading level="1" size="xl">Catálogo de Cursos</lui-heading>
-        <p className="text-sm text-gray-500 mt-1">Explore todos os cursos disponíveis na plataforma.</p>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-10">
+        {instructor.user.avatarUrl ? (
+          <Image
+            src={instructor.user.avatarUrl}
+            alt={instructor.user.name}
+            width={72}
+            height={72}
+            className="rounded-full object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className="w-[72px] h-[72px] rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-2xl font-bold flex-shrink-0">
+            {instructor.user.name[0]}
+          </div>
+        )}
+        <div>
+          <lui-heading level="1" size="xl">{instructor.user.name}</lui-heading>
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl">{instructor.bio}</p>
+        </div>
       </div>
 
-      <Suspense>
-        <CatalogFilters hidePlanFilter={hasFullCatalogAccess} />
-      </Suspense>
+      {/* Courses */}
+      <h2 className="text-lg font-bold text-gray-900 mb-4">
+        Cursos de {instructor.user.name}
+      </h2>
 
-      {courses.length === 0 ? (
-        <EmptyState />
+      {instructor.courses.length === 0 ? (
+        <p className="text-sm text-gray-500">Nenhum curso publicado ainda.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map(course => {
+          {instructor.courses.map(course => {
             const totalLessons = course.modules.reduce((sum, m) => sum + m._count.lessons, 0)
             const hasAccess =
               hasFullCatalogAccess ||
@@ -113,7 +114,7 @@ export default async function CursosPage({
                 description={course.description}
                 thumbnailUrl={course.thumbnailUrl}
                 planAccess={course.planAccess}
-                instructorName={course.instructor.user.name}
+                instructorName={instructor.user.name}
                 totalLessons={totalLessons}
                 hasAccess={hasAccess}
                 hasEnrollment={hasEnrollment}

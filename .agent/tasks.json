@@ -612,15 +612,15 @@
     "id": "TASK-88",
     "title": "Rota pública /instrutores/[slug]",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-88.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-88.json",
+    "passes": true
   },
   {
     "id": "TASK-89",
     "title": "Linkar instrutor nas páginas de curso",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-89.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-89.json",
+    "passes": true
   },
   {
     "id": "TASK-90",

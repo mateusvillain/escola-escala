@@ -38,6 +38,7 @@ export default async function CursoDetalhe({
       planAccess: true,
       instructor: {
         select: {
+          slug: true,
           user: { select: { name: true, avatarUrl: true } },
         },
       },
@@ -155,7 +156,10 @@ export default async function CursoDetalhe({
             <h1 className="text-2xl font-bold text-gray-900 mb-3">{course.title}</h1>
             <p className="text-sm text-gray-600 leading-relaxed mb-4">{course.description}</p>
 
-            <div className="flex items-center gap-1.5 text-sm text-gray-500">
+            <Link
+              href={`/instrutores/${course.instructor.slug}`}
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-700 transition-colors w-fit"
+            >
               {course.instructor.user.avatarUrl ? (
                 <Image
                   src={course.instructor.user.avatarUrl}
@@ -170,7 +174,7 @@ export default async function CursoDetalhe({
                 </div>
               )}
               <span>{course.instructor.user.name}</span>
-            </div>
+            </Link>
           </div>
 
           {/* Stats */}

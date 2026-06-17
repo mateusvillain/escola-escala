@@ -13,26 +13,26 @@
     {
       "step": 1,
       "description": "Criar a página",
-      "details": "Criar `src/app/instrutores/[slug]/page.tsx` como Server Component.",
-      "pass": false
+      "details": "Criar `src/app/instrutores/[slug]/page.tsx` como Server Component. Adicionado também `src/app/instrutores/layout.tsx` reaproveitando `CursosHeader` para manter navegação consistente com o resto do site público.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar instrutor com cursos",
       "details": "Buscar `Instructor` por slug via Prisma incluindo `user` e `courses` filtrando `status: 'published'`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Tratar instrutor inexistente",
-      "details": "Retornar `notFound()` do Next.js quando o instrutor não existir.",
-      "pass": false
+      "details": "Retornar `notFound()` do Next.js quando o instrutor não existir. Testado manualmente: /instrutores/slug-que-nao-existe retorna HTTP 404.",
+      "pass": true
     },
     {
       "step": 4,
       "description": "Montar layout",
-      "details": "Montar foto, nome, bio e grid de cursos reaproveitando o card de curso já usado em `/cursos`.",
-      "pass": false
+      "details": "Montar foto, nome, bio e grid de cursos reaproveitando o card de curso já usado em `/cursos`. `CourseCard` foi extraído de `src/app/cursos/page.tsx` para `src/components/cursos/CourseCard.tsx` para permitir o reaproveitamento sem duplicar código.",
+      "pass": true
     }
   ],
   "dependencies": [
