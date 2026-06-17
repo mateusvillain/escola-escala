@@ -6,7 +6,20 @@ import { Prisma } from "@/generated/prisma/client";
 
 const attachmentSchema = z.object({
   label: z.string().min(1).max(120),
-  url: z.string().url().max(2000),
+  url: z
+    .string()
+    .url()
+    .max(2000)
+    .refine(
+      value => {
+        try {
+          return ["http:", "https:"].includes(new URL(value).protocol);
+        } catch {
+          return false;
+        }
+      },
+      { message: "URL deve usar http:// ou https://" }
+    ),
 });
 
 const patchSchema = z.object({
