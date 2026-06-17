@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Linkar na página de detalhe do curso",
-      "details": "Envolver o nome do instrutor em `<Link>` para `/instrutores/[slug]`.",
-      "pass": false
+      "details": "Envolver o nome do instrutor em `<Link>` para `/instrutores/[slug]`. Implementado em `src/app/cursos/[slug]/page.tsx`; adicionado `instructor.slug` ao select da query do curso. Testado manualmente: link renderizado com href correto.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Linkar no CourseSidebar",
-      "details": "Repetir o ajuste em `CourseSidebar` se o nome do instrutor for exibido nesse componente.",
-      "pass": false
+      "details": "Repetir o ajuste em `CourseSidebar` se o nome do instrutor for exibido nesse componente. Confirmado que `src/components/course/CourseSidebar.tsx` não exibe o nome do instrutor em nenhum lugar — nenhuma mudança necessária (condição do próprio step não se aplica).",
+      "pass": true
     }
   ],
   "dependencies": [
