@@ -12,20 +12,20 @@
     {
       "step": 1,
       "description": "Criar o endpoint",
-      "details": "Criar `src/app/api/admin/audit-log/route.ts` com handler `GET` paginado e filtros.",
-      "pass": false
+      "details": "Criar `src/app/api/admin/audit-log/route.ts` com handler `GET` paginado e filtros por `action` e intervalo de data (`startDate`/`endDate`). Testado manualmente: filtro por ação retornou só o tipo esperado; filtro por data incluindo hoje retornou os registros, intervalo de 2020 retornou 0.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar a página",
-      "details": "Criar `src/app/admin/auditoria/page.tsx` e componente de listagem reaproveitando o padrão visual das demais tabelas admin.",
-      "pass": false
+      "details": "Criar `src/app/admin/auditoria/page.tsx` e `AuditLogTable` reaproveitando o padrão visual de `CourseTable` (filtros, tabela, paginação). Coluna \"Detalhes\" formata o `metadata` de forma legível por tipo de ação. Testado visualmente via Playwright.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Adicionar à navegação",
-      "details": "Adicionar item \"Auditoria\" em `AdminSidebar`.",
-      "pass": false
+      "details": "Adicionado item \"Auditoria\" em `AdminSidebar`, após \"Assinaturas\".",
+      "pass": true
     }
   ],
   "dependencies": [

@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Adicionar o model",
       "details": "Adicionar model `AdminAuditLog` ao `prisma/schema.prisma`, com relação a `User` via `actorId`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_admin_audit_log`.",
-      "pass": false
+      "details": "Rodar `npx prisma migrate dev --name add_admin_audit_log`. Migration `20260617205041_add_admin_audit_log` aplicada com sucesso.",
+      "pass": true
     }
   ],
   "dependencies": [

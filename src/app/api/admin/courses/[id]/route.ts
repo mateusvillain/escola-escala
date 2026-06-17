@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logAdminAction } from "@/lib/audit";
 
 const patchSchema = z.object({
   status: z.enum(["draft", "published", "archived"]).optional(),
@@ -94,6 +95,16 @@ export async function PATCH(
       updatedAt: true,
     },
   });
+
+  if (parsed.data.status !== undefined && parsed.data.status !== existing.status) {
+    await logAdminAction({
+      actorId: auth.user.userId,
+      action: "course.status_changed",
+      entityType: "Course",
+      entityId: id,
+      metadata: { title: existing.title, from: existing.status, to: parsed.data.status },
+    });
+  }
 
   return NextResponse.json({ course });
 }

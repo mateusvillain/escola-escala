@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logAdminAction } from "@/lib/audit";
 
 const patchSchema = z.object({
   role: z.enum(["admin", "instructor", "student"]).optional(),
@@ -56,6 +57,26 @@ export async function PATCH(
       isActive: true,
     },
   });
+
+  if (parsed.data.role !== undefined && parsed.data.role !== existing.role) {
+    await logAdminAction({
+      actorId: auth.user.userId,
+      action: "user.role_changed",
+      entityType: "User",
+      entityId: id,
+      metadata: { email: existing.email, from: existing.role, to: parsed.data.role },
+    });
+  }
+
+  if (parsed.data.isActive !== undefined && parsed.data.isActive !== existing.isActive) {
+    await logAdminAction({
+      actorId: auth.user.userId,
+      action: "user.status_changed",
+      entityType: "User",
+      entityId: id,
+      metadata: { email: existing.email, from: existing.isActive, to: parsed.data.isActive },
+    });
+  }
 
   return NextResponse.json({ user });
 }
