@@ -68,19 +68,11 @@ export default async function CursoDetalhe({
 
   if (!course) notFound()
 
-  const [reviews, reviewAggregate] = await Promise.all([
-    prisma.courseReview.findMany({
-      where: { courseId: course.id },
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      select: { rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
-    }),
-    prisma.courseReview.aggregate({
-      where: { courseId: course.id },
-      _avg: { rating: true },
-      _count: { rating: true },
-    }),
-  ])
+  const reviewAggregate = await prisma.courseReview.aggregate({
+    where: { courseId: course.id },
+    _avg: { rating: true },
+    _count: { rating: true },
+  })
   const averageRating = reviewAggregate._avg.rating ?? 0
   const reviewCount = reviewAggregate._count.rating
 
@@ -99,7 +91,7 @@ export default async function CursoDetalhe({
   let hasAccess = false
   let hasEnrollment = false
   let isCompleted = false
-  let hasReview = false
+  let myReview: { rating: number; comment: string | null; createdAt: Date } | null = null
   let lastWatchedLessonTitle: string | null = null
 
   if (user) {
@@ -122,7 +114,7 @@ export default async function CursoDetalhe({
       }),
       prisma.courseReview.findUnique({
         where: { userId_courseId: { userId: user.userId, courseId: course.id } },
-        select: { id: true },
+        select: { rating: true, comment: true, createdAt: true },
       }),
     ])
 
@@ -133,7 +125,7 @@ export default async function CursoDetalhe({
       (planType === 'basic' && course.planAccess === 'basic')
     hasEnrollment = enrollment !== null
     isCompleted = enrollment?.completedAt != null
-    hasReview = review !== null
+    myReview = review
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null
   }
 
@@ -263,7 +255,7 @@ export default async function CursoDetalhe({
             Começar curso
           </Link>
         </div>
-      ) : isCompleted && !hasReview ? (
+      ) : isCompleted && !myReview ? (
         <ReviewReminderBanner courseSlug={course.slug} courseTitle={course.title} />
       ) : (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -292,23 +284,18 @@ export default async function CursoDetalhe({
         />
       </div>
 
-      {/* Reviews */}
-      {reviews.length > 0 && (
+      {/* My review */}
+      {myReview && (
         <div className="mt-10">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Avaliações dos alunos</h2>
-          <div className="space-y-4">
-            {reviews.map((review, i) => (
-              <div key={i} className="border border-gray-200 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-sm font-semibold text-gray-900">{review.user.name}</p>
-                  <p className="text-xs text-gray-400">
-                    {review.createdAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-                <StarRating rating={review.rating} size="sm" />
-                {review.comment && <p className="text-sm text-gray-600 mt-2">{review.comment}</p>}
-              </div>
-            ))}
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Minha avaliação</h2>
+          <div className="border border-gray-200 rounded-xl p-4 max-w-md">
+            <div className="flex items-center justify-between mb-1.5">
+              <StarRating rating={myReview.rating} size="sm" />
+              <p className="text-xs text-gray-400">
+                {myReview.createdAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            {myReview.comment && <p className="text-sm text-gray-600 mt-2">{myReview.comment}</p>}
           </div>
         </div>
       )}
