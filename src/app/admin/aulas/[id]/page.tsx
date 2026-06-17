@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { LessonEditor } from '@/components/admin/LessonEditor'
+import type { LessonAttachment } from '@/lib/utils/lessons'
 
 interface EditAulaPageProps {
   params: Promise<{ id: string }>
@@ -44,6 +45,7 @@ export default async function EditAulaPage({ params }: EditAulaPageProps) {
           }}
           initialVideoId={lesson.videoId}
           initialVideoDuration={lesson.videoDuration}
+          initialAttachments={(lesson.attachments as LessonAttachment[] | null) ?? []}
         />
       </div>
     </div>

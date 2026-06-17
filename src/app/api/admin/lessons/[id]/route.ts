@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
+
+const attachmentSchema = z.object({
+  label: z.string().min(1).max(120),
+  url: z.string().url().max(2000),
+});
 
 const patchSchema = z.object({
   title: z.string().min(1).max(255).optional(),
@@ -11,6 +17,7 @@ const patchSchema = z.object({
   content: z.string().max(50000).nullable().optional(),
   order: z.number().int().positive().optional(),
   isPreview: z.boolean().optional(),
+  attachments: z.array(attachmentSchema).max(20).nullable().optional(),
 });
 
 export async function GET(
@@ -59,9 +66,16 @@ export async function PATCH(
     );
   }
 
+  const { attachments, ...rest } = parsed.data;
+
   const lesson = await prisma.lesson.update({
     where: { id },
-    data: parsed.data,
+    data: {
+      ...rest,
+      ...(attachments !== undefined
+        ? { attachments: attachments === null ? Prisma.JsonNull : attachments }
+        : {}),
+    },
   });
 
   return NextResponse.json({ lesson });

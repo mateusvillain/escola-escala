@@ -1,3 +1,8 @@
+export interface LessonAttachment {
+  label: string
+  url: string
+}
+
 interface LessonRef {
   id: string
   title: string

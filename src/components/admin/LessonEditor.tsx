@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { LessonAttachment } from '@/lib/utils/lessons'
 
 interface LessonEditorProps {
   lessonId: string
@@ -13,6 +14,7 @@ interface LessonEditorProps {
   }
   initialVideoId: string | null
   initialVideoDuration: number | null
+  initialAttachments: LessonAttachment[]
 }
 
 type FormValues = {
@@ -47,6 +49,7 @@ export function LessonEditor({
   defaultValues,
   initialVideoId,
   initialVideoDuration,
+  initialAttachments,
 }: LessonEditorProps) {
   const {
     register,
@@ -56,6 +59,15 @@ export function LessonEditor({
 
   const [videoId, setVideoId] = useState<string | null>(initialVideoId)
   const [videoDuration, setVideoDuration] = useState<number | null>(initialVideoDuration)
+  const [attachments, setAttachments] = useState<LessonAttachment[]>(initialAttachments)
+
+  const addAttachment = () => setAttachments(prev => [...prev, { label: '', url: '' }])
+
+  const updateAttachment = (index: number, field: keyof LessonAttachment, value: string) => {
+    setAttachments(prev => prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)))
+  }
+
+  const removeAttachment = (index: number) => setAttachments(prev => prev.filter((_, i) => i !== index))
   const [activeTab, setActiveTab] = useState<'upload' | 'manual'>(
     initialVideoId ? 'manual' : 'upload'
   )
@@ -126,6 +138,10 @@ export function LessonEditor({
     setSuccess(null)
 
     try {
+      const cleanedAttachments = attachments
+        .map(a => ({ label: a.label.trim(), url: a.url.trim() }))
+        .filter(a => a.label || a.url)
+
       const res = await fetch(`/api/admin/lessons/${lessonId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -136,6 +152,7 @@ export function LessonEditor({
           isPreview: data.isPreview,
           videoId,
           videoDuration,
+          attachments: cleanedAttachments,
         }),
       })
 
@@ -336,6 +353,48 @@ export function LessonEditor({
               )}
             </div>
           </div>
+        </div>
+
+        {/* Attachments */}
+        <div>
+          <span className={LABEL_CLASS}>Materiais complementares</span>
+          <div className="space-y-2">
+            {attachments.map((attachment, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Rótulo (ex: Slides da aula)"
+                  value={attachment.label}
+                  onChange={e => updateAttachment(index, 'label', e.target.value)}
+                  className={`${INPUT_CLASS} flex-1`}
+                />
+                <input
+                  type="text"
+                  placeholder="URL (https://...)"
+                  value={attachment.url}
+                  onChange={e => updateAttachment(index, 'url', e.target.value)}
+                  className={`${INPUT_CLASS} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(index)}
+                  aria-label="Remover anexo"
+                  className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addAttachment}
+            className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            + Adicionar material
+          </button>
         </div>
       </div>
 

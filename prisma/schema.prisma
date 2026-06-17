@@ -111,6 +111,7 @@ model Lesson {
   content       String?
   order         Int
   isPreview     Boolean  @default(false)
+  attachments   Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

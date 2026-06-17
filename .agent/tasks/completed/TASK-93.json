@@ -12,20 +12,20 @@
     {
       "step": 1,
       "description": "Criar a seção de anexos",
-      "details": "Adicionar seção em `src/components/admin/LessonEditor.tsx` com inputs nativos (label + URL) e botões de adicionar/remover linha.",
-      "pass": false
+      "details": "Adicionada seção \"Materiais complementares\" em `src/components/admin/LessonEditor.tsx` com inputs nativos (label + URL) e botões de adicionar/remover linha. Testado visualmente via Playwright.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Incluir no payload de salvamento",
-      "details": "Incluir `attachments` no payload enviado ao salvar a aula.",
-      "pass": false
+      "details": "Incluído `attachments` (linhas vazias filtradas antes do envio) no payload do `PATCH`.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Validar no endpoint",
-      "details": "Confirmar que o schema Zod do `PATCH /api/admin/lessons/[id]` aceita o novo campo (array de objetos com `label` e `url` válidos).",
-      "pass": false
+      "details": "Schema Zod estendido com `attachmentSchema` (`label` 1-120 chars, `url` válida, máx. 20 itens). Tratamento explícito de `Prisma.JsonNull` para limpar o campo via `attachments: null` — testado manualmente: 2 anexos salvos e persistidos corretamente, depois revertido para `null` com sucesso.",
+      "pass": true
     }
   ],
   "dependencies": [
