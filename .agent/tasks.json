@@ -584,8 +584,8 @@
     "id": "TASK-84",
     "title": "Verificar pré-requisitos da Fase 2",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-84.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-84.json",
+    "passes": true
   },
   {
     "id": "TASK-85",
