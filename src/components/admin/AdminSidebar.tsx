@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/admin/cursos', label: 'Cursos' },
   { href: '/admin/usuarios', label: 'Usuários' },
   { href: '/admin/assinaturas', label: 'Assinaturas' },
+  { href: '/admin/auditoria', label: 'Auditoria' },
 ]
 
 interface AdminSidebarProps {

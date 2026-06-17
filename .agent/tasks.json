@@ -997,21 +997,21 @@
     "id": "TASK-143",
     "title": "Tabela AdminAuditLog",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-143.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-143.json",
+    "passes": true
   },
   {
     "id": "TASK-144",
     "title": "Helper logAdminAction integrado às mutações sensíveis",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-144.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-144.json",
+    "passes": true
   },
   {
     "id": "TASK-145",
     "title": "Tela /admin/auditoria",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-145.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-145.json",
+    "passes": true
   }
 ]

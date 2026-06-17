@@ -12,20 +12,20 @@
     {
       "step": 1,
       "description": "Criar o helper",
-      "details": "Criar `logAdminAction` em `src/lib/audit.ts`.",
-      "pass": false
+      "details": "Criar `logAdminAction` em `src/lib/audit.ts` — best-effort, captura e loga qualquer erro sem propagar (try/catch interno).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Integrar em courses",
-      "details": "Chamar a função em `PATCH /api/admin/courses/[id]` ao detectar mudança de `status`.",
-      "pass": false
+      "details": "Chamar a função em `PATCH /api/admin/courses/[id]` ao detectar mudança de `status` (`action: course.status_changed`). Testado manualmente: alterar status de um curso de teste gerou entrada correta com title/from/to.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Integrar em users",
-      "details": "Chamar a função em `PATCH /api/admin/users/[id]` ao detectar mudança de `role` ou `isActive`.",
-      "pass": false
+      "details": "Chamar a função em `PATCH /api/admin/users/[id]` ao detectar mudança de `role` (`user.role_changed`) ou `isActive` (`user.status_changed`) — como entradas separadas quando ambos mudam na mesma requisição. Testado manualmente com um usuário de teste descartável: uma única requisição alterando role e isActive gerou exatamente 2 entradas de log distintas.",
+      "pass": true
     }
   ],
   "dependencies": [
