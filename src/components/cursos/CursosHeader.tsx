@@ -132,6 +132,15 @@ export function CursosHeader({ user, showReviewsLink = false }: { user: JwtPaylo
                   >
                     Perfil
                   </Link>
+                  {user.role === 'instructor' && (
+                    <Link
+                      href="/instrutor"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Painel do Instrutor
+                    </Link>
+                  )}
                   <Link
                     href="/dashboard/assinatura"
                     onClick={() => setMobileOpen(false)}

@@ -60,6 +60,15 @@ export function UserMenu({ user, showReviewsLink = false }: { user: JwtPayload; 
             >
               Perfil
             </Link>
+            {user.role === 'instructor' && (
+              <Link
+                href="/instrutor"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Painel do Instrutor
+              </Link>
+            )}
             <Link
               href="/dashboard/assinatura"
               onClick={() => setOpen(false)}

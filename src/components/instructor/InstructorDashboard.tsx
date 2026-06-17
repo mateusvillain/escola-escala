@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 type CourseStatus = 'draft' | 'published' | 'archived'
 
@@ -70,6 +71,7 @@ export function InstructorDashboard() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Alunos matriculados</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Taxa de conclusão</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -110,6 +112,15 @@ export function InstructorDashboard() {
                   <td className="px-4 py-3 text-gray-600">{course.enrollmentCount}</td>
 
                   <td className="px-4 py-3 text-gray-600">{course.completionRate}%</td>
+
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/instrutor/${course.id}`}
+                      className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                      Ver detalhes
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
