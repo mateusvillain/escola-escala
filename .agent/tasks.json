@@ -955,22 +955,22 @@
     "id": "TASK-137",
     "title": "Layout /instrutor com verificação de role",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-137.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-137.json",
+    "passes": true
   },
   {
     "id": "TASK-138",
     "title": "GET /api/instructor/courses e métricas",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-138.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-138.json",
+    "passes": true
   },
   {
     "id": "TASK-139",
     "title": "Dashboard do instrutor",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-139.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-139.json",
+    "passes": true
   },
   {
     "id": "TASK-140",

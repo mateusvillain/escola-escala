@@ -12,14 +12,14 @@
     {
       "step": 1,
       "description": "Criar o layout",
-      "details": "Criar `src/app/instrutor/layout.tsx` seguindo o padrão de `src/app/admin/layout.tsx`, validando `role === 'instructor' || role === 'admin'`.",
-      "pass": false
+      "details": "Criar `src/app/instrutor/layout.tsx` seguindo o padrão de `src/app/admin/layout.tsx`, validando `role === 'instructor' || role === 'admin'`. Criado também `src/components/instructor/InstructorSidebar.tsx`. Testado manualmente: aluno é redirecionado para `/dashboard`, instrutor e admin acessam normalmente, não autenticado vai para `/login`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Proteger as rotas",
-      "details": "Adicionar `/instrutor/:path*` ao matcher de `src/proxy.ts`.",
-      "pass": false
+      "details": "Adicionado `/instrutor/:path*` e `/api/instructor/:path*` ao matcher de `src/proxy.ts`.",
+      "pass": true
     }
   ],
   "dependencies": [

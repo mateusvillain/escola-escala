@@ -29,20 +29,10 @@ export async function GET(request: NextRequest) {
         slug: true,
         status: true,
         planAccess: true,
+        createdAt: true,
         instructor: {
           select: {
             user: { select: { name: true } },
-          },
-        },
-        _count: {
-          select: {
-            modules: true,
-            enrollments: true,
-          },
-        },
-        modules: {
-          select: {
-            _count: { select: { lessons: true } },
           },
         },
       },
@@ -53,14 +43,9 @@ export async function GET(request: NextRequest) {
     prisma.course.count({ where }),
   ]);
 
-  const data = courses.map(({ modules, _count, instructor, ...course }) => ({
+  const data = courses.map(({ instructor, ...course }) => ({
     ...course,
     instructor: { name: instructor.user.name },
-    _count: {
-      modules: _count.modules,
-      lessons: modules.reduce((sum, m) => sum + m._count.lessons, 0),
-      enrollments: _count.enrollments,
-    },
   }));
 
   return NextResponse.json({
