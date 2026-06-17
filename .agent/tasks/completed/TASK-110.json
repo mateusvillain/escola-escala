@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Agrupar canceladas por plano",
       "details": "Buscar assinaturas com `status: 'canceled'` agrupadas por `plan.type`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Calcular duração média",
       "details": "Calcular duração média em meses (`updatedAt - createdAt`) por grupo.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Calcular e incluir o LTV",
-      "details": "Multiplicar pela mensalidade média do grupo e incluir `ltvByPlan` na resposta.",
-      "pass": false
+      "details": "Multiplicar pela mensalidade média do grupo e incluir `ltvByPlan` na resposta. Testado manualmente: sem assinaturas canceladas, `ltvByPlan` retornou `{basic:0, premium:0}` (sem erro). Inserida assinatura básica cancelada de teste com ~3,6 meses de duração e ticket de R$29,90 — `ltvByPlan.basic` retornou 108.13 (≈3.63 × 29.90), confirmando o cálculo; depois revertido.",
+      "pass": true
     }
   ],
   "dependencies": [

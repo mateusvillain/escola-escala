@@ -12,19 +12,19 @@
       "step": 1,
       "description": "Contar cancelamentos do mês",
       "details": "Contar `UserSubscription` com `status: 'canceled'` e `updatedAt` dentro do mês corrente.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Contar base ativa no início do mês",
       "details": "Contar assinaturas ativas no primeiro dia do mês via `createdAt <= inícioDoMes` sem cancelamento anterior.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Calcular e tratar zero",
-      "details": "Calcular `churnRate` e tratar divisão por zero, incluindo no retorno do endpoint.",
-      "pass": false
+      "details": "Calcular `churnRate` e tratar divisão por zero, incluindo no retorno do endpoint. Testado manualmente: sem cancelamentos no seed, retornou 0 (sem erro de divisão por zero); inserida temporariamente uma assinatura cancelada de teste — churnRate passou a refletir o cancelamento corretamente, depois revertido.",
+      "pass": true
     }
   ],
   "dependencies": [
