@@ -187,6 +187,32 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<'/api/admin/
 | PATCH | `/api/admin/lessons/[id]` | Atualizar qualquer campo da aula |
 | DELETE | `/api/admin/lessons/[id]` | Hard-delete (LessonProgress cascade) |
 | GET | `/api/admin/users?role=instructor` | Lista instrutores para select |
+| GET/PATCH/DELETE | `/api/admin/users/[id]` | Detalhe/edição/desativação de usuário |
+| GET | `/api/admin/subscriptions` | Listagem de assinaturas (admin) |
+| GET | `/api/admin/metrics` | Métricas para o dashboard admin |
+| POST | `/api/admin/videos/upload` | Upload de vídeo para Bunny Stream — **ver armadilha do limite de 4.5MB abaixo** |
+
+### Endpoints públicos / área do aluno
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/courses` / `/api/courses/[slug]` | Catálogo público de cursos |
+| GET/POST | `/api/enrollments/[courseId]` | Matrícula (via `ensureEnrollment`, automática conforme assinatura ativa) |
+| GET/POST | `/api/progress/[lessonId]` | Progresso de aula (watch %, conclusão manual/automática em 80%) |
+| GET | `/api/dashboard` | Dados do dashboard do aluno (cursos em andamento/concluídos) |
+| GET/POST | `/api/certificates/[courseId]` | Geração idempotente de certificado ao concluir 100% do curso |
+| GET | `/api/certificates/[courseId]/download` | Download do PDF do certificado |
+| POST | `/api/subscriptions/checkout` | Cria Stripe Checkout Session |
+| POST | `/api/subscriptions/portal` | Cria sessão do Stripe Customer Portal |
+| POST | `/api/webhooks/stripe` | Webhook do Stripe — ver padrão abaixo |
+
+### Padrão de controle de acesso por plano
+
+`src/lib/access.ts` (`checkLessonAccess`) é a fonte única de verdade: aulas com `isPreview: true` são liberadas sem autenticação; `premium` acessa qualquer curso; `basic` só acessa cursos com `planAccess: basic`; assinatura não-`active` bloqueia acesso. `src/lib/enrollment.ts` (`ensureEnrollment`) usa a mesma regra para matricular automaticamente o aluno quando ele acessa um curso ao qual tem direito.
+
+### Padrão de webhooks Stripe
+
+Handlers em `src/lib/stripe-handlers.ts`, um por tipo de evento. **Importante:** na API version usada (`2026-05-27.dahlia`, ver `src/lib/stripe.ts`), `current_period_start`/`current_period_end` **não existem mais no nível da Subscription** — estão no `SubscriptionItem` (`subscription.items.data[0].current_period_start`). Em `invoice.payment_succeeded`/`failed`, o ID da subscription vem de `invoice.parent.subscription_details`, não de `invoice.subscription`. Mapeamento de `priceId` → plano/ciclo é feito via `buildPriceMap()` lendo as env vars `STRIPE_PRICE_ID_*`.
 
 ---
 
@@ -211,8 +237,8 @@ parsed.error.errors  // ❌ não existe em v4
 | Neon PostgreSQL | ✅ Configurado | `DATABASE_URL` |
 | JWT Auth | ✅ Configurado | `JWT_SECRET`, `JWT_EXPIRES_IN` |
 | SMTP (Resend) | ✅ Configurado | `SMTP_*` |
-| Bunny Stream | ⏳ Pendente credenciais | `BUNNY_STREAM_API_KEY`, `BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_CDN_HOSTNAME` |
-| Stripe | ⏳ Pendente credenciais | `STRIPE_*` |
+| Bunny Stream | ✅ Configurado | `BUNNY_STREAM_API_KEY`, `BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_CDN_HOSTNAME` |
+| Stripe | ✅ Configurado (modo teste) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_*` |
 
 Consulte `docs/bunny-stream-pricing.md` para referência de custos do Bunny Stream.
 
@@ -231,9 +257,8 @@ npx tsc --noEmit
 npx prisma migrate dev --name nome
 npx prisma generate
 
-# Testes
+# Testes (apenas unitário — Playwright ainda não tem config nem specs)
 npx vitest run
-npx playwright test
 ```
 
 ## Armadilhas conhecidas
@@ -244,3 +269,7 @@ npx playwright test
 - **`instructorId`** em Course referencia `Instructor.id`, não `User.id`
 - **Lesson order:** sem unique constraint no DB — gap-closing após delete deve ser feito no cliente
 - **Slug único:** usar `getUniqueSlug()` de `@/lib/utils/slug.ts`, nunca gerar manualmente
+- **Upload de vídeo trava em produção:** `POST /api/admin/videos/upload` envia o arquivo via FormData direto pelo servidor Next.js. A Vercel limita payload de Serverless Functions a 4.5MB em todos os planos — não há como configurar isso em `next.config.ts`. Qualquer vídeo de aula real vai falhar em produção. Fix planejado em `TASK-83`: migrar para upload TUS direto do navegador para o Bunny Stream (`tus-js-client`), com o servidor apenas assinando as credenciais.
+- **Stripe API version `2026-05-27.dahlia`:** `current_period_start`/`end` estão em `subscription.items.data[0]`, não em `subscription` — e o ID da subscription em invoices vem de `invoice.parent.subscription_details`, não de `invoice.subscription`. Ver `src/lib/stripe-handlers.ts`.
+- **Certificado em PDF:** armazenado como data URL base64 em `Certificate.fileUrl` (MVP, sem blob storage configurado). Para volume maior, migrar para Vercel Blob ou similar antes de produção.
+- **Rate limiting é em memória** (`src/lib/rate-limit.ts`) — zera a cada deploy/restart e não funciona entre múltiplas instâncias. Adequado para Fase 1, mas não é distribuído.
