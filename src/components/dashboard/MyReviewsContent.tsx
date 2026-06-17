@@ -57,13 +57,11 @@ export function MyReviewsContent({
         </section>
       )}
 
-      <section>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-          Minhas avaliações
-        </h2>
-        {submitted.length === 0 ? (
-          <p className="text-sm text-gray-500">Você ainda não avaliou nenhum curso.</p>
-        ) : (
+      {submitted.length > 0 && (
+        <section>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            Minhas avaliações
+          </h2>
           <div className="space-y-3">
             {submitted.map(review => (
               <div key={review.courseId} className="bg-white border border-gray-200 rounded-xl p-4">
@@ -82,8 +80,8 @@ export function MyReviewsContent({
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {reviewingCourse && (
         <CourseReviewModal
