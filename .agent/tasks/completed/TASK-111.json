@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Consumir os novos campos",
-      "details": "Editar `src/components/admin/AdminDashboard.tsx` para consumir os novos campos de `GET /api/admin/metrics`.",
-      "pass": false
+      "details": "Editar `src/components/admin/AdminDashboard.tsx` para consumir os novos campos de `GET /api/admin/metrics`. Interface `Metrics` estendida com `mrr`, `churnRate` e `ltvByPlan`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar os cards",
-      "details": "Adicionar os 3 novos cards reaproveitando o componente de card de métrica já existente.",
-      "pass": false
+      "details": "Adicionar os 3 novos cards reaproveitando o componente `MetricCard` já existente (prop `value` generalizada para `React.ReactNode` para suportar formatação em R$/% e o card duplo de LTV). Testado visualmente via Playwright: os 9 cards renderizam corretamente, MRR como 'R$ 89,80', Churn mensal como '0%', LTV médio por plano com linhas 'Básico'/'Premium'.",
+      "pass": true
     }
   ],
   "dependencies": [

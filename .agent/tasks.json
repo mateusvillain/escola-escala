@@ -752,29 +752,29 @@
     "id": "TASK-108",
     "title": "Calcular MRR em /api/admin/metrics",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-108.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-108.json",
+    "passes": true
   },
   {
     "id": "TASK-109",
     "title": "Calcular churn mensal",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-109.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-109.json",
+    "passes": true
   },
   {
     "id": "TASK-110",
     "title": "Calcular LTV médio por plano",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-110.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-110.json",
+    "passes": true
   },
   {
     "id": "TASK-111",
     "title": "Exibir MRR/churn/LTV no AdminDashboard",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-111.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-111.json",
+    "passes": true
   },
   {
     "id": "TASK-112",
