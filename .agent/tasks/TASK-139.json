@@ -1,0 +1,31 @@
+{
+  "id": "TASK-139",
+  "title": "Dashboard do instrutor",
+  "category": "ui-ux",
+  "description": "Tela inicial da área do instrutor, com lista de seus cursos e métricas básicas.",
+  "acceptanceCriteria": [
+    "`/instrutor` lista os cursos do instrutor com thumbnail, status, número de alunos matriculados e taxa de conclusão",
+    "Tela é somente leitura nesta versão — instrutor não edita conteúdo do curso por `/instrutor`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página",
+      "details": "Criar `src/app/instrutor/page.tsx` consumindo `GET /api/instructor/courses`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Reaproveitar componentes",
+      "details": "Reaproveitar componentes de card/tabela já usados no admin para listar os cursos com as métricas.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-138"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Decisão de escopo: v1 da área do instrutor é somente leitura. Edição de conteúdo pelo próprio instrutor é uma extensão natural para uma Fase 3, não incluída aqui."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "TASK-105",
+  "title": "Exibir código de indicação no perfil",
+  "category": "ui-ux",
+  "description": "Mostrar ao aluno seu código/link de indicação na página de perfil, com botão de copiar.",
+  "acceptanceCriteria": [
+    "`/perfil` exibe o link de indicação no formato `{NEXT_PUBLIC_APP_URL}/planos?ref={code}`",
+    "Botão \"Copiar link\" copia para a área de transferência e mostra confirmação visual"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar o código",
+      "details": "Editar `src/app/(app)/perfil/page.tsx` (ou componente filho) para buscar o código via `GET /api/users/me/referral-code`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar botão de copiar",
+      "details": "Montar o link completo e adicionar botão usando `navigator.clipboard.writeText`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-104"
+  ],
+  "estimatedComplexity": "low"
+}

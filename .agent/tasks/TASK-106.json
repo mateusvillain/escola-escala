@@ -1,0 +1,46 @@
+{
+  "id": "TASK-106",
+  "title": "Aplicar cupom ao indicado via ?ref=",
+  "category": "integration",
+  "description": "Quando alguém chega em /planos com ?ref=CODE válido, aplicar automaticamente um cupom de desconto na sessão de checkout subsequente.",
+  "acceptanceCriteria": [
+    "`/planos?ref=CODE` repassa o código ao checkout se o código existir e for de outro usuário",
+    "`POST /api/subscriptions/checkout` aceita `referralCode` opcional no body e, se válido, aplica um Coupon de indicação pré-criado no Stripe via `discounts`",
+    "Código inválido ou do próprio usuário é ignorado silenciosamente (sem erro para o usuário)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Ler o ref da URL",
+      "details": "Em `src/app/planos/PlansClient.tsx`, ler `?ref=` da URL e repassar como `referralCode` na chamada de checkout.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar o código no endpoint",
+      "details": "Validar `referralCode` em `POST /api/subscriptions/checkout`, buscando `ReferralCode` e rejeitando se for do próprio usuário autenticado.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Aplicar o desconto",
+      "details": "Se válido, aplicar `discounts: [{ coupon: process.env.STRIPE_COUPON_ID_REFERRAL }]` em vez de `allow_promotion_codes`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Persistir a origem",
+      "details": "Salvar `referredByCode` no `UserSubscription` criado pelo webhook, repassando o código via `metadata` da sessão.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-104",
+    "TASK-90"
+  ],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Stripe não permite `allow_promotion_codes: true` e `discounts` na mesma Checkout Session — escolher um por sessão dependendo se há `referralCode` válido.",
+    "Requer criar manualmente um Coupon fixo de indicação no Stripe Dashboard e adicionar `STRIPE_COUPON_ID_REFERRAL` ao `.env.local`."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-144",
+  "title": "Helper logAdminAction integrado às mutações sensíveis",
+  "category": "functional",
+  "description": "Criar o helper de log e chamá-lo nas operações administrativas mais sensíveis (publicar/arquivar curso, alterar role/status de usuário).",
+  "acceptanceCriteria": [
+    "Função `logAdminAction({ actorId, action, entityType, entityId, metadata })` cria o registro em `AdminAuditLog`",
+    "Chamada adicionada em `PATCH /api/admin/courses/[id]` quando `status` muda, e em `PATCH /api/admin/users/[id]` quando `role` ou `isActive` muda",
+    "Falha ao gravar o log não interrompe a operação principal (log é best-effort)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o helper",
+      "details": "Criar `logAdminAction` em `src/lib/audit.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Integrar em courses",
+      "details": "Chamar a função em `PATCH /api/admin/courses/[id]` ao detectar mudança de `status`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Integrar em users",
+      "details": "Chamar a função em `PATCH /api/admin/users/[id]` ao detectar mudança de `role` ou `isActive`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-143",
+    "TASK-22",
+    "TASK-33"
+  ],
+  "estimatedComplexity": "medium"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "TASK-136",
+  "title": "Controle de velocidade de reprodução",
+  "category": "ui-ux",
+  "description": "Permitir que o aluno ajuste a velocidade de reprodução do vídeo (0.5x a 2x).",
+  "acceptanceCriteria": [
+    "Confirmado se o player embed do Bunny Stream já expõe controle nativo de velocidade",
+    "Se disponível nativamente, apenas validado e documentado, sem código novo",
+    "Se não disponível, registrado como gap técnico no PRD, fora do escopo desta task"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Testar o player atual",
+      "details": "Testar manualmente o player atual (`getEmbedUrl`) e verificar se o menu de configurações já inclui controle de velocidade.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Documentar o resultado",
+      "details": "Se disponível nativamente, apenas confirmar e documentar; se não, registrar como gap técnico no PRD.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-135"
+  ],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "O player embed atual (iframe simples) costuma já incluir controle de velocidade no menu nativo do Bunny Stream — confirmar antes de assumir que requer trabalho de integração."
+  ]
+}

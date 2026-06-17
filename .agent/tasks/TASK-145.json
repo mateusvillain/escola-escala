@@ -1,0 +1,35 @@
+{
+  "id": "TASK-145",
+  "title": "Tela /admin/auditoria",
+  "category": "ui-ux",
+  "description": "Tela administrativa para visualizar o histórico de ações sensíveis, com filtros básicos.",
+  "acceptanceCriteria": [
+    "`/admin/auditoria` lista entradas de `AdminAuditLog` em ordem cronológica decrescente, com autor, ação, entidade afetada e data",
+    "Filtros por tipo de ação e por intervalo de data",
+    "Tela alimentada por endpoint paginado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/admin/audit-log/route.ts` com handler `GET` paginado e filtros.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a página",
+      "details": "Criar `src/app/admin/auditoria/page.tsx` e componente de listagem reaproveitando o padrão visual das demais tabelas admin.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Adicionar à navegação",
+      "details": "Adicionar item \"Auditoria\" em `AdminSidebar`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-144"
+  ],
+  "estimatedComplexity": "medium"
+}

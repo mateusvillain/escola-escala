@@ -1,0 +1,30 @@
+{
+  "id": "TASK-94",
+  "title": "Exibir anexos na página da aula",
+  "category": "ui-ux",
+  "description": "Mostrar a lista de materiais complementares para download na página de consumo da aula.",
+  "acceptanceCriteria": [
+    "Página `/cursos/[slug]/aulas/[lessonId]` exibe seção \"Materiais\" com links de download quando `attachments` não está vazio",
+    "Seção não aparece quando a aula não tem anexos",
+    "Links abrem em nova aba (`target=\"_blank\"`, `rel=\"noopener noreferrer\"`)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Renderizar a seção",
+      "details": "Editar a página da aula para renderizar a lista de `attachments` abaixo do player ou do conteúdo em markdown.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar estilo consistente",
+      "details": "Estilizar a seção com os componentes `lui-*`/Tailwind já usados na página.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-93",
+    "TASK-44"
+  ],
+  "estimatedComplexity": "low"
+}

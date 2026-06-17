@@ -1,0 +1,28 @@
+{
+  "id": "TASK-122",
+  "title": "Indicador de streak no dashboard",
+  "category": "ui-ux",
+  "description": "Exibir o streak atual do aluno no dashboard como motivador de engajamento.",
+  "acceptanceCriteria": [
+    "`/dashboard` exibe \"N dias consecutivos estudando\" quando `studyStreak >= 2`",
+    "Nenhum indicador exibido quando `studyStreak < 2`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Consumir o campo",
+      "details": "Editar `DashboardContent` para consumir `studyStreak` de `GET /api/dashboard`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Renderizar o indicador",
+      "details": "Adicionar componente visual simples (badge ou texto destacado), condicional a `studyStreak >= 2`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-121"
+  ],
+  "estimatedComplexity": "low"
+}

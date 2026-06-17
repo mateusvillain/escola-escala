@@ -1,0 +1,41 @@
+{
+  "id": "TASK-138",
+  "title": "GET /api/instructor/courses e métricas",
+  "category": "api-endpoint",
+  "description": "Endpoint que retorna os cursos do instrutor autenticado e métricas básicas de cada um (alunos matriculados, taxa de conclusão).",
+  "acceptanceCriteria": [
+    "Retorna apenas os cursos cujo `instructorId` corresponde ao `Instructor` do usuário autenticado",
+    "Cada curso na resposta inclui `enrollmentCount` e `completionRate`",
+    "Instrutor não vê cursos de outros instrutores"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/instructor/courses/route.ts` com handler `GET`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Resolver o instrutor",
+      "details": "Resolver o `Instructor` a partir do `userId` do JWT.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Buscar cursos com métricas",
+      "details": "Buscar cursos do instrutor com contagem de enrollments e enrollments concluídos.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Calcular a taxa de conclusão",
+      "details": "Calcular `completionRate` por curso e incluir na resposta.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-137"
+  ],
+  "estimatedComplexity": "medium"
+}

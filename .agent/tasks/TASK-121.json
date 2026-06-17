@@ -1,0 +1,36 @@
+{
+  "id": "TASK-121",
+  "title": "Calcular streak de dias consecutivos",
+  "category": "functional",
+  "description": "Calcular quantos dias consecutivos o aluno teve pelo menos uma atualização de progresso de aula.",
+  "acceptanceCriteria": [
+    "Função `getStudyStreak(userId)` retorna o número de dias consecutivos (incluindo hoje ou ontem) com pelo menos um `LessonProgress.lastWatchedAt`",
+    "Streak zera se houver um dia sem nenhuma atividade",
+    "Valor exposto via `GET /api/dashboard` como `studyStreak`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a função",
+      "details": "Criar `getStudyStreak` em `src/lib/progress.ts`, agrupando `lastWatchedAt` por dia para o usuário.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Calcular a sequência",
+      "details": "Percorrer os dias do mais recente para o mais antigo, contando enquanto forem consecutivos.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Expor no dashboard",
+      "details": "Incluir `studyStreak` no retorno de `GET /api/dashboard`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-56"
+  ],
+  "estimatedComplexity": "medium"
+}

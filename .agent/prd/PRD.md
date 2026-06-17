@@ -1,8 +1,10 @@
-# PRD — Plataforma de Cursos Online por Assinatura (Fase 1)
+# PRD — Plataforma de Cursos Online por Assinatura
 
-**Versão**: 1.0  
-**Data**: 2026-06-14  
-**Fase**: 1 — MVP B2C
+**Versão**: 2.0  
+**Data**: 2026-06-16  
+**Fase**: 1 — MVP B2C (completa) + Fase 2 — Crescimento e Engajamento (em planejamento)
+
+> A Fase 1 (seções 1–10 abaixo) está implementada — ver `CLAUDE.md`/`AGENTS.md` do repositório para o estado real de cada funcionalidade. A seção 13 detalha a Fase 2, derivada de `docs/oportunidades-plataforma.md`.
 
 ---
 
@@ -445,14 +447,31 @@ certificates
 - Performance e SEO básico
 - Deploy em produção (Vercel)
 
-### Fase 2 (fora do escopo)
+### Fase 2 — Crescimento e Engajamento (TASK-84 a TASK-145)
+
+Detalhada na seção 13. Resumo por sprint sugerido:
+
+**Sprint 6 — Monetização**
+- Trial gratuito, cupons de desconto, compra avulsa de curso, programa de indicação, relatórios financeiros (MRR/churn/LTV)
+
+**Sprint 7 — Retenção e prova social**
+- E-mail de retomada de curso, notificação de cobrança falhada, avaliação de curso, streak de estudo
+
+**Sprint 8 — Conteúdo e aprendizado**
+- Legendas/transcrição de vídeo, quiz por módulo, busca dentro do curso, retomar do ponto exato e velocidade de reprodução
+
+**Sprint 9 — Operação**
+- Página pública de instrutor, área própria do instrutor (somente leitura), materiais complementares por aula, exportação CSV, auditoria de ações admin
+
+### Fase 3+ (fora do escopo desta rodada)
 
 - Gestão B2B com painel de equipes e seats corporativos
-- Gamificação (badges, pontos, ranking)
+- Gamificação pesada (pontos, ranking competitivo)
 - Fórum e comunidade de alunos
 - App mobile nativo (iOS e Android)
 - Certificado com URL de verificação pública
 - Live streaming de aulas
+- Edição de conteúdo de curso pelo próprio instrutor (a Fase 2 entrega o painel do instrutor somente leitura — ver TASK-139)
 
 ---
 
@@ -475,9 +494,73 @@ certificates
 
 ### Não-Metas (Fase 1)
 
-- Não há sistema de afiliados ou comissões
+- ~~Não há sistema de afiliados ou comissões~~ → Fase 2 entrega um programa de indicação simples (TASK-103 a TASK-107), não um sistema completo de afiliados
 - Não há integração com plataformas de terceiros (LinkedIn, Zapier, etc.)
 - Não há suporte a múltiplos idiomas (apenas PT-BR)
-- Não há funcionalidade de busca avançada por conteúdo das aulas
-- Instrutores não têm painel próprio na Fase 1 (Admin gerencia todo o conteúdo)
-- Não há trial gratuito de assinatura na Fase 1
+- ~~Não há funcionalidade de busca avançada por conteúdo das aulas~~ → Fase 2 entrega busca simples via `contains` (TASK-131/132), não full-text search
+- ~~Instrutores não têm painel próprio na Fase 1~~ → Fase 2 entrega painel do instrutor somente leitura (TASK-137 a TASK-139); edição de conteúdo pelo instrutor continua fora de escopo
+- ~~Não há trial gratuito de assinatura na Fase 1~~ → Fase 2 adiciona trial de 7 dias (TASK-85 a TASK-87)
+
+### Não-Metas (Fase 2 e além)
+
+- Gestão B2B, fórum/comunidade, app mobile nativo, gamificação competitiva e live streaming — ver "Fase 3+" na seção 11
+- Edição de conteúdo de curso pelo próprio instrutor (painel do instrutor é somente leitura na Fase 2)
+- Sistema de afiliados completo com múltiplos níveis de comissão (Fase 2 entrega só indicação direta 1 nível)
+- Full-text search (tsvector/Elasticsearch) — Fase 2 usa busca simples via `contains`
+
+---
+
+## 13. Fase 2 — Crescimento e Engajamento
+
+Origem: `docs/oportunidades-plataforma.md`, seções 1–5 (seção 6, B2B e fórum, permanece fora de escopo — ver seção 12). Cada requisito referencia o ID de task correspondente em `.agent/tasks/`.
+
+### 13.1 Monetização (TASK-85 a TASK-110)
+
+**Trial gratuito** — TASK-85 a TASK-87: 7 dias de teste grátis no Checkout Stripe, com aviso de fim de trial por e-mail e indicação visual no dashboard/planos.
+**Cupons de desconto** — TASK-90/91: `allow_promotion_codes` habilitado no Checkout; cupons criados e geridos direto no Stripe Dashboard.
+**Compra avulsa de curso** — TASK-95 a TASK-99: cursos podem ser configurados para venda em pagamento único, sem exigir assinatura, com enrollment direto via webhook.
+**Upsell contextual** — TASK-100 a TASK-102: eventos de exibição do `UpgradePrompt` são registrados e disparam e-mail de upsell automático após 3 dias sem conversão.
+**Programa de indicação** — TASK-103 a TASK-107: código de indicação único por aluno, cupom de desconto para o indicado e crédito automático para o indicador na primeira assinatura do indicado.
+**Relatórios financeiros** — TASK-108 a TASK-111: MRR, churn mensal e LTV médio por plano calculados a partir de `UserSubscription` e exibidos no `AdminDashboard`.
+
+### 13.2 Engajamento e Retenção (TASK-112 a TASK-122)
+
+**E-mail de retomada** — TASK-112 a TASK-114: identificação mensal de alunos inativos com curso incompleto, com e-mail "continue de onde parou" disparado via Vercel Cron.
+**Notificação de cobrança falhada** — TASK-115/116: e-mail automático com link para o Stripe Customer Portal quando uma cobrança falha.
+**Avaliação de curso** — TASK-117 a TASK-120: nota de 1 a 5 + comentário opcional ao concluir um curso, exibidos como prova social na página de detalhe.
+**Streak de estudo** — TASK-121/122: indicador de dias consecutivos de estudo no dashboard do aluno.
+
+### 13.3 Conteúdo e Aprendizado (TASK-123 a TASK-136)
+
+**Legendas/transcrição** — TASK-123 a TASK-125: upload de arquivo `.vtt` por aula via API de Captions do Bunny Stream, com seletor nativo no player.
+**Quiz por módulo** — TASK-126 a TASK-130: perguntas de múltipla escolha por módulo; aprovação (≥70%) passa a ser pré-requisito do certificado quando o módulo tiver quiz.
+**Busca dentro do curso** — TASK-131/132: busca textual simples (título/descrição/conteúdo das aulas) na sidebar do curso.
+**Retomar do ponto exato e velocidade** — TASK-133 a TASK-136: posição exata do vídeo salva e usada para retomar a aula; controle de velocidade depende de validar suporte nativo do embed Bunny Stream.
+
+### 13.4 Operação e Admin (TASK-88, TASK-89, TASK-92 a TASK-94, TASK-137 a TASK-145)
+
+**Página pública de instrutor** — TASK-88/89: rota `/instrutores/[slug]` com bio e cursos publicados, usando o `slug` já existente no model `Instructor`.
+**Materiais complementares por aula** — TASK-92 a TASK-94: campo `attachments` em `Lesson` para links de download (slides, exercícios, código-fonte).
+**Área própria do instrutor** — TASK-137 a TASK-139: painel somente leitura em `/instrutor` com cursos próprios, matrículas e taxa de conclusão.
+**Exportação CSV** — TASK-140 a TASK-142: exportação de assinaturas e usuários para reconciliação financeira e campanhas.
+**Auditoria de ações admin** — TASK-143 a TASK-145: log de mudanças sensíveis (status de curso, role/status de usuário) com tela de consulta em `/admin/auditoria`.
+
+### 13.5 Pré-requisitos específicos da Fase 2
+
+| Item | Necessário para | Status |
+|---|---|---|
+| `CRON_SECRET` (nova variável em `.env.local`) | Proteger endpoints `/api/cron/*` (TASK-102, TASK-114) | A preencher manualmente (TASK-84) |
+| Promotion Codes habilitado no Stripe Dashboard | Cupons de desconto (TASK-90) | A confirmar (TASK-84) |
+| `STRIPE_COUPON_ID_REFERRAL` (nova variável) | Crédito de indicação (TASK-106) | Criar Coupon fixo no Stripe Dashboard antes da TASK-106 |
+| API de Captions do Bunny Stream acessível | Legendas (TASK-123) | A confirmar (TASK-84) |
+| Vercel Cron habilitado no projeto | E-mails de upsell e reengajamento (TASK-102, TASK-114) | A configurar no deploy (depende de TASK-82) |
+
+### 13.6 Decisões de escopo assumidas (sem confirmação do cliente)
+
+- Trial gratuito: 7 dias, sem necessidade de cartão verificado além do que o próprio Stripe já exige no Checkout
+- Quiz: aprovação mínima de 70%: para passar a contar como pré-requisito do certificado
+- Painel do instrutor: somente leitura nesta rodada — edição de conteúdo continua centralizada no admin
+- Programa de indicação: 1 nível apenas (sem cadeia de indicações), crédito equivalente a um ciclo de cobrança
+- Churn/LTV: calculados de forma aproximada a partir do histórico de `UserSubscription`, sem tabela de snapshot mensal dedicada
+
+Essas decisões devem ser validadas com o cliente antes ou durante a implementação das tasks correspondentes; ajustar a task específica se a decisão mudar.

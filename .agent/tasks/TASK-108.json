@@ -1,0 +1,36 @@
+{
+  "id": "TASK-108",
+  "title": "Calcular MRR em /api/admin/metrics",
+  "category": "api-endpoint",
+  "description": "Adicionar cálculo de Monthly Recurring Revenue às métricas do admin, normalizando assinaturas anuais para equivalente mensal.",
+  "acceptanceCriteria": [
+    "`GET /api/admin/metrics` retorna `mrr` somando, para toda `UserSubscription` com `status: 'active'`, o valor mensal do plano",
+    "Assinaturas `annual` contam `priceAnnual / 12`; assinaturas `monthly` contam `priceMonthly` direto",
+    "Valor retornado em decimal (reais), não em centavos"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar assinaturas ativas",
+      "details": "Editar `src/app/api/admin/metrics/route.ts` para buscar assinaturas ativas com o plano relacionado.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Somar o valor mensal equivalente",
+      "details": "Somar `billingCycle === 'monthly' ? plan.priceMonthly : plan.priceAnnual / 12` para cada assinatura.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Incluir no retorno",
+      "details": "Incluir `mrr` no JSON de resposta do endpoint.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-37"
+  ],
+  "estimatedComplexity": "medium"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "TASK-132",
+  "title": "Campo de busca na CourseSidebar",
+  "category": "ui-ux",
+  "description": "Adicionar um campo de busca na sidebar do curso que destaca onde um termo foi mencionado nas aulas.",
+  "acceptanceCriteria": [
+    "`CourseSidebar` tem um input de busca no topo",
+    "Ao digitar (com debounce), chama o endpoint de busca e exibe lista de resultados com snippet e link direto para a aula",
+    "Lista de módulos/aulas normal volta a aparecer quando o campo de busca está vazio"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o input",
+      "details": "Adicionar input de busca e estado local em `src/components/course/CourseSidebar.tsx`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar debounce",
+      "details": "Implementar debounce de 300ms antes de chamar o endpoint de busca.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Renderizar resultados destacados",
+      "details": "Renderizar resultados com snippet, destacando o termo buscado (ex: `<mark>`).",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-131",
+    "TASK-45"
+  ],
+  "estimatedComplexity": "medium"
+}

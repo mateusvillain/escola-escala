@@ -1,0 +1,46 @@
+{
+  "id": "TASK-84",
+  "title": "Verificar pré-requisitos da Fase 2",
+  "category": "setup",
+  "description": "Confirmar que os pré-requisitos específicos da Fase 2 (variáveis de ambiente novas e configurações no Stripe Dashboard e no Bunny Stream) estão disponíveis antes de iniciar a implementação das novas funcionalidades.",
+  "acceptanceCriteria": [
+    "`.env.local` contém `CRON_SECRET` com valor placeholder, usado para proteger os endpoints de cron de e-mail",
+    "Promotion Codes está habilitado na conta Stripe (Dashboard → Settings → Checkout and Payment Links → Promotion codes)",
+    "Confirmado que a API do Bunny Stream da conta atual suporta upload de captions (.vtt) via endpoint de Captions",
+    "Gaps de pré-requisito documentados e com decisão de seguir/bloquear registrada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Revisar a seção Fase 2 do PRD e listar pré-requisitos",
+      "details": "Ler `.agent/prd/PRD.md` seção Fase 2 e listar variáveis, contas e configurações necessárias.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar CRON_SECRET ao .env.local",
+      "details": "Adicionar `CRON_SECRET=TODO_FILL_MANUALLY` ao `.env.local`, sem preencher valor real.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar Promotion Codes habilitado no Stripe",
+      "details": "Acessar Stripe Dashboard → Settings → Checkout and Payment Links e confirmar que Promotion Codes está habilitado.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Confirmar suporte a Captions no Bunny Stream",
+      "details": "Fazer uma chamada de teste ao endpoint de Captions da API do Bunny Stream para a library configurada e confirmar resposta válida.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-1"
+  ],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Esta task gate as tasks de cupom (TASK-90), e-mails de cron (TASK-102, TASK-114) e legendas (TASK-123 a TASK-125).",
+    "Não requer nenhuma nova conta de serviço — apenas configuração dentro das contas Stripe e Bunny Stream já existentes."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "TASK-117",
+  "title": "Tabela CourseReview",
+  "category": "data-model",
+  "description": "Modelar avaliações de curso (nota de 1 a 5 e comentário opcional) feitas pelo aluno.",
+  "acceptanceCriteria": [
+    "Nova tabela `CourseReview` com `id`, `userId`, `courseId`, `rating Int` (1-5), `comment String?`, `createdAt`",
+    "`@@unique([userId, courseId])` — um aluno avalia cada curso uma única vez",
+    "Migration aplicada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model",
+      "details": "Adicionar model `CourseReview` ao `prisma/schema.prisma` com relações a `User` e `Course`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_course_review`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

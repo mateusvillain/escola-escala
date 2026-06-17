@@ -1,0 +1,28 @@
+{
+  "id": "TASK-125",
+  "title": "Seletor de legendas no player",
+  "category": "ui-ux",
+  "description": "Expor a legenda enviada como opção selecionável no player de aula.",
+  "acceptanceCriteria": [
+    "`BunnyPlayer` exibe o controle nativo de legendas do embed do Bunny Stream quando a aula tem caption associada",
+    "Sem caption, o player funciona normalmente sem o controle"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Confirmar suporte nativo",
+      "details": "Confirmar que o iframe embed do Bunny Stream já expõe o seletor de legenda nativamente quando o vídeo tem captions associadas, sem mudança de código em `BunnyPlayer`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Testar manualmente",
+      "details": "Enviar uma legenda via TASK-124 e confirmar que o controle aparece no player da aula.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-124"
+  ],
+  "estimatedComplexity": "low"
+}

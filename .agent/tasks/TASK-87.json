@@ -1,0 +1,29 @@
+{
+  "id": "TASK-87",
+  "title": "Exibir aviso de trial ativo",
+  "category": "ui-ux",
+  "description": "Indicar visualmente ao aluno que ele está em período de teste gratuito, com a data em que a cobrança começa.",
+  "acceptanceCriteria": [
+    "`/dashboard/assinatura` exibe badge \"Em teste — cobrança em DD/MM/AAAA\" quando `status === 'trialing'`",
+    "`/planos` informa \"7 dias gratuitos\" nos cards de plano",
+    "Nenhuma mudança visual para usuários com assinatura `active`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Exibir data de fim do trial no dashboard de assinatura",
+      "details": "Editar `src/app/(app)/dashboard/assinatura/page.tsx` para mostrar `currentPeriodEnd` formatada quando o status for `trialing`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar texto de trial na página de planos",
+      "details": "Editar `src/app/planos/PlansClient.tsx` incluindo \"7 dias gratuitos, cancele quando quiser\" nos dois planos.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-85"
+  ],
+  "estimatedComplexity": "low"
+}

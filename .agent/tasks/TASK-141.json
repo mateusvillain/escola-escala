@@ -1,0 +1,29 @@
+{
+  "id": "TASK-141",
+  "title": "GET /api/admin/users/export",
+  "category": "api-endpoint",
+  "description": "Exportar a listagem de usuários em CSV.",
+  "acceptanceCriteria": [
+    "Endpoint admin-only retorna CSV com nome, e-mail, role, status (ativo/inativo) e data de cadastro",
+    "Respeita os mesmos filtros de `GET /api/admin/users`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/admin/users/export/route.ts` com handler `GET` (admin-only).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Formatar como CSV",
+      "details": "Reaproveitar a query de `GET /api/admin/users`, formatando como CSV.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-33"
+  ],
+  "estimatedComplexity": "low"
+}

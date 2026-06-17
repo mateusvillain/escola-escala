@@ -1,0 +1,42 @@
+{
+  "id": "TASK-128",
+  "title": "POST /api/modules/[id]/quiz/attempt",
+  "category": "api-endpoint",
+  "description": "Endpoint que recebe as respostas do aluno, calcula a nota e registra a tentativa.",
+  "acceptanceCriteria": [
+    "Endpoint requer autenticação e acesso ao curso do módulo",
+    "Recebe lista de `{ questionId, selectedOptionIndex }`, calcula `score` (% de acertos) e `passed` (`score >= 70`)",
+    "Cria `QuizAttempt` e retorna nota, aprovação e gabarito (qual era a opção correta de cada pergunta)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/modules/[id]/quiz/attempt/route.ts` com handler `POST`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar acesso",
+      "details": "Validar acesso do aluno ao curso do módulo antes de aceitar a tentativa.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Calcular a nota",
+      "details": "Calcular `score` comparando respostas com `correctOptionIndex` de cada `QuizQuestion`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Registrar e retornar",
+      "details": "Criar `QuizAttempt` e retornar resultado detalhado.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-126",
+    "TASK-43"
+  ],
+  "estimatedComplexity": "medium"
+}

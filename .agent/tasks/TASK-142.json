@@ -1,0 +1,28 @@
+{
+  "id": "TASK-142",
+  "title": "Botão \"Exportar CSV\" nas tabelas admin",
+  "category": "ui-ux",
+  "description": "Adicionar o botão de exportação nas telas de assinaturas e usuários do admin.",
+  "acceptanceCriteria": [
+    "`SubscriptionTable` e `UserTable` têm botão \"Exportar CSV\" que aciona o download com os filtros atuais aplicados"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar em SubscriptionTable",
+      "details": "Adicionar botão em `src/components/admin/SubscriptionTable.tsx` apontando para `/api/admin/subscriptions/export` com os filtros atuais como query string.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar em UserTable",
+      "details": "Repetir em `src/components/admin/UserTable.tsx` apontando para `/api/admin/users/export`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-140",
+    "TASK-141"
+  ],
+  "estimatedComplexity": "low"
+}

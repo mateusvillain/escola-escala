@@ -1,0 +1,32 @@
+{
+  "id": "TASK-130",
+  "title": "Certificado exige quiz aprovado",
+  "category": "functional",
+  "description": "Ajustar a lógica de conclusão de curso para exigir aprovação nos quizzes dos módulos (quando existirem), além de 100% das aulas assistidas.",
+  "acceptanceCriteria": [
+    "`checkCourseCompletion` só marca o curso como concluído e gera certificado quando 100% das aulas estão concluídas E todo módulo com quiz associado tem `QuizAttempt` aprovado do usuário",
+    "Módulos sem quiz não bloqueiam a conclusão (comportamento atual preservado)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Checar quizzes pendentes",
+      "details": "Editar `checkCourseCompletion` em `src/lib/progress.ts` para, além do progresso por aula, verificar quizzes pendentes.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Bloquear certificado se houver pendência",
+      "details": "Para cada módulo do curso com `Quiz` associado, checar `QuizAttempt` aprovado do usuário; se faltar algum, não disparar a geração do certificado.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-128",
+    "TASK-55"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Esta mudança é retroativamente segura — cursos sem nenhum quiz continuam funcionando exatamente como hoje."
+  ]
+}

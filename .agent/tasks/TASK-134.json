@@ -1,0 +1,29 @@
+{
+  "id": "TASK-134",
+  "title": "PATCH /api/progress/[lessonId] salva posição exata",
+  "category": "api-endpoint",
+  "description": "Estender o endpoint de progresso existente para aceitar e persistir a posição exata do player, além do percentual.",
+  "acceptanceCriteria": [
+    "`POST /api/progress/[lessonId]` aceita `positionSeconds` opcional no body e grava em `lastPositionSeconds`",
+    "Comportamento existente de `watchPercentage`/`isCompleted` não é alterado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Aceitar o novo campo",
+      "details": "Editar o schema Zod do endpoint em `src/app/api/progress/[lessonId]/route.ts` para aceitar `positionSeconds`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Persistir o valor",
+      "details": "Persistir o valor em `lastPositionSeconds` no `prisma.lessonProgress.upsert`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-133",
+    "TASK-49"
+  ],
+  "estimatedComplexity": "low"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "TASK-86",
+  "title": "E-mail de aviso antes do fim do trial",
+  "category": "functional",
+  "description": "Avisar o aluno por e-mail quando o trial estiver perto do fim, para reduzir cancelamentos por surpresa na primeira cobrança.",
+  "acceptanceCriteria": [
+    "Webhook `customer.subscription.trial_will_end` (disparado pelo Stripe 3 dias antes do fim do trial) é tratado em `stripe-handlers.ts`",
+    "Handler dispara e-mail com template informando data da primeira cobrança e valor",
+    "Evento documentado como necessário na configuração do endpoint de webhook na Stripe Dashboard (local e produção)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar handler do evento",
+      "details": "Adicionar `handleTrialWillEnd` em `src/lib/stripe-handlers.ts` que busca o usuário pelo `stripeCustomerId` e dispara o e-mail.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Registrar o evento no endpoint do webhook",
+      "details": "Adicionar o case `customer.subscription.trial_will_end` no switch de `src/app/api/webhooks/stripe/route.ts`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar template de e-mail",
+      "details": "Adicionar `trialEndingEmailHtml` em `src/lib/email-templates.ts` seguindo o padrão visual dos templates existentes.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Documentar configuração manual no Stripe Dashboard",
+      "details": "Anotar no PRD que o evento precisa ser adicionado manualmente à lista de eventos do endpoint de webhook, em local e produção.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-85",
+    "TASK-64"
+  ],
+  "estimatedComplexity": "low"
+}

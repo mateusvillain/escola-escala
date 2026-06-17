@@ -1,0 +1,39 @@
+{
+  "id": "TASK-97",
+  "title": "Webhook de compra avulsa cria enrollment direto",
+  "category": "integration",
+  "description": "Tratar o evento de checkout completo em modo pagamento único, matriculando o aluno no curso sem criar UserSubscription.",
+  "acceptanceCriteria": [
+    "`handleCheckoutSessionCompleted` distingue `session.mode === 'payment'` de `session.mode === 'subscription'`",
+    "Para `mode === 'payment'`, cria `CourseEnrollment` direto usando `userId`/`courseId` do metadata, sem tocar em `UserSubscription`",
+    "Idempotente — não duplica enrollment se o webhook for reentregue"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Ramificar por modo da sessão",
+      "details": "No início de `handleCheckoutSessionCompleted`, ramificar o comportamento por `session.mode`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar enrollment direto",
+      "details": "Para `mode === 'payment'`, fazer `prisma.courseEnrollment.upsert` com `userId`/`courseId` do metadata.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Preservar fluxo de assinatura",
+      "details": "Manter o fluxo existente intacto para `mode === 'subscription'`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-96",
+    "TASK-71"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Webhooks podem ser reentregues pelo Stripe — sempre usar upsert/idempotência, nunca create puro."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "id": "TASK-98",
+  "title": "CTA \"Comprar este curso\"",
+  "category": "ui-ux",
+  "description": "Exibir opção de compra avulsa na página de detalhe do curso para cursos configurados com essa opção.",
+  "acceptanceCriteria": [
+    "Página `/cursos/[slug]` mostra botão \"Comprar este curso — R$ X\" quando `allowOneTimePurchase` é `true`, ao lado do CTA de assinatura",
+    "Clique chama `POST /api/courses/[slug]/purchase` e redireciona para a `url` retornada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Exibir o preço e o botão",
+      "details": "Editar a página de detalhe do curso para buscar e exibir `priceOneTime`/`allowOneTimePurchase`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Disparar o checkout",
+      "details": "Adicionar botão que chama o endpoint de compra e faz `window.location.href = url`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-96",
+    "TASK-42"
+  ],
+  "estimatedComplexity": "low"
+}

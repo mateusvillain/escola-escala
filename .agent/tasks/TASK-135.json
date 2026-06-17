@@ -1,0 +1,30 @@
+{
+  "id": "TASK-135",
+  "title": "Player retoma do ponto salvo",
+  "category": "ui-ux",
+  "description": "Ao abrir uma aula já iniciada, o player deve começar a partir de lastPositionSeconds em vez do início.",
+  "acceptanceCriteria": [
+    "Página da aula busca `lastPositionSeconds` do progresso atual do aluno e passa ao `BunnyPlayer`",
+    "`BunnyPlayer` usa o parâmetro de tempo inicial do embed do Bunny Stream para começar no ponto certo",
+    "Aula nunca assistida começa do zero, normalmente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Repassar a posição salva",
+      "details": "Editar a página da aula para repassar `lastPositionSeconds` ao `BunnyPlayer`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Usar o parâmetro de tempo do embed",
+      "details": "Editar `src/components/player/BunnyPlayer.tsx` para incluir o parâmetro de tempo inicial na URL do embed quando o valor for maior que zero.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-134",
+    "TASK-44"
+  ],
+  "estimatedComplexity": "medium"
+}

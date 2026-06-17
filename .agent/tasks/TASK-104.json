@@ -1,0 +1,28 @@
+{
+  "id": "TASK-104",
+  "title": "Gerar código de indicação único por aluno",
+  "category": "functional",
+  "description": "Criar (ou retornar, se já existir) um código de indicação curto e único para o aluno autenticado.",
+  "acceptanceCriteria": [
+    "`GET /api/users/me/referral-code` retorna o código existente do usuário ou cria um novo se não existir (idempotente)",
+    "Código gerado é curto (ex: 8 caracteres alfanuméricos), legível e sem colisão com códigos existentes"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a função de geração",
+      "details": "Criar `getOrCreateReferralCode(userId)` que faz upsert com geração de código aleatório e checagem de unicidade.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/users/me/referral-code/route.ts` com handler `GET` autenticado chamando essa função.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-103"
+  ],
+  "estimatedComplexity": "low"
+}

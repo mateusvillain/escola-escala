@@ -1,0 +1,36 @@
+{
+  "id": "TASK-115",
+  "title": "E-mail de cobrança falhada",
+  "category": "integration",
+  "description": "Avisar o aluno por e-mail quando uma cobrança de assinatura falhar, antes que ele descubra ao perder acesso ao conteúdo.",
+  "acceptanceCriteria": [
+    "`handleInvoicePaymentFailed` dispara e-mail para o aluno após marcar a assinatura como `past_due`",
+    "E-mail inclui link direto para o Stripe Customer Portal"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar o usuário",
+      "details": "Editar `handleInvoicePaymentFailed` para buscar o `User` pelo `stripeCustomerId` da assinatura.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Disparar o e-mail",
+      "details": "Chamar `sendPaymentFailedEmail` passando nome, e-mail e link do portal.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Tratar falha de envio",
+      "details": "Envolver o envio em try/catch com log, sem interromper o processamento do webhook, igual ao padrão do e-mail de boas-vindas.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-73",
+    "TASK-76"
+  ],
+  "estimatedComplexity": "medium"
+}

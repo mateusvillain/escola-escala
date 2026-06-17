@@ -1,0 +1,33 @@
+{
+  "id": "TASK-124",
+  "title": "Upload de legenda no LessonEditor",
+  "category": "ui-ux",
+  "description": "Permitir que o admin envie um arquivo .vtt de legenda para a aula direto do painel.",
+  "acceptanceCriteria": [
+    "`LessonEditor` tem campo de upload de arquivo `.vtt` na aba de vídeo",
+    "Ao enviar, chama endpoint que lê o arquivo e usa `uploadCaption`",
+    "Exibe confirmação de sucesso/erro do upload"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/admin/videos/[videoId]/captions/route.ts` com handler `POST` (admin-only) recebendo o arquivo via FormData e chamando `uploadCaption`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar o input no editor",
+      "details": "Adicionar input de arquivo `.vtt` em `LessonEditor` e chamar o novo endpoint.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-123",
+    "TASK-32"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Arquivos .vtt são pequenos (texto puro) — não há o problema de limite de 4.5MB da Vercel que afeta o upload de vídeo (TASK-83)."
+  ]
+}

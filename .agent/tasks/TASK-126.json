@@ -1,0 +1,29 @@
+{
+  "id": "TASK-126",
+  "title": "Tabelas de Quiz",
+  "category": "data-model",
+  "description": "Modelar quiz por módulo com perguntas de múltipla escolha e tentativas dos alunos.",
+  "acceptanceCriteria": [
+    "`Quiz` (1:1 com `Module`), `QuizQuestion` (`text`, `options Json`, `correctOptionIndex Int`), `QuizAttempt` (`userId`, `quizId`, `score Float`, `passed Boolean`, `completedAt`)",
+    "Múltiplas tentativas são permitidas (sem unique constraint em QuizAttempt) — a melhor nota prevalece nas consultas de status",
+    "Migration aplicada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar os models",
+      "details": "Adicionar `Quiz`, `QuizQuestion` e `QuizAttempt` ao `prisma/schema.prisma` com as relações corretas.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_quiz_models`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "medium"
+}

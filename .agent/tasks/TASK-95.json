@@ -1,0 +1,34 @@
+{
+  "id": "TASK-95",
+  "title": "Campos de compra avulsa em Course",
+  "category": "data-model",
+  "description": "Permitir que um curso seja configurado para venda avulsa (pagamento único), independente da assinatura recorrente.",
+  "acceptanceCriteria": [
+    "`Course` ganha `allowOneTimePurchase Boolean @default(false)`, `priceOneTime Decimal?` e `stripePriceIdOneTime String?`",
+    "Migration aplicada sem alterar cursos existentes (default `false`/null)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar campos ao schema",
+      "details": "Adicionar os três campos ao model `Course` em `prisma/schema.prisma`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_course_one_time_purchase`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Expor no formulário admin",
+      "details": "Adicionar os campos correspondentes ao `CourseForm` como opcionais.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

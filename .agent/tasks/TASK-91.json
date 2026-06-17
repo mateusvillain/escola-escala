@@ -1,0 +1,28 @@
+{
+  "id": "TASK-91",
+  "title": "Documentar processo de criação de cupons",
+  "category": "documentation",
+  "description": "Documentar o passo a passo de criação de cupons de desconto no Stripe Dashboard para uso pelo time de marketing/operação, sem depender de um desenvolvedor.",
+  "acceptanceCriteria": [
+    "Documento explica como criar um Coupon + Promotion Code, definir validade, limite de usos e tipo de desconto (percentual ou valor fixo)",
+    "Documento explica onde visualizar relatórios de uso (redemptions) no Stripe Dashboard"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o documento",
+      "details": "Criar `docs/cupons-stripe.md` com o passo a passo de criação de Coupon + Promotion Code no Stripe Dashboard.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Documentar relatórios",
+      "details": "Incluir descrição de onde encontrar relatórios de redemptions no Stripe Dashboard.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-90"
+  ],
+  "estimatedComplexity": "low"
+}

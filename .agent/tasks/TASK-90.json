@@ -1,0 +1,33 @@
+{
+  "id": "TASK-90",
+  "title": "Habilitar allow_promotion_codes no Checkout",
+  "category": "integration",
+  "description": "Permitir que o aluno insira um cupom de desconto na própria tela de Checkout hospedada pelo Stripe, sem precisar de UI customizada.",
+  "acceptanceCriteria": [
+    "`POST /api/subscriptions/checkout` passa `allow_promotion_codes: true` na criação da Checkout Session",
+    "Um cupom de teste criado no Stripe Dashboard (modo teste) é aceito e aplica o desconto corretamente na tela de Checkout",
+    "`allow_promotion_codes` não é combinado com `discounts` pré-aplicados na mesma sessão (Stripe não permite os dois simultaneamente)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Habilitar o parâmetro",
+      "details": "Editar `src/app/api/subscriptions/checkout/route.ts` incluindo `allow_promotion_codes: true`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Testar com cupom de teste",
+      "details": "Criar um cupom de teste no Stripe Dashboard (modo teste) e validar o fluxo completo de checkout com o código aplicado.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-68"
+  ],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Cupons são criados e gerenciados direto no Stripe Dashboard — não há necessidade de UI admin própria nem de nova tabela no banco."
+  ]
+}

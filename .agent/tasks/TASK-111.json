@@ -1,0 +1,31 @@
+{
+  "id": "TASK-111",
+  "title": "Exibir MRR/churn/LTV no AdminDashboard",
+  "category": "ui-ux",
+  "description": "Mostrar os novos indicadores financeiros no painel administrativo, ao lado dos KPIs já existentes.",
+  "acceptanceCriteria": [
+    "`AdminDashboard` exibe 3 novos cards: \"MRR\", \"Churn mensal\" e \"LTV médio por plano\"",
+    "Valores formatados em R$ (MRR, LTV) e percentual (churn)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Consumir os novos campos",
+      "details": "Editar `src/components/admin/AdminDashboard.tsx` para consumir os novos campos de `GET /api/admin/metrics`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar os cards",
+      "details": "Adicionar os 3 novos cards reaproveitando o componente de card de métrica já existente.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-108",
+    "TASK-109",
+    "TASK-110",
+    "TASK-38"
+  ],
+  "estimatedComplexity": "low"
+}

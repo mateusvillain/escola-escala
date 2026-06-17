@@ -1,0 +1,35 @@
+{
+  "id": "TASK-92",
+  "title": "Campo attachments em Lesson",
+  "category": "data-model",
+  "description": "Adicionar suporte a anexos (slides, exercícios, código-fonte) por aula, armazenados como lista de links com rótulo.",
+  "acceptanceCriteria": [
+    "`Lesson` tem novo campo `attachments Json?` (lista de objetos `{ label: string, url: string }`)",
+    "Migration criada e aplicada sem quebrar aulas existentes (default null/vazio)",
+    "Tipo `LessonAttachment` exportado em local reaproveitável"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar campo ao schema",
+      "details": "Adicionar `attachments Json?` ao model `Lesson` em `prisma/schema.prisma`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_lesson_attachments`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Definir o tipo TypeScript",
+      "details": "Definir `LessonAttachment { label: string; url: string }` em `src/lib/utils/lessons.ts`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

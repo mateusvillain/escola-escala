@@ -1,0 +1,35 @@
+{
+  "id": "TASK-119",
+  "title": "Modal de avaliação ao concluir curso",
+  "category": "ui-ux",
+  "description": "Convidar o aluno a avaliar o curso assim que ele aparece como concluído no dashboard.",
+  "acceptanceCriteria": [
+    "Ao abrir `/dashboard` e existir um curso recém-concluído sem avaliação, exibir modal \"Como foi sua experiência?\" com estrelas (1-5) e comentário opcional",
+    "Modal não reaparece depois de enviado ou de ser dispensado pelo aluno"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o componente",
+      "details": "Criar `CourseReviewModal` em `src/components/dashboard/`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Detectar curso elegível",
+      "details": "No `DashboardContent`, detectar cursos concluídos sem `CourseReview` do usuário e abrir o modal.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Enviar a avaliação",
+      "details": "Ao enviar, chamar `POST /api/courses/[slug]/reviews` e fechar o modal.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-118",
+    "TASK-57"
+  ],
+  "estimatedComplexity": "medium"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "TASK-137",
+  "title": "Layout /instrutor com verificação de role",
+  "category": "security",
+  "description": "Criar a área restrita ao instrutor, com verificação de role no servidor, no mesmo padrão usado pelo admin.",
+  "acceptanceCriteria": [
+    "`src/app/instrutor/layout.tsx` verifica JWT e `role === 'instructor'` (ou admin) no servidor antes de renderizar qualquer página",
+    "Usuário sem role compatível é redirecionado",
+    "`/instrutor/:path*` protegido pelo proxy de autenticação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o layout",
+      "details": "Criar `src/app/instrutor/layout.tsx` seguindo o padrão de `src/app/admin/layout.tsx`, validando `role === 'instructor' || role === 'admin'`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Proteger as rotas",
+      "details": "Adicionar `/instrutor/:path*` ao matcher de `src/proxy.ts`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-7"
+  ],
+  "estimatedComplexity": "low"
+}

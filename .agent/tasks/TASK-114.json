@@ -1,0 +1,42 @@
+{
+  "id": "TASK-114",
+  "title": "Endpoint de cron para e-mails de reengajamento",
+  "category": "integration",
+  "description": "Expor um endpoint protegido que dispara os e-mails de reengajamento, chamado mensalmente pelo Vercel Cron.",
+  "acceptanceCriteria": [
+    "`GET /api/cron/re-engagement` requer header `Authorization: Bearer ${CRON_SECRET}`, retorna 401 sem o header correto",
+    "Endpoint dispara e-mail para cada aluno inativo encontrado, no máximo uma vez por mês por aluno/curso",
+    "Configuração de cron documentada em `vercel.ts` com schedule mensal"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar tabela de controle de envio",
+      "details": "Criar tabela `EmailLog` (`userId`, `courseId`, `type`, `sentAt`) para evitar envios duplicados.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/cron/re-engagement/route.ts` validando `CRON_SECRET`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Evitar duplicidade",
+      "details": "Para cada aluno inativo de `getInactiveStudentsWithIncompleteCourses(7)`, checar `EmailLog` do tipo `resume_course` nos últimos 30 dias antes de enviar.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Configurar o cron",
+      "details": "Adicionar entrada em `vercel.ts` apontando para o endpoint, schedule `0 9 1 * *` (todo dia 1 do mês, 9h).",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-113",
+    "TASK-84"
+  ],
+  "estimatedComplexity": "medium"
+}

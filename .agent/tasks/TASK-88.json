@@ -1,0 +1,43 @@
+{
+  "id": "TASK-88",
+  "title": "Rota pública /instrutores/[slug]",
+  "category": "functional",
+  "description": "Criar página pública com bio do instrutor, foto e lista de cursos publicados por ele, usando o slug já existente no model Instructor.",
+  "acceptanceCriteria": [
+    "`GET /instrutores/[slug]` renderiza nome, foto (`user.avatarUrl`), bio e lista de cursos com status `published` do instrutor",
+    "Slug inexistente retorna 404",
+    "Página é Server Component (SSR), sem necessidade de novo endpoint de API — busca direta via Prisma",
+    "Cada curso da lista linka para `/cursos/[slug]`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página",
+      "details": "Criar `src/app/instrutores/[slug]/page.tsx` como Server Component.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar instrutor com cursos",
+      "details": "Buscar `Instructor` por slug via Prisma incluindo `user` e `courses` filtrando `status: 'published'`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Tratar instrutor inexistente",
+      "details": "Retornar `notFound()` do Next.js quando o instrutor não existir.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Montar layout",
+      "details": "Montar foto, nome, bio e grid de cursos reaproveitando o card de curso já usado em `/cursos`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-41"
+  ],
+  "estimatedComplexity": "medium"
+}

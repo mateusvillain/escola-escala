@@ -1,0 +1,28 @@
+{
+  "id": "TASK-89",
+  "title": "Linkar instrutor nas páginas de curso",
+  "category": "ui-ux",
+  "description": "Tornar o nome do instrutor clicável nas telas onde ele aparece, levando ao novo perfil público.",
+  "acceptanceCriteria": [
+    "Nome do instrutor na página de detalhe do curso (`/cursos/[slug]`) é um link para `/instrutores/[slug]`",
+    "Nome do instrutor no `CourseSidebar` (página de aula), se exibido ali, também linka"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Linkar na página de detalhe do curso",
+      "details": "Envolver o nome do instrutor em `<Link>` para `/instrutores/[slug]`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Linkar no CourseSidebar",
+      "details": "Repetir o ajuste em `CourseSidebar` se o nome do instrutor for exibido nesse componente.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-88"
+  ],
+  "estimatedComplexity": "low"
+}

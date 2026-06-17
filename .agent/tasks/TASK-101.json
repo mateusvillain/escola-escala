@@ -1,0 +1,29 @@
+{
+  "id": "TASK-101",
+  "title": "Registrar evento ao exibir UpgradePrompt",
+  "category": "functional",
+  "description": "Disparar a gravação do evento sempre que o componente UpgradePrompt for renderizado para um aluno.",
+  "acceptanceCriteria": [
+    "Endpoint `POST /api/upgrade-prompt-events` cria um registro com `userId`, `courseId` e `lessonId` opcional",
+    "`UpgradePrompt` chama esse endpoint uma única vez por exibição (não duplica em re-renders)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/upgrade-prompt-events/route.ts` com handler `POST` autenticado.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Disparar no componente",
+      "details": "Em `src/components/course/UpgradePrompt.tsx`, disparar a chamada via `useEffect` com guarda (ex: `useRef`) para não duplicar em re-renders.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-100",
+    "TASK-48"
+  ],
+  "estimatedComplexity": "low"
+}

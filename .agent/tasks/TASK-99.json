@@ -1,0 +1,29 @@
+{
+  "id": "TASK-99",
+  "title": "Acesso reconhece compra avulsa",
+  "category": "functional",
+  "description": "Garantir que checkLessonAccess e ensureEnrollment considerem um CourseEnrollment criado por compra avulsa como acesso válido, independente de assinatura ativa.",
+  "acceptanceCriteria": [
+    "Aluno com `CourseEnrollment` no curso (criado via compra avulsa) acessa todas as aulas do curso mesmo sem assinatura ativa",
+    "Aluno sem assinatura e sem enrollment continua bloqueado normalmente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Checar enrollment direto primeiro",
+      "details": "Editar `checkLessonAccess` em `src/lib/access.ts` para checar primeiro se existe `CourseEnrollment` do usuário para o curso da aula — se existir, liberar acesso direto, sem checar plano.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Preservar enrollments de compra avulsa",
+      "details": "Confirmar que `ensureEnrollment` não sobrescreve nem remove enrollments criados por compra avulsa.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-97",
+    "TASK-43"
+  ],
+  "estimatedComplexity": "medium"
+}

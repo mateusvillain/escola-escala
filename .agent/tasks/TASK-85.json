@@ -1,0 +1,47 @@
+{
+  "id": "TASK-85",
+  "title": "Adicionar trial_period_days=7 ao Stripe Checkout",
+  "category": "integration",
+  "description": "Configurar o Checkout Session para conceder 7 dias de teste gratuito antes da primeira cobrança, usando o parâmetro nativo do Stripe Subscriptions.",
+  "acceptanceCriteria": [
+    "`POST /api/subscriptions/checkout` passa `subscription_data: { trial_period_days: 7 }` ao criar a Checkout Session",
+    "Assinatura criada no Stripe entra com status `trialing`, sem cobrança imediata no cartão",
+    "`handleCheckoutSessionCompleted` grava o status retornado pelo Stripe (`trialing` ou `active`) em vez de forçar `'active'`",
+    "Usuário com assinatura `trialing` tem acesso normal ao conteúdo do plano assinado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar trial_period_days ao Checkout Session",
+      "details": "Editar `src/app/api/subscriptions/checkout/route.ts` incluindo `subscription_data: { trial_period_days: 7 }` na chamada `stripe.checkout.sessions.create`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Usar status real da subscription no webhook",
+      "details": "Editar `handleCheckoutSessionCompleted` em `src/lib/stripe-handlers.ts` para usar `subscription.status` (pode ser `trialing`) em vez de gravar sempre `'active'`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Tratar trialing como acesso válido",
+      "details": "Editar `checkLessonAccess` em `src/lib/access.ts` para tratar `status === 'trialing'` como acesso liberado, igual a `active`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testar localmente com Stripe CLI",
+      "details": "Rodar `stripe listen --forward-to localhost:3000/api/webhooks/stripe`, completar um checkout de teste e confirmar status `trialing` salvo em `UserSubscription`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-68",
+    "TASK-71"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Hoje `handleCheckoutSessionCompleted` sempre grava `status: 'active'` — checar essa linha antes de editar."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "TASK-131",
+  "title": "GET /api/courses/[slug]/search",
+  "category": "api-endpoint",
+  "description": "Endpoint de busca textual simples sobre título, descrição e conteúdo das aulas de um curso.",
+  "acceptanceCriteria": [
+    "Endpoint aceita `?q=termo` e retorna aulas cujo título, descrição ou conteúdo contém o termo (case-insensitive)",
+    "Resultado inclui `moduleId`, `lessonId`, `title` e um snippet de até 150 caracteres ao redor da primeira ocorrência",
+    "Respeita o controle de acesso — só retorna aulas que o usuário teria permissão de acessar"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/courses/[slug]/search/route.ts` com handler `GET`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar com contains",
+      "details": "Usar `contains` (case-insensitive) do Prisma sobre os três campos das aulas do curso.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Filtrar por acesso",
+      "details": "Filtrar o resultado pela mesma regra de `checkLessonAccess`/plano do curso.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Gerar o snippet",
+      "details": "Gerar o snippet a partir da posição do termo encontrado no campo correspondente.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-43"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Busca via `contains` no Postgres via Prisma é suficiente para o volume de conteúdo da Fase 2 — full-text search só se justifica com catálogo bem maior."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-109",
+  "title": "Calcular churn mensal",
+  "category": "api-endpoint",
+  "description": "Calcular a taxa de churn do mês corrente (cancelamentos dividido por assinantes ativos no início do mês).",
+  "acceptanceCriteria": [
+    "`GET /api/admin/metrics` retorna `churnRate` (percentual) para o mês corrente",
+    "Retorna `0` quando não havia assinaturas ativas no início do mês (evita divisão por zero)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Contar cancelamentos do mês",
+      "details": "Contar `UserSubscription` com `status: 'canceled'` e `updatedAt` dentro do mês corrente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Contar base ativa no início do mês",
+      "details": "Contar assinaturas ativas no primeiro dia do mês via `createdAt <= inícioDoMes` sem cancelamento anterior.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Calcular e tratar zero",
+      "details": "Calcular `churnRate` e tratar divisão por zero, incluindo no retorno do endpoint.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-108"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Cálculo de churn histórico exato exigiria uma tabela de snapshot mensal — esta versão é uma aproximação adequada para a Fase 2; documentar a limitação no PRD."
+  ]
+}

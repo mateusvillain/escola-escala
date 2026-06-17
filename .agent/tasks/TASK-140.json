@@ -1,0 +1,36 @@
+{
+  "id": "TASK-140",
+  "title": "GET /api/admin/subscriptions/export",
+  "category": "api-endpoint",
+  "description": "Exportar a listagem de assinaturas em CSV para reconciliação financeira.",
+  "acceptanceCriteria": [
+    "Endpoint admin-only retorna CSV com e-mail do aluno, plano, ciclo, status, início e fim do período",
+    "Respeita os mesmos filtros de status aceitos por `GET /api/admin/subscriptions`",
+    "Resposta com `Content-Type: text/csv` e `Content-Disposition: attachment`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/admin/subscriptions/export/route.ts` com handler `GET` (admin-only).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Formatar como CSV",
+      "details": "Reaproveitar a query de `GET /api/admin/subscriptions`, formatando o resultado como CSV com escape correto de vírgulas/aspas.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Forçar o download",
+      "details": "Definir headers de resposta para forçar download do arquivo.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84",
+    "TASK-35"
+  ],
+  "estimatedComplexity": "low"
+}

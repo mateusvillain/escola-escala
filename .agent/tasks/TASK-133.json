@@ -1,0 +1,28 @@
+{
+  "id": "TASK-133",
+  "title": "Campo lastPositionSeconds",
+  "category": "data-model",
+  "description": "Guardar a posição exata (em segundos) onde o aluno parou de assistir, além do percentual já existente.",
+  "acceptanceCriteria": [
+    "`LessonProgress` ganha `lastPositionSeconds Int @default(0)`",
+    "Migration aplicada sem afetar registros existentes (default 0)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o campo",
+      "details": "Adicionar `lastPositionSeconds Int @default(0)` ao model `LessonProgress`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_last_position_seconds`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

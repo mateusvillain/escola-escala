@@ -1,0 +1,28 @@
+{
+  "id": "TASK-123",
+  "title": "Upload de captions via Bunny Stream API",
+  "category": "integration",
+  "description": "Adicionar função para enviar um arquivo de legenda (.vtt) para um vídeo já existente no Bunny Stream.",
+  "acceptanceCriteria": [
+    "Nova função `uploadCaption(videoGuid, language, vttContent)` em `src/lib/bunny.ts` chama o endpoint de Captions da API do Bunny Stream",
+    "Função lança erro descritivo em caso de falha, no mesmo padrão das funções existentes em `bunny.ts`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Consultar a API de Captions",
+      "details": "Consultar a documentação do Bunny Stream para o endpoint `PUT /library/{id}/videos/{videoId}/captions/{srclang}`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar a função",
+      "details": "Implementar `uploadCaption` em `src/lib/bunny.ts` seguindo o padrão de erro de `createVideo`/`getVideoInfo`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "medium"
+}

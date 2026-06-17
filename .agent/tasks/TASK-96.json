@@ -1,0 +1,42 @@
+{
+  "id": "TASK-96",
+  "title": "POST /api/courses/[slug]/purchase",
+  "category": "api-endpoint",
+  "description": "Criar endpoint que gera uma Stripe Checkout Session em modo pagamento único para um curso configurado com allowOneTimePurchase.",
+  "acceptanceCriteria": [
+    "Endpoint requer autenticação; rejeita com 403 se `allowOneTimePurchase` for `false` ou `stripePriceIdOneTime` ausente",
+    "Cria Checkout Session com `mode: 'payment'`, `line_items` usando `stripePriceIdOneTime`, e `metadata: { userId, courseId }`",
+    "Retorna `{ url }` da sessão para redirect no cliente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criar `src/app/api/courses/[slug]/purchase/route.ts` com handler `POST`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar e buscar o curso",
+      "details": "Validar autenticação via `getAuthUser`; buscar curso por slug e validar `allowOneTimePurchase`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar a Checkout Session",
+      "details": "Criar a sessão com `mode: 'payment'` e `metadata: { userId, courseId }`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Retornar a URL",
+      "details": "Retornar `NextResponse.json({ url: session.url })`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-95",
+    "TASK-68"
+  ],
+  "estimatedComplexity": "medium"
+}

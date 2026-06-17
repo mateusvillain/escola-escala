@@ -1,0 +1,28 @@
+{
+  "id": "TASK-143",
+  "title": "Tabela AdminAuditLog",
+  "category": "data-model",
+  "description": "Modelar o registro de ações administrativas sensíveis para permitir investigação de incidentes.",
+  "acceptanceCriteria": [
+    "Nova tabela `AdminAuditLog` com `id`, `actorId`, `action`, `entityType`, `entityId`, `metadata Json?`, `createdAt`",
+    "Migration aplicada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model",
+      "details": "Adicionar model `AdminAuditLog` ao `prisma/schema.prisma`, com relação a `User` via `actorId`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_admin_audit_log`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

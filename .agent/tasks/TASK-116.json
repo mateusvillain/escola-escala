@@ -1,0 +1,28 @@
+{
+  "id": "TASK-116",
+  "title": "Template de e-mail de cobrança falhada",
+  "category": "functional",
+  "description": "Criar o template HTML do e-mail de cobrança falhada.",
+  "acceptanceCriteria": [
+    "`paymentFailedEmailHtml(name, portalUrl)` segue o padrão visual dos demais templates",
+    "Texto deixa claro que o acesso pode ser suspenso e como resolver"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o template",
+      "details": "Adicionar `paymentFailedEmailHtml` em `src/lib/email-templates.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a função de envio",
+      "details": "Adicionar `sendPaymentFailedEmail` em `src/lib/email.ts`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-115"
+  ],
+  "estimatedComplexity": "low"
+}

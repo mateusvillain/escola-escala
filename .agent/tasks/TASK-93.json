@@ -1,0 +1,36 @@
+{
+  "id": "TASK-93",
+  "title": "Editor de anexos no LessonEditor",
+  "category": "ui-ux",
+  "description": "Permitir que o admin adicione, edite e remova anexos (label + URL) de uma aula pelo painel administrativo.",
+  "acceptanceCriteria": [
+    "`LessonEditor` tem seção \"Materiais complementares\" com lista editável de `{ label, url }`",
+    "Admin pode adicionar, editar e remover itens antes de salvar",
+    "`PATCH /api/admin/lessons/[id]` aceita e persiste o campo `attachments`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a seção de anexos",
+      "details": "Adicionar seção em `src/components/admin/LessonEditor.tsx` com inputs nativos (label + URL) e botões de adicionar/remover linha.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Incluir no payload de salvamento",
+      "details": "Incluir `attachments` no payload enviado ao salvar a aula.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Validar no endpoint",
+      "details": "Confirmar que o schema Zod do `PATCH /api/admin/lessons/[id]` aceita o novo campo (array de objetos com `label` e `url` válidos).",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-92",
+    "TASK-31"
+  ],
+  "estimatedComplexity": "medium"
+}

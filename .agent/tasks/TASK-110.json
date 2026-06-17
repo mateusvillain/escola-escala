@@ -1,0 +1,35 @@
+{
+  "id": "TASK-110",
+  "title": "Calcular LTV médio por plano",
+  "category": "api-endpoint",
+  "description": "Calcular o Lifetime Value médio dos assinantes de cada plano com base no tempo médio de permanência e no ticket mensal.",
+  "acceptanceCriteria": [
+    "`GET /api/admin/metrics` retorna `ltvByPlan: { basic: number, premium: number }`",
+    "LTV calculado como ticket mensal médio × duração média em meses das assinaturas já canceladas de cada plano",
+    "Planos sem nenhuma assinatura cancelada retornam `0` em vez de erro"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Agrupar canceladas por plano",
+      "details": "Buscar assinaturas com `status: 'canceled'` agrupadas por `plan.type`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Calcular duração média",
+      "details": "Calcular duração média em meses (`updatedAt - createdAt`) por grupo.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Calcular e incluir o LTV",
+      "details": "Multiplicar pela mensalidade média do grupo e incluir `ltvByPlan` na resposta.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-108"
+  ],
+  "estimatedComplexity": "medium"
+}

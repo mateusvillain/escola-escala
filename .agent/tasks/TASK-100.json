@@ -1,0 +1,28 @@
+{
+  "id": "TASK-100",
+  "title": "Tabela UpgradePromptEvent",
+  "category": "data-model",
+  "description": "Registrar quando um aluno visualiza o prompt de upgrade, para permitir campanhas de e-mail direcionadas depois.",
+  "acceptanceCriteria": [
+    "Nova tabela `UpgradePromptEvent` com `id`, `userId`, `courseId`, `lessonId?`, `seenAt`, `emailSentAt?`",
+    "Migration aplicada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model",
+      "details": "Adicionar model `UpgradePromptEvent` ao `prisma/schema.prisma` com relação a `User` e `Course`, e campo `lessonId` opcional.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_upgrade_prompt_event`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "low"
+}

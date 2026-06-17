@@ -1,0 +1,29 @@
+{
+  "id": "TASK-113",
+  "title": "Template de e-mail \"continue de onde parou\"",
+  "category": "functional",
+  "description": "Criar o template de e-mail transacional convidando o aluno a retomar o curso, com nome do curso e link direto para a última aula assistida.",
+  "acceptanceCriteria": [
+    "Função `resumeCourseEmailHtml(name, courseTitle, resumeUrl)` segue o mesmo padrão visual dos templates existentes",
+    "E-mail inclui CTA único e claro \"Continuar curso\""
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o template",
+      "details": "Adicionar `resumeCourseEmailHtml` em `src/lib/email-templates.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a função de envio",
+      "details": "Adicionar `sendResumeCourseEmail` em `src/lib/email.ts` usando o template.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-112",
+    "TASK-64"
+  ],
+  "estimatedComplexity": "low"
+}

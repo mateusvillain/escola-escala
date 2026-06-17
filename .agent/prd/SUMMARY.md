@@ -1,4 +1,4 @@
-# Resumo do Projeto — Plataforma de Cursos Online por Assinatura (Fase 1)
+# Resumo do Projeto — Plataforma de Cursos Online por Assinatura
 
 ## Visão Geral
 
@@ -31,3 +31,7 @@ Plataforma web responsiva de cursos online por assinatura recorrente, focada no 
 - Design: Design system existente do cliente (Figma/Storybook)
 - Idioma: PT-BR only
 - Fora do escopo Fase 1: app mobile nativo, gamificação, fórum, gestão B2B
+
+## Fase 2 — Crescimento e Engajamento (planejada, TASK-84 a TASK-145)
+
+Com a Fase 1 completa, a Fase 2 soma 62 novas tasks em 4 frentes: monetização (trial gratuito, cupons, compra avulsa de curso, indicação, MRR/churn/LTV), retenção (e-mail de retomada, aviso de cobrança falhada, avaliação de curso, streak), conteúdo (legendas, quiz por módulo, busca, retomar do ponto exato) e operação (perfil público de instrutor, painel do instrutor somente leitura, materiais por aula, exportação CSV, auditoria admin). Detalhes em `.agent/prd/PRD.md` seção 13 e na origem em `docs/oportunidades-plataforma.md`. B2B, fórum, app mobile e gamificação competitiva permanecem fora de escopo.

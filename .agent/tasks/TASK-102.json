@@ -1,0 +1,42 @@
+{
+  "id": "TASK-102",
+  "title": "E-mail automático de upsell",
+  "category": "integration",
+  "description": "Enviar e-mail de upgrade para alunos que viram o prompt há mais de 3 dias e ainda não fizeram upgrade.",
+  "acceptanceCriteria": [
+    "Endpoint `GET /api/cron/upsell-emails` (protegido por `CRON_SECRET`) identifica UpgradePromptEvents com mais de 3 dias cujo autor ainda não tem assinatura premium",
+    "Dispara e-mail de upsell uma única vez por evento (usa `emailSentAt` para não duplicar)",
+    "Vercel Cron configurado para chamar o endpoint mensalmente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Validar o CRON_SECRET",
+      "details": "Criar `src/app/api/cron/upsell-emails/route.ts` validando o header `Authorization: Bearer ${CRON_SECRET}`, retornando 401 sem ele.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar eventos elegíveis",
+      "details": "Buscar `UpgradePromptEvent`s com mais de 3 dias, sem `emailSentAt`, cujo usuário não tem assinatura `premium` ativa.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Disparar e-mail e marcar enviado",
+      "details": "Disparar e-mail via novo template em `email-templates.ts` e marcar `emailSentAt` no evento.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Configurar o cron",
+      "details": "Adicionar entrada de cron mensal em `vercel.ts` apontando para o endpoint, schedule `0 9 1 * *` (todo dia 1 do mês, 9h).",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-101",
+    "TASK-64"
+  ],
+  "estimatedComplexity": "medium"
+}

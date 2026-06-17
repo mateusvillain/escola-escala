@@ -1,0 +1,42 @@
+{
+  "id": "TASK-107",
+  "title": "Crédito ao indicador",
+  "category": "integration",
+  "description": "Conceder um crédito (ex: um ciclo de cobrança) ao indicador quando o indicado completa a primeira assinatura.",
+  "acceptanceCriteria": [
+    "`handleCheckoutSessionCompleted` identifica o `ownerUserId` do `ReferralCode` quando `referredByCode` está presente no metadata",
+    "Cria uma balance transaction negativa (crédito) no Stripe Customer do indicador, equivalente a um ciclo de cobrança do plano dele",
+    "Não concede crédito em renovações, apenas na primeira assinatura do indicado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Identificar o indicador",
+      "details": "Em `handleCheckoutSessionCompleted`, após ativar a assinatura do indicado, buscar `ReferralCode` pelo `referralCode` do metadata.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Calcular o valor do crédito",
+      "details": "Buscar a assinatura ativa do indicador (`ownerUserId`) para saber o valor mensal do crédito.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Conceder o crédito",
+      "details": "Chamar `stripe.customers.createBalanceTransaction` no `stripeCustomerId` do indicador com valor negativo equivalente.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Registrar para auditoria",
+      "details": "Logar a operação (console) para auditoria manual inicial, sem tabela própria nesta task.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-106",
+    "TASK-71"
+  ],
+  "estimatedComplexity": "high"
+}

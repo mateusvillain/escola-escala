@@ -579,5 +579,439 @@
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-83.json",
     "passes": false
+  },
+  {
+    "id": "TASK-84",
+    "title": "Verificar pré-requisitos da Fase 2",
+    "category": "setup",
+    "specFilePath": ".agent/tasks/TASK-84.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-85",
+    "title": "Adicionar trial_period_days=7 ao Stripe Checkout",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-85.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-86",
+    "title": "E-mail de aviso antes do fim do trial",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-86.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-87",
+    "title": "Exibir aviso de trial ativo",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-87.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-88",
+    "title": "Rota pública /instrutores/[slug]",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-88.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-89",
+    "title": "Linkar instrutor nas páginas de curso",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-89.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-90",
+    "title": "Habilitar allow_promotion_codes no Checkout",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-90.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-91",
+    "title": "Documentar processo de criação de cupons",
+    "category": "documentation",
+    "specFilePath": ".agent/tasks/TASK-91.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-92",
+    "title": "Campo attachments em Lesson",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-92.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-93",
+    "title": "Editor de anexos no LessonEditor",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-93.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-94",
+    "title": "Exibir anexos na página da aula",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-94.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-95",
+    "title": "Campos de compra avulsa em Course",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-95.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-96",
+    "title": "POST /api/courses/[slug]/purchase",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-96.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-97",
+    "title": "Webhook de compra avulsa cria enrollment direto",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-97.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-98",
+    "title": "CTA \"Comprar este curso\"",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-98.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-99",
+    "title": "Acesso reconhece compra avulsa",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-99.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-100",
+    "title": "Tabela UpgradePromptEvent",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-100.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-101",
+    "title": "Registrar evento ao exibir UpgradePrompt",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-101.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-102",
+    "title": "E-mail automático de upsell",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-102.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-103",
+    "title": "Tabela ReferralCode",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-103.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-104",
+    "title": "Gerar código de indicação único por aluno",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-104.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-105",
+    "title": "Exibir código de indicação no perfil",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-105.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-106",
+    "title": "Aplicar cupom ao indicado via ?ref=",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-106.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-107",
+    "title": "Crédito ao indicador",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-107.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-108",
+    "title": "Calcular MRR em /api/admin/metrics",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-108.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-109",
+    "title": "Calcular churn mensal",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-109.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-110",
+    "title": "Calcular LTV médio por plano",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-110.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-111",
+    "title": "Exibir MRR/churn/LTV no AdminDashboard",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-111.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-112",
+    "title": "Identificar alunos inativos com curso incompleto",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-112.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-113",
+    "title": "Template de e-mail \"continue de onde parou\"",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-113.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-114",
+    "title": "Endpoint de cron para e-mails de reengajamento",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-114.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-115",
+    "title": "E-mail de cobrança falhada",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-115.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-116",
+    "title": "Template de e-mail de cobrança falhada",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-116.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-117",
+    "title": "Tabela CourseReview",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-117.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-118",
+    "title": "POST /api/courses/[slug]/reviews",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-118.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-119",
+    "title": "Modal de avaliação ao concluir curso",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-119.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-120",
+    "title": "Exibir nota média e reviews no curso",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-120.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-121",
+    "title": "Calcular streak de dias consecutivos",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-121.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-122",
+    "title": "Indicador de streak no dashboard",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-122.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-123",
+    "title": "Upload de captions via Bunny Stream API",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-123.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-124",
+    "title": "Upload de legenda no LessonEditor",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-124.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-125",
+    "title": "Seletor de legendas no player",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-125.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-126",
+    "title": "Tabelas de Quiz",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-126.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-127",
+    "title": "Editor admin de quiz por módulo",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-127.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-128",
+    "title": "POST /api/modules/[id]/quiz/attempt",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-128.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-129",
+    "title": "Tela de quiz para o aluno",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-129.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-130",
+    "title": "Certificado exige quiz aprovado",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-130.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-131",
+    "title": "GET /api/courses/[slug]/search",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-131.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-132",
+    "title": "Campo de busca na CourseSidebar",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-132.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-133",
+    "title": "Campo lastPositionSeconds",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-133.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-134",
+    "title": "PATCH /api/progress/[lessonId] salva posição exata",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-134.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-135",
+    "title": "Player retoma do ponto salvo",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-135.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-136",
+    "title": "Controle de velocidade de reprodução",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-136.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-137",
+    "title": "Layout /instrutor com verificação de role",
+    "category": "security",
+    "specFilePath": ".agent/tasks/TASK-137.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-138",
+    "title": "GET /api/instructor/courses e métricas",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-138.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-139",
+    "title": "Dashboard do instrutor",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-139.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-140",
+    "title": "GET /api/admin/subscriptions/export",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-140.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-141",
+    "title": "GET /api/admin/users/export",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-141.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-142",
+    "title": "Botão \"Exportar CSV\" nas tabelas admin",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-142.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-143",
+    "title": "Tabela AdminAuditLog",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-143.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-144",
+    "title": "Helper logAdminAction integrado às mutações sensíveis",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-144.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-145",
+    "title": "Tela /admin/auditoria",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-145.json",
+    "passes": false
   }
 ]

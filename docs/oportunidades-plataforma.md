@@ -6,7 +6,6 @@ A Fase 1 (B2C, assinatura recorrente) está praticamente completa: auth, catálo
 
 ## 1. Quick wins (infraestrutura já existe, falta ligar)
 
-- **Trial gratuito.** O enum `SubscriptionStatus` já tem `trialing` e a UI (admin, dashboard de assinatura) já sabe exibi-lo — mas o checkout (`src/app/api/subscriptions/checkout/route.ts`) nunca passa `trial_period_days` para o Stripe. Adicionar um trial de 7 dias é uma linha de configuração no Checkout Session e pode ter impacto direto em conversão.
 - **Página pública de instrutor.** `Instructor` já tem `slug` único no schema, mas não existe nenhuma rota `/instrutores/[slug]`. Uma página simples com bio, foto e lista de cursos do instrutor aumenta SEO e dá mais contexto de autoridade ao aluno antes de assinar.
 - **Cupons de desconto.** Stripe Checkout suporta `discounts`/`allow_promotion_codes` nativamente. Hoje não há nenhum cupom configurado — é a forma mais rápida de viabilizar campanhas de aquisição (Black Friday, parcerias, lançamento de curso) sem tocar no banco.
 - **Materiais complementares por aula.** `Lesson.content` já existe como campo de texto livre (markdown, via `react-markdown`). Vale documentar/expandir esse campo para incluir links de download (slides, exercícios, código-fonte) — zero mudança de schema.
@@ -15,7 +14,6 @@ A Fase 1 (B2C, assinatura recorrente) está praticamente completa: auth, catálo
 
 ## 2. Monetização e growth
 
-- **Compra avulsa de curso (sem assinatura).** Hoje o único caminho de acesso é assinatura recorrente. Um modelo de "comprar este curso" via Stripe Checkout em `mode: payment` atende quem não quer compromisso mensal e amplia o público — especialmente para cursos de nicho fora do catálogo "always-on".
 - **Upsell contextual basic → premium.** `UpgradePrompt` já existe e é acionado quando o aluno tenta acessar um curso fora do plano. Vale instrumentar esse evento (qual curso, em que ponto da jornada) para campanhas de e-mail direcionadas — "você tentou acessar X, faça upgrade".
 - **Programa de indicação.** Sem fórum/gamificação (fora do escopo da Fase 1), um programa de referral simples — gerar cupom único por aluno, crédito na próxima fatura via Stripe — é um motor de aquisição de baixo custo que não exige as features descartadas no PRD original.
 - **Relatórios financeiros (MRR, churn, LTV).** `GET /api/admin/metrics` hoje é básico. Com `UserSubscription` já guardando histórico de status e ciclo, dá para calcular MRR, churn mensal e LTV médio por plano sem novas tabelas — só novas queries agregadas.

@@ -1,0 +1,29 @@
+{
+  "id": "TASK-112",
+  "title": "Identificar alunos inativos com curso incompleto",
+  "category": "functional",
+  "description": "Criar a função que identifica alunos com curso incompleto e sem atividade recente, base para o e-mail de reengajamento.",
+  "acceptanceCriteria": [
+    "Função `getInactiveStudentsWithIncompleteCourses(daysSinceLastWatch)` retorna lista de `{ userId, courseId, lastWatchedAt }`",
+    "Função considera apenas cursos cujo `CourseEnrollment.completedAt` não está preenchido",
+    "Função filtra por `MAX(lastWatchedAt)` mais antigo que N dias"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a função",
+      "details": "Criar a função em `src/lib/progress.ts` (ou novo módulo) usando agregação por `userId`+`courseId` sobre `LessonProgress`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar os filtros",
+      "details": "Filtrar por `MAX(lastWatchedAt) < now - N dias` e ausência de `completedAt` no enrollment correspondente.",
+      "pass": false
+    }
+  ],
+  "dependencies": [
+    "TASK-84"
+  ],
+  "estimatedComplexity": "medium"
+}
