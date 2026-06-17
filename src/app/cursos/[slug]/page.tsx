@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
+import { StarRating } from '@/components/cursos/StarRating'
+import { ReviewReminderBanner } from '@/components/cursos/ReviewReminderBanner'
 
 const PLAN_LABELS = { basic: 'Básico', premium: 'Premium' } as const
 const PLAN_STYLES = {
@@ -66,6 +68,14 @@ export default async function CursoDetalhe({
 
   if (!course) notFound()
 
+  const reviewAggregate = await prisma.courseReview.aggregate({
+    where: { courseId: course.id },
+    _avg: { rating: true },
+    _count: { rating: true },
+  })
+  const averageRating = reviewAggregate._avg.rating ?? 0
+  const reviewCount = reviewAggregate._count.rating
+
   const allLessons = course.modules.flatMap(m => m.lessons)
   const totalSeconds = allLessons.reduce((s, l) => s + (l.videoDuration ?? 0), 0)
   const totalDuration = formatTotalDuration(totalSeconds)
@@ -80,17 +90,19 @@ export default async function CursoDetalhe({
 
   let hasAccess = false
   let hasEnrollment = false
+  let isCompleted = false
+  let myReview: { rating: number; comment: string | null; createdAt: Date } | null = null
   let lastWatchedLessonTitle: string | null = null
 
   if (user) {
-    const [subscription, enrollment, lastProgress] = await Promise.all([
+    const [subscription, enrollment, lastProgress, review] = await Promise.all([
       prisma.userSubscription.findFirst({
         where: { userId: user.userId, status: 'active' },
         include: { plan: true },
       }),
       prisma.courseEnrollment.findFirst({
         where: { userId: user.userId, courseId: course.id },
-        select: { id: true },
+        select: { id: true, completedAt: true },
       }),
       prisma.lessonProgress.findFirst({
         where: {
@@ -100,6 +112,10 @@ export default async function CursoDetalhe({
         orderBy: { lastWatchedAt: 'desc' },
         select: { lesson: { select: { title: true } } },
       }),
+      prisma.courseReview.findUnique({
+        where: { userId_courseId: { userId: user.userId, courseId: course.id } },
+        select: { rating: true, comment: true, createdAt: true },
+      }),
     ])
 
     const planType = subscription?.plan.type ?? null
@@ -108,6 +124,8 @@ export default async function CursoDetalhe({
       planType === 'premium' ||
       (planType === 'basic' && course.planAccess === 'basic')
     hasEnrollment = enrollment !== null
+    isCompleted = enrollment?.completedAt != null
+    myReview = review
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null
   }
 
@@ -199,6 +217,12 @@ export default async function CursoDetalhe({
                 {totalDuration}
               </span>
             )}
+            {reviewCount > 0 && (
+              <span className="flex items-center gap-1.5">
+                <StarRating rating={averageRating} size="sm" />
+                {averageRating.toFixed(1)} ({reviewCount} avaliaç{reviewCount !== 1 ? 'ões' : 'ão'})
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -231,6 +255,8 @@ export default async function CursoDetalhe({
             Começar curso
           </Link>
         </div>
+      ) : isCompleted && !myReview ? (
+        <ReviewReminderBanner courseSlug={course.slug} courseTitle={course.title} />
       ) : (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
@@ -257,6 +283,22 @@ export default async function CursoDetalhe({
           hasAccess={hasAccess}
         />
       </div>
+
+      {/* My review */}
+      {myReview && (
+        <div className="mt-10">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Minha avaliação</h2>
+          <div className="border border-gray-200 rounded-xl p-4 max-w-md">
+            <div className="flex items-center justify-between mb-1.5">
+              <StarRating rating={myReview.rating} size="sm" />
+              <p className="text-xs text-gray-400">
+                {myReview.createdAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            {myReview.comment && <p className="text-sm text-gray-600 mt-2">{myReview.comment}</p>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

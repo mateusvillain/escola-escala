@@ -1,0 +1,30 @@
+{
+  "id": "TASK-120",
+  "title": "Exibir nota média e reviews no curso",
+  "category": "ui-ux",
+  "description": "Mostrar prova social agregada (nota média) na página de detalhe do curso, sem expor avaliações individuais de outros alunos — decisão de produto posterior: avaliações são privadas, cada aluno só vê a própria (seção 'Minha avaliação').",
+  "acceptanceCriteria": [
+    "Página `/cursos/[slug]` exibe nota média (estrelas) e contagem total de avaliações, se houver pelo menos uma — agregado, sem identificar autores",
+    "Exibe 'Minha avaliação' (nota + comentário) apenas para o autor logado, nunca a de outros alunos",
+    "Curso sem avaliações não exibe a nota média; usuário sem avaliação própria não vê a seção 'Minha avaliação'"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar a nota média e a avaliação do próprio usuário",
+      "details": "`/cursos/[slug]/page.tsx` é Server Component e já busca o curso direto via Prisma (sem chamar sua própria API) — por consistência, a agregação de nota média (`courseReview.aggregate`) e a avaliação do usuário logado (`courseReview.findUnique` por `userId_courseId`) também são buscadas direto via Prisma. O endpoint `POST /api/courses/[slug]/reviews` da TASK-118 continua existindo para envio; o `GET` de listagem pública foi removido por violar a privacidade (ver TASK-118).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Renderizar nota média e 'Minha avaliação'",
+      "details": "Nota média + contagem exibidas na linha de stats do hero (componente `StarRating` reaproveitado, sem nomes). Seção 'Minha avaliação' (estrelas + comentário) exibida apenas quando o usuário logado tem uma avaliação própria para o curso — nunca a de outros alunos. Testado manualmente com duas contas de aluno diferentes avaliando o mesmo curso: cada uma via somente a própria avaliação; conta sem avaliação e visitante anônimo não veem nenhum conteúdo individual.",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-118",
+    "TASK-42"
+  ],
+  "estimatedComplexity": "low"
+}

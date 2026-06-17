@@ -11,20 +11,20 @@
     {
       "step": 1,
       "description": "Criar o componente",
-      "details": "Criar `CourseReviewModal` em `src/components/dashboard/`.",
-      "pass": false
+      "details": "Criar `CourseReviewModal` em `src/components/dashboard/` (estrelas 1-5 + comentário opcional).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Detectar curso elegível",
-      "details": "No `DashboardContent`, detectar cursos concluídos sem `CourseReview` do usuário e abrir o modal.",
-      "pass": false
+      "details": "`GET /api/dashboard` passou a incluir `hasReview` por curso concluído e ordenar `completed` por `completedAt` desc; `DashboardContent` abre o modal para o primeiro curso concluído sem review e sem flag de dispensa em `localStorage`. Testado via Playwright: modal aparece corretamente, não reaparece após dispensado (persistido em localStorage) nem após enviado.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Enviar a avaliação",
-      "details": "Ao enviar, chamar `POST /api/courses/[slug]/reviews` e fechar o modal.",
-      "pass": false
+      "details": "Ao enviar, chama `POST /api/courses/[slug]/reviews` e fecha o modal. Testado via Playwright: review enviada via UI apareceu corretamente no banco e no endpoint público.",
+      "pass": true
     }
   ],
   "dependencies": [

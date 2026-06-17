@@ -6,6 +6,11 @@ import { CourseProgressCard } from './CourseProgressCard'
 import { ContinueWatchingCard } from './ContinueWatchingCard'
 import { CompletedCourseCard } from './CompletedCourseCard'
 import { DashboardSkeleton } from './DashboardSkeleton'
+import { CourseReviewModal } from './CourseReviewModal'
+
+function dismissedReviewKey(courseId: string) {
+  return `review-dismissed-${courseId}`
+}
 
 interface DashboardLesson {
   id: string
@@ -29,6 +34,7 @@ interface CompletedCourse {
   progress: number
   completedAt: string
   certificateUrl: string | null
+  hasReview: boolean
 }
 
 interface AvailableCourse {
@@ -95,6 +101,7 @@ function ErrorState({ message }: { message: string }) {
 export function DashboardContent() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [reviewModalCourse, setReviewModalCourse] = useState<CompletedCourse | null>(null)
 
   useEffect(() => {
     let active = true
@@ -116,6 +123,14 @@ export function DashboardContent() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!data) return
+    const eligible = data.completed.find(
+      course => !course.hasReview && !localStorage.getItem(dismissedReviewKey(course.id))
+    )
+    setReviewModalCourse(eligible ?? null)
+  }, [data])
+
   if (error) return <ErrorState message={error} />
   if (!data) return <DashboardSkeleton />
 
@@ -124,6 +139,15 @@ export function DashboardContent() {
   const isEmpty = inProgress.length === 0 && completed.length === 0 && available.length === 0
 
   if (isEmpty) return <EmptyState />
+
+  function handleDismissReview() {
+    if (reviewModalCourse) localStorage.setItem(dismissedReviewKey(reviewModalCourse.id), '1')
+    setReviewModalCourse(null)
+  }
+
+  function handleReviewSubmitted() {
+    setReviewModalCourse(null)
+  }
 
   return (
     <div className="space-y-10">
@@ -186,6 +210,15 @@ export function DashboardContent() {
             />
           ))}
         </Section>
+      )}
+
+      {reviewModalCourse && (
+        <CourseReviewModal
+          courseTitle={reviewModalCourse.title}
+          courseSlug={reviewModalCourse.slug}
+          onClose={handleDismissReview}
+          onSubmitted={handleReviewSubmitted}
+        />
       )}
     </div>
   )
