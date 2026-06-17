@@ -12,17 +12,51 @@ interface Lesson {
   videoId: string | null
 }
 
+interface Quiz {
+  id: string
+  questionCount: number
+}
+
 interface Module {
   id: string
   title: string
   order: number
   lessons: Lesson[]
+  quiz: Quiz | null
 }
 
 interface CourseAccordionProps {
   modules: Module[]
   courseSlug: string
   hasAccess: boolean
+}
+
+function QuizRow({ questionCount, accessible }: { questionCount: number; accessible: boolean }) {
+  return (
+    <div className="flex items-center gap-3 px-5 py-3">
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${accessible ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400'}`}>
+        {accessible ? (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        ) : (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        )}
+      </div>
+
+      <span className={`flex-1 text-sm font-medium ${accessible ? 'text-gray-800' : 'text-gray-400'}`}>
+        Quiz do módulo
+      </span>
+
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className="text-xs text-gray-400">
+          {questionCount} pergunta{questionCount !== 1 ? 's' : ''}
+        </span>
+      </div>
+    </div>
+  )
 }
 
 function formatDuration(seconds: number | null): string {
@@ -129,6 +163,23 @@ export function CourseAccordion({ modules, courseSlug, hasAccess }: CourseAccord
                     </li>
                   )
                 })}
+
+                {module.quiz && (
+                  <li>
+                    {hasAccess ? (
+                      <Link
+                        href={`/cursos/${courseSlug}/modulos/${module.id}/quiz`}
+                        className="block hover:bg-gray-100 transition-colors"
+                      >
+                        <QuizRow questionCount={module.quiz.questionCount} accessible />
+                      </Link>
+                    ) : (
+                      <div className="cursor-default">
+                        <QuizRow questionCount={module.quiz.questionCount} accessible={false} />
+                      </div>
+                    )}
+                  </li>
+                )}
               </ul>
             )}
           </div>

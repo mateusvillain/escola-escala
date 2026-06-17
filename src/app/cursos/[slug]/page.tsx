@@ -61,6 +61,7 @@ export default async function CursoDetalhe({
               videoId: true,
             },
           },
+          quiz: { select: { id: true, _count: { select: { questions: true } } } },
         },
       },
     },
@@ -136,6 +137,7 @@ export default async function CursoDetalhe({
       ...l,
       videoId: hasAccess ? l.videoId : null,
     })),
+    quiz: m.quiz ? { id: m.quiz.id, questionCount: m.quiz._count.questions } : null,
   }))
 
   return (
