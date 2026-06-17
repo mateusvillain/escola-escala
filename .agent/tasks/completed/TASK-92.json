@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Adicionar campo ao schema",
       "details": "Adicionar `attachments Json?` ao model `Lesson` em `prisma/schema.prisma`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_lesson_attachments`.",
-      "pass": false
+      "details": "Rodar `npx prisma migrate dev --name add_lesson_attachments`. Migration `20260617212731_add_lesson_attachments` aplicada com sucesso, sem quebrar aulas existentes (default null).",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Definir o tipo TypeScript",
-      "details": "Definir `LessonAttachment { label: string; url: string }` em `src/lib/utils/lessons.ts`.",
-      "pass": false
+      "details": "Definido `LessonAttachment { label: string; url: string }` em `src/lib/utils/lessons.ts`, exportado e reaproveitado em `LessonEditor`, `admin/aulas/[id]/page.tsx` e na página de consumo da aula.",
+      "pass": true
     }
   ],
   "dependencies": [

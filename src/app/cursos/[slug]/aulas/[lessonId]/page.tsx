@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { checkLessonAccess } from '@/lib/access'
-import { getAdjacentLessons } from '@/lib/utils/lessons'
+import { getAdjacentLessons, type LessonAttachment } from '@/lib/utils/lessons'
 import { getCourseProgress } from '@/lib/progress'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
@@ -33,7 +33,7 @@ export default async function AulaPage({
           title: true,
           lessons: {
             orderBy: { order: 'asc' },
-            select: { id: true, title: true, content: true, videoId: true, isPreview: true },
+            select: { id: true, title: true, content: true, videoId: true, isPreview: true, attachments: true },
           },
         },
       },
@@ -44,6 +44,8 @@ export default async function AulaPage({
 
   const lesson = course.modules.flatMap(m => m.lessons).find(l => l.id === lessonId)
   if (!lesson) notFound()
+
+  const attachments = (lesson.attachments as LessonAttachment[] | null) ?? []
 
   const { prev, next } = getAdjacentLessons(course.modules, lessonId)
   const totalLessons = course.modules.flatMap(m => m.lessons).length
@@ -139,6 +141,28 @@ export default async function AulaPage({
         {lesson.content && (
           <div className="prose prose-sm sm:prose-base mt-8 max-w-none">
             <ReactMarkdown>{lesson.content}</ReactMarkdown>
+          </div>
+        )}
+
+        {access.allowed && attachments.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Materiais</h2>
+            <div className="space-y-2">
+              {attachments.map((attachment, index) => (
+                <a
+                  key={index}
+                  href={attachment.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                  {attachment.label}
+                </a>
+              ))}
+            </div>
           </div>
         )}
 

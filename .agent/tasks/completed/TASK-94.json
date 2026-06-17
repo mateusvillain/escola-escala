@@ -12,14 +12,14 @@
     {
       "step": 1,
       "description": "Renderizar a seção",
-      "details": "Editar a página da aula para renderizar a lista de `attachments` abaixo do player ou do conteúdo em markdown.",
-      "pass": false
+      "details": "Seção \"Materiais\" renderizada em `src/app/cursos/[slug]/aulas/[lessonId]/page.tsx`, abaixo do conteúdo em markdown, condicionada a `access.allowed && attachments.length > 0`. Testado manualmente: aula com 2 anexos exibe a seção com links `target=\"_blank\" rel=\"noopener noreferrer\"` corretos; aula sem anexos não exibe a seção (0 ocorrências confirmadas).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Aplicar estilo consistente",
-      "details": "Estilizar a seção com os componentes `lui-*`/Tailwind já usados na página.",
-      "pass": false
+      "details": "Estilizado com Tailwind consistente com o resto da página (cards com borda, ícone de clipe). Testado visualmente via Playwright.",
+      "pass": true
     }
   ],
   "dependencies": [

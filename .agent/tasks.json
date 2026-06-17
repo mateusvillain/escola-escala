@@ -640,22 +640,22 @@
     "id": "TASK-92",
     "title": "Campo attachments em Lesson",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-92.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-92.json",
+    "passes": true
   },
   {
     "id": "TASK-93",
     "title": "Editor de anexos no LessonEditor",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-93.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-93.json",
+    "passes": true
   },
   {
     "id": "TASK-94",
     "title": "Exibir anexos na página da aula",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-94.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-94.json",
+    "passes": true
   },
   {
     "id": "TASK-95",
