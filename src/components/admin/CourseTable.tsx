@@ -68,8 +68,21 @@ export function CourseTable() {
   const [error, setError] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState(currentSearch)
   const [confirmModal, setConfirmModal] = useState<ConfirmModal | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!openMenuId) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openMenuId])
 
   const buildUrl = useCallback(
     (overrides: Record<string, string>) => {
@@ -189,7 +202,7 @@ export function CourseTable() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-gray-400">
             <lui-body>Carregando...</lui-body>
@@ -271,13 +284,6 @@ export function CourseTable() {
                   {/* Actions */}
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/cursos/${course.id}`}
-                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        Editar
-                      </Link>
-
                       {course.status !== 'published' && (
                         <button
                           onClick={() => setConfirmModal({ courseId: course.id, courseTitle: course.title, action: 'published' })}
@@ -288,15 +294,48 @@ export function CourseTable() {
                         </button>
                       )}
 
-                      {course.status !== 'archived' && (
+                      <div className="relative" ref={openMenuId === course.id ? menuRef : null}>
                         <button
-                          onClick={() => setConfirmModal({ courseId: course.id, courseTitle: course.title, action: 'archived' })}
-                          disabled={actionLoading === course.id}
-                          className="px-3 py-1 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50"
+                          onClick={() => setOpenMenuId(prev => (prev === course.id ? null : course.id))}
+                          aria-label="Mais ações"
+                          aria-expanded={openMenuId === course.id}
+                          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 transition-colors"
                         >
-                          {actionLoading === course.id ? '...' : 'Arquivar'}
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                          </svg>
                         </button>
-                      )}
+
+                        {openMenuId === course.id && (
+                          <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 z-10 py-1">
+                            <Link
+                              href={`/admin/cursos/${course.id}`}
+                              onClick={() => setOpenMenuId(null)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Editar
+                            </Link>
+                            <Link
+                              href={`/admin/cursos/${course.id}/detalhes`}
+                              onClick={() => setOpenMenuId(null)}
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Detalhes
+                            </Link>
+                            {course.status !== 'archived' && (
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null)
+                                  setConfirmModal({ courseId: course.id, courseTitle: course.title, action: 'archived' })
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                Arquivar
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
