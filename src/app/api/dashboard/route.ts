@@ -26,8 +26,9 @@ export async function GET(request: NextRequest) {
   })
 
   const enrolledCourseIds = enrollments.map(e => e.course.id)
+  const completedCourseIds = enrollments.filter(e => e.completedAt).map(e => e.course.id)
 
-  const [inProgressItems, completedItems] = await Promise.all([
+  const [inProgressItems, completedItems, userReviews] = await Promise.all([
     Promise.all(
       enrollments
         .filter(e => !e.completedAt)
@@ -73,7 +74,15 @@ export async function GET(request: NextRequest) {
           }
         })
     ),
+    completedCourseIds.length
+      ? prisma.courseReview.findMany({
+          where: { userId: user.userId, courseId: { in: completedCourseIds } },
+          select: { courseId: true },
+        })
+      : Promise.resolve([]),
   ])
+
+  const reviewedCourseIds = new Set(userReviews.map(r => r.courseId))
 
   const inProgress = inProgressItems
     .filter(item => item.progress > 0)
@@ -107,5 +116,10 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  return NextResponse.json({ inProgress, completed: completedItems, available })
+  const completed = completedItems
+    .slice()
+    .sort((a, b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0))
+    .map(item => ({ ...item, hasReview: reviewedCourseIds.has(item.id) }))
+
+  return NextResponse.json({ inProgress, completed, available })
 }

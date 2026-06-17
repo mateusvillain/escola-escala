@@ -14,25 +14,25 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/courses/[slug]/reviews/route.ts` com handlers `GET` e `POST`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar conclusão do curso",
-      "details": "Validar `CourseEnrollment.completedAt` antes de aceitar o `POST`.",
-      "pass": false
+      "details": "Validar `CourseEnrollment.completedAt` antes de aceitar o `POST`. Testado manualmente: usuário sem `completedAt` recebe 403 'Curso ainda não foi concluído'.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Implementar upsert",
-      "details": "Implementar upsert por `userId_courseId` no `POST`.",
-      "pass": false
+      "details": "Implementar upsert por `userId_courseId` no `POST`. Testado manualmente: reenviar com nota diferente atualiza o registro existente (total continua 1, não duplica).",
+      "pass": true
     },
     {
       "step": 4,
       "description": "Implementar listagem paginada",
-      "details": "Implementar `GET` paginado retornando `rating`, `comment`, `createdAt` e nome do autor.",
-      "pass": false
+      "details": "Implementar `GET` paginado retornando `rating`, `comment`, `createdAt` e nome do autor, além de `averageRating`. Testado manualmente e validação de `rating` fora do intervalo 1-5 confirmada (400).",
+      "pass": true
     }
   ],
   "dependencies": [

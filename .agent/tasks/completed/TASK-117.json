@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Adicionar o model",
       "details": "Adicionar model `CourseReview` ao `prisma/schema.prisma` com relações a `User` e `Course`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_course_review`.",
-      "pass": false
+      "details": "Rodar `npx prisma migrate dev --name add_course_review`. Migration `20260617151728_add_course_review` aplicada com sucesso.",
+      "pass": true
     }
   ],
   "dependencies": [

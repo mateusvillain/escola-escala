@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
+import { StarRating } from '@/components/cursos/StarRating'
 
 const PLAN_LABELS = { basic: 'Básico', premium: 'Premium' } as const
 const PLAN_STYLES = {
@@ -65,6 +66,22 @@ export default async function CursoDetalhe({
   })
 
   if (!course) notFound()
+
+  const [reviews, reviewAggregate] = await Promise.all([
+    prisma.courseReview.findMany({
+      where: { courseId: course.id },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
+    }),
+    prisma.courseReview.aggregate({
+      where: { courseId: course.id },
+      _avg: { rating: true },
+      _count: { rating: true },
+    }),
+  ])
+  const averageRating = reviewAggregate._avg.rating ?? 0
+  const reviewCount = reviewAggregate._count.rating
 
   const allLessons = course.modules.flatMap(m => m.lessons)
   const totalSeconds = allLessons.reduce((s, l) => s + (l.videoDuration ?? 0), 0)
@@ -199,6 +216,12 @@ export default async function CursoDetalhe({
                 {totalDuration}
               </span>
             )}
+            {reviewCount > 0 && (
+              <span className="flex items-center gap-1.5">
+                <StarRating rating={averageRating} size="sm" />
+                {averageRating.toFixed(1)} ({reviewCount} avaliaç{reviewCount !== 1 ? 'ões' : 'ão'})
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -257,6 +280,27 @@ export default async function CursoDetalhe({
           hasAccess={hasAccess}
         />
       </div>
+
+      {/* Reviews */}
+      {reviews.length > 0 && (
+        <div className="mt-10">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Avaliações dos alunos</h2>
+          <div className="space-y-4">
+            {reviews.map((review, i) => (
+              <div key={i} className="border border-gray-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-sm font-semibold text-gray-900">{review.user.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {review.createdAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+                <StarRating rating={review.rating} size="sm" />
+                {review.comment && <p className="text-sm text-gray-600 mt-2">{review.comment}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

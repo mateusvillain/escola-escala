@@ -815,29 +815,29 @@
     "id": "TASK-117",
     "title": "Tabela CourseReview",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-117.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-117.json",
+    "passes": true
   },
   {
     "id": "TASK-118",
     "title": "POST /api/courses/[slug]/reviews",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-118.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-118.json",
+    "passes": true
   },
   {
     "id": "TASK-119",
     "title": "Modal de avaliação ao concluir curso",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-119.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-119.json",
+    "passes": true
   },
   {
     "id": "TASK-120",
     "title": "Exibir nota média e reviews no curso",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-120.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-120.json",
+    "passes": true
   },
   {
     "id": "TASK-121",
