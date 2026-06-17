@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Criar a página",
-      "details": "Criar `src/app/instrutor/page.tsx` consumindo `GET /api/instructor/courses`.",
-      "pass": false
+      "details": "Criar `src/app/instrutor/page.tsx` (wrapper fino, mesmo padrão de `admin/page.tsx`) renderizando `InstructorDashboard` (client component) que consome `GET /api/instructor/courses` via `useEffect`/`fetch`, mesmo padrão de `AdminDashboard`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Reaproveitar componentes",
-      "details": "Reaproveitar componentes de card/tabela já usados no admin para listar os cursos com as métricas.",
-      "pass": false
+      "details": "Reaproveitado o padrão visual de `CourseTable` (thumbnail+título, `lui-tag` de status, layout de tabela) em um componente novo e dedicado, sem as ações de mutação (Editar/Publicar/Arquivar) — o `CourseTable` original está acoplado a `/api/admin/courses` e a PATCHs que não se aplicam a uma tela somente leitura. Testado manualmente e via Playwright: tabela renderiza thumbnail, status, alunos matriculados e taxa de conclusão corretamente para o instrutor de teste.",
+      "pass": true
     }
   ],
   "dependencies": [

@@ -13,25 +13,25 @@
       "step": 1,
       "description": "Criar o endpoint",
       "details": "Criar `src/app/api/instructor/courses/route.ts` com handler `GET`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Resolver o instrutor",
-      "details": "Resolver o `Instructor` a partir do `userId` do JWT.",
-      "pass": false
+      "details": "Resolver o `Instructor` a partir do `userId` do JWT. Usuário sem perfil de `Instructor` (ex: admin) recebe lista vazia, não erro.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Buscar cursos com métricas",
-      "details": "Buscar cursos do instrutor com contagem de enrollments e enrollments concluídos.",
-      "pass": false
+      "details": "Buscar cursos do instrutor (`enrollments: { select: { completedAt: true } }`) e derivar `enrollmentCount`/completados em memória. Testado manualmente: instrutor de teste viu suas 12 cursos; criado um segundo instrutor temporário com curso próprio e confirmado isolamento total nos dois sentidos (depois removido).",
+      "pass": true
     },
     {
       "step": 4,
       "description": "Calcular a taxa de conclusão",
-      "details": "Calcular `completionRate` por curso e incluir na resposta.",
-      "pass": false
+      "details": "`completionRate = round(completedCount/enrollmentCount*100)`, `0` quando não há matrículas. Testado manualmente: 'Curso de Teste' com 2 matrículas (1 concluída) retornou 50%.",
+      "pass": true
     }
   ],
   "dependencies": [
