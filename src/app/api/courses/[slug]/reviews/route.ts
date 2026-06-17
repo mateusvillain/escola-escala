@@ -8,50 +8,6 @@ const postSchema = z.object({
   comment: z.string().max(1000).optional(),
 })
 
-export async function GET(request: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
-  const { slug } = await ctx.params
-
-  const course = await prisma.course.findUnique({ where: { slug }, select: { id: true } })
-  if (!course) {
-    return NextResponse.json({ error: 'Curso não encontrado' }, { status: 404 })
-  }
-
-  const { searchParams } = request.nextUrl
-  const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10))
-  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') ?? '10', 10)))
-  const skip = (page - 1) * limit
-
-  const [reviews, total, aggregate] = await Promise.all([
-    prisma.courseReview.findMany({
-      where: { courseId: course.id },
-      select: { rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit,
-    }),
-    prisma.courseReview.count({ where: { courseId: course.id } }),
-    prisma.courseReview.aggregate({ where: { courseId: course.id }, _avg: { rating: true } }),
-  ])
-
-  const data = reviews.map(review => ({
-    rating: review.rating,
-    comment: review.comment,
-    createdAt: review.createdAt,
-    authorName: review.user.name,
-  }))
-
-  return NextResponse.json({
-    data,
-    averageRating: aggregate._avg.rating ?? 0,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  })
-}
-
 export async function POST(request: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const auth = requireRole(request, ['student', 'instructor', 'admin'])
   if (auth instanceof NextResponse) return auth

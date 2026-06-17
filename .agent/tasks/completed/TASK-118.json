@@ -2,18 +2,18 @@
   "id": "TASK-118",
   "title": "POST /api/courses/[slug]/reviews",
   "category": "api-endpoint",
-  "description": "Endpoint para o aluno enviar (ou atualizar) sua avaliação de um curso que já concluiu, e para listar avaliações públicas.",
+  "description": "Endpoint para o aluno enviar (ou atualizar) sua avaliação de um curso que já concluiu. Decisão de produto posterior (ver TASK-120): avaliações são privadas — cada aluno só pode ver a própria, nunca a de outros — então o endpoint não expõe listagem pública.",
   "acceptanceCriteria": [
     "`POST` requer autenticação e `CourseEnrollment.completedAt` preenchido para o curso — sem isso retorna 403",
     "`rating` validado via Zod (inteiro 1 a 5); `comment` opcional, máx. 1000 caracteres",
     "Upsert por `userId`+`courseId` — reenviar atualiza a avaliação existente em vez de duplicar",
-    "`GET` retorna lista paginada de avaliações públicas (rating, comment, createdAt e nome do autor)"
+    "Não há `GET` público de listagem — qualquer leitura de avaliação de outro usuário violaria a privacidade exigida na TASK-120; a nota média agregada (sem identificar autores) é calculada via Prisma direto na página do curso, não por este endpoint"
   ],
   "steps": [
     {
       "step": 1,
       "description": "Criar o route handler",
-      "details": "Criar `src/app/api/courses/[slug]/reviews/route.ts` com handlers `GET` e `POST`.",
+      "details": "Criar `src/app/api/courses/[slug]/reviews/route.ts` com handler `POST`.",
       "pass": true
     },
     {
@@ -30,8 +30,8 @@
     },
     {
       "step": 4,
-      "description": "Implementar listagem paginada",
-      "details": "Implementar `GET` paginado retornando `rating`, `comment`, `createdAt` e nome do autor, além de `averageRating`. Testado manualmente e validação de `rating` fora do intervalo 1-5 confirmada (400).",
+      "description": "Validação e remoção do GET público",
+      "details": "Validação de `rating` fora do intervalo 1-5 confirmada (400) — testado manualmente. O `GET` paginado de listagem pública foi implementado inicialmente, mas removido após a TASK-120 estabelecer que avaliações são privadas: ele não era mais consumido por nenhum client (apenas `POST` é chamado pelo `CourseReviewModal`) e expunha `rating`/`comment`/nome do autor de qualquer usuário sem autenticação, contradizendo a exigência de privacidade.",
       "pass": true
     }
   ],
