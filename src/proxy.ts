@@ -23,6 +23,7 @@ export const config = {
     "/api/admin/:path*",
     "/api/instructor/:path*",
     "/api/dashboard/:path*",
+    "/api/modules/:path*",
     "/api/progress/:path*",
     "/api/enrollments/:path*",
     "/api/certificates/:path*",

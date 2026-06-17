@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { LessonList, type Lesson } from './LessonList'
+import { QuizEditor, type Quiz } from './QuizEditor'
 
 interface Module {
   id: string
@@ -10,6 +11,7 @@ interface Module {
   description: string | null
   order: number
   lessons: Lesson[]
+  quiz: Quiz | null
 }
 
 interface ModuleListProps {
@@ -329,12 +331,15 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
 
               {/* Expanded lesson list */}
               {isExpanded && (
-                <LessonList
-                  moduleId={mod.id}
-                  courseId={courseId}
-                  initialLessons={mod.lessons}
-                  onUpdate={refetch}
-                />
+                <>
+                  <LessonList
+                    moduleId={mod.id}
+                    courseId={courseId}
+                    initialLessons={mod.lessons}
+                    onUpdate={refetch}
+                  />
+                  <QuizEditor moduleId={mod.id} initialQuiz={mod.quiz} onUpdate={refetch} />
+                </>
               )}
             </div>
           )

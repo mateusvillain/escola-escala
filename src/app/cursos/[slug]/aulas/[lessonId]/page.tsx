@@ -35,6 +35,7 @@ export default async function AulaPage({
             orderBy: { order: 'asc' },
             select: { id: true, title: true, content: true, videoId: true, isPreview: true, attachments: true },
           },
+          quiz: { select: { id: true } },
         },
       },
     },
@@ -67,17 +68,34 @@ export default async function AulaPage({
 
   let progress: Record<string, boolean> = {}
   let completedCount = 0
+  let passedQuizIds = new Set<string>()
   if (user) {
-    const [progressRecords, courseProgress] = await Promise.all([
+    const quizIds = course.modules.map(m => m.quiz?.id).filter((id): id is string => id != null)
+
+    const [progressRecords, courseProgress, quizAttempts] = await Promise.all([
       prisma.lessonProgress.findMany({
         where: { userId: user.userId, lesson: { module: { courseId: course.id } } },
         select: { lessonId: true, isCompleted: true },
       }),
       getCourseProgress(user.userId, course.id),
+      quizIds.length
+        ? prisma.quizAttempt.findMany({
+            where: { userId: user.userId, quizId: { in: quizIds }, passed: true },
+            select: { quizId: true },
+          })
+        : Promise.resolve([]),
     ])
     progress = Object.fromEntries(progressRecords.map(r => [r.lessonId, r.isCompleted]))
     completedCount = courseProgress.completedLessons
+    passedQuizIds = new Set(quizAttempts.map(a => a.quizId))
   }
+
+  const sidebarModules = course.modules.map(m => ({
+    id: m.id,
+    title: m.title,
+    lessons: m.lessons.map(l => ({ id: l.id, title: l.title })),
+    quiz: m.quiz ? { passed: passedQuizIds.has(m.quiz.id) } : null,
+  }))
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
@@ -204,7 +222,7 @@ export default async function AulaPage({
 
       <div className="lg:w-[30%] flex-shrink-0">
         <CourseSidebar
-          modules={course.modules}
+          modules={sidebarModules}
           courseSlug={slug}
           currentLessonId={lessonId}
           progress={progress}

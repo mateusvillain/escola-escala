@@ -1,0 +1,35 @@
+{
+  "id": "TASK-127",
+  "title": "Editor admin de quiz por módulo",
+  "category": "ui-ux",
+  "description": "Permitir que o admin crie e edite as perguntas de um quiz associado a um módulo.",
+  "acceptanceCriteria": [
+    "Admin pode adicionar/editar/remover perguntas com 2 a 5 alternativas cada e marcar a correta",
+    "Alterações persistidas via API dedicada de quiz do módulo"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint",
+      "details": "Criado `src/app/api/admin/modules/[id]/quiz/route.ts` com `GET`/`PUT` (upsert do quiz + replace transacional das perguntas)/`DELETE`. Validação Zod garante 2-5 alternativas e `correctOptionIndex` dentro do range.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Criar o componente",
+      "details": "Criado `QuizEditor` em `src/components/admin/`, reaproveitando o padrão visual de `LessonList`/`ModuleList` (linhas expansíveis, inputs nativos). Testado visualmente via Playwright: perguntas, alternativas e opção correta renderizam e persistem corretamente.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Integrar à edição do módulo",
+      "details": "Integrado em `ModuleList` (renderizado junto com `LessonList` quando o módulo está expandido), com `onUpdate` ligado ao `refetch` do `ModuleList` para evitar exibir dados desatualizados após salvar/remover o quiz. `GET /api/admin/courses/[id]` estendido para incluir `quiz`+`questions` por módulo.",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-126",
+    "TASK-30"
+  ],
+  "estimatedComplexity": "high"
+}

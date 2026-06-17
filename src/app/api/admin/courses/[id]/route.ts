@@ -26,7 +26,13 @@ export async function GET(
     where: { id },
     include: {
       instructor: { include: { user: { select: { name: true } } } },
-      modules: { include: { lessons: true }, orderBy: { order: "asc" } },
+      modules: {
+        include: {
+          lessons: true,
+          quiz: { include: { questions: { orderBy: { order: "asc" } } } },
+        },
+        orderBy: { order: "asc" },
+      },
       _count: { select: { enrollments: true } },
     },
   });

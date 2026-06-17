@@ -12,14 +12,14 @@
     {
       "step": 1,
       "description": "Adicionar os models",
-      "details": "Adicionar `Quiz`, `QuizQuestion` e `QuizAttempt` ao `prisma/schema.prisma` com as relações corretas.",
-      "pass": false
+      "details": "Adicionado `Quiz` (1:1 com `Module` via `moduleId @unique`), `QuizQuestion` (`text`, `options Json`, `correctOptionIndex`, `order`) e `QuizAttempt` (`userId`, `quizId`, `score`, `passed`, `completedAt`, sem unique constraint — múltiplas tentativas permitidas) ao `prisma/schema.prisma`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_quiz_models`.",
-      "pass": false
+      "details": "Migration `20260617220026_add_quiz_models` aplicada com sucesso.",
+      "pass": true
     }
   ],
   "dependencies": [

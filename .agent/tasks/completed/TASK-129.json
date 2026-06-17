@@ -1,0 +1,43 @@
+{
+  "id": "TASK-129",
+  "title": "Tela de quiz para o aluno",
+  "category": "ui-ux",
+  "description": "Interface do aluno para responder o quiz ao final do módulo, com feedback imediato.",
+  "acceptanceCriteria": [
+    "Ao concluir todas as aulas de um módulo com quiz associado, é exibido CTA \"Fazer quiz do módulo\"",
+    "Tela mostra todas as perguntas juntas em uma página, com alternativas em rádio button",
+    "Ao enviar, mostra nota final e quais perguntas foram respondidas corretamente/incorretamente",
+    "Aluno pode refazer o quiz se não atingiu 70%"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página",
+      "details": "Criada `src/app/cursos/[slug]/modulos/[moduleId]/quiz/page.tsx` (Server Component) — busca perguntas SEM `correctOptionIndex` (gabarito só é exposto na resposta do POST de tentativa, nunca no carregamento inicial, evitando que o aluno veja a resposta antes de responder).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Renderizar o formulário",
+      "details": "Criado `QuizForm` em `src/components/course/` com todas as perguntas e alternativas em rádio button. Também adicionado o CTA \"Fazer quiz do módulo\" em `CourseSidebar`, exibido quando todas as aulas do módulo estão concluídas e o módulo tem quiz pendente (ou \"Quiz aprovado ✓\" se já aprovado). Testado visualmente via Playwright.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Enviar e exibir resultado",
+      "details": "Ao enviar, chama `POST /api/modules/[id]/quiz/attempt` e exibe nota final + feedback por pergunta (resposta selecionada vs. correta). Testado manualmente de ponta a ponta.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Permitir refazer",
+      "details": "Botão \"Refazer quiz\" exibido quando `passed` é `false`, reseta o formulário para nova tentativa. Testado manualmente: reprovação seguida de nova tentativa aprovada.",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-128",
+    "TASK-45"
+  ],
+  "estimatedComplexity": "high"
+}

@@ -12,26 +12,26 @@
     {
       "step": 1,
       "description": "Criar o endpoint",
-      "details": "Criar `src/app/api/modules/[id]/quiz/attempt/route.ts` com handler `POST`.",
-      "pass": false
+      "details": "Criado `src/app/api/modules/[id]/quiz/attempt/route.ts` com handler `POST`. Adicionado `/api/modules/:path*` ao matcher de `src/proxy.ts`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar acesso",
-      "details": "Validar acesso do aluno ao curso do módulo antes de aceitar a tentativa.",
-      "pass": false
+      "details": "Criado `checkCourseAccess` em `src/lib/access.ts` (nível curso, espelha a lógica de assinatura de `checkLessonAccess`). Endpoint retorna 403 sem acesso.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Calcular a nota",
-      "details": "Calcular `score` comparando respostas com `correctOptionIndex` de cada `QuizQuestion`.",
-      "pass": false
+      "details": "`score = round(corretas/total*100)`, `passed = score >= 70`. Testado manualmente: 0/2 corretas → 0%, reprovado; 2/2 corretas → 100%, aprovado.",
+      "pass": true
     },
     {
       "step": 4,
       "description": "Registrar e retornar",
-      "details": "Criar `QuizAttempt` e retornar resultado detalhado.",
-      "pass": false
+      "details": "Cria `QuizAttempt` e retorna `score`, `passed`, `completedAt` e gabarito por pergunta (`selectedOptionIndex`/`correctOptionIndex`/`isCorrect`). Múltiplas tentativas confirmadas (2 tentativas do mesmo usuário coexistindo). Dispara `checkCourseCompletion` (fire-and-forget) quando aprovado.",
+      "pass": true
     }
   ],
   "dependencies": [
