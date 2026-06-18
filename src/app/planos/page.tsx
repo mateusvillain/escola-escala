@@ -8,7 +8,12 @@ export const metadata = {
   title: 'Planos e Preços',
 }
 
-export default async function PlanosPage() {
+export default async function PlanosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>
+}) {
+  const { ref } = await searchParams
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
 
@@ -82,6 +87,7 @@ export default async function PlanosPage() {
           priceIds={priceIds}
           isAuthenticated={!!userId}
           activeSubscription={activeSubscription}
+          referralCode={ref}
         />
       </main>
     </div>

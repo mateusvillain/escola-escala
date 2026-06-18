@@ -20,6 +20,7 @@ interface Props {
   priceIds: PriceIds
   isAuthenticated: boolean
   activeSubscription: ActiveSubscription | null
+  referralCode?: string
 }
 
 // Update these to match your Stripe product prices
@@ -54,7 +55,7 @@ function discountPercent(monthly: number, annual: number) {
   return Math.round(((monthly - annualMonthly) / monthly) * 100)
 }
 
-export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: Props) {
+export function PlansClient({ priceIds, isAuthenticated, activeSubscription, referralCode }: Props) {
   const router = useRouter()
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState<string | null>(null)
@@ -64,7 +65,8 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
 
   async function handleCheckout(plan: 'basic' | 'premium') {
     if (!isAuthenticated) {
-      router.push('/login?next=/planos')
+      const next = referralCode ? `/planos?ref=${referralCode}` : '/planos'
+      router.push(`/login?next=${encodeURIComponent(next)}`)
       return
     }
 
@@ -80,7 +82,7 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
       const res = await fetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, billingCycle: billing }),
+        body: JSON.stringify({ priceId, billingCycle: billing, referralCode }),
       })
 
       const data = await res.json()

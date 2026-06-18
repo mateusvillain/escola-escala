@@ -15,6 +15,38 @@ function buildPriceMap(): Record<string, { type: PlanType; billingCycle: Billing
   }
 }
 
+// Crédito de um ciclo mensal do plano do indicador, concedido apenas na primeira assinatura do indicado.
+async function grantReferralCredit(referredByCode: string, referredUserId: string): Promise<void> {
+  const referral = await prisma.referralCode.findUnique({
+    where: { code: referredByCode },
+    include: { owner: { select: { stripeCustomerId: true } } },
+  })
+  if (!referral) {
+    console.warn(`[stripe] referral: código ${referredByCode} não encontrado — nenhum crédito concedido`)
+    return
+  }
+
+  const ownerSubscription = await prisma.userSubscription.findFirst({
+    where: { userId: referral.ownerUserId, status: 'active' },
+    include: { plan: true },
+  })
+
+  if (!ownerSubscription || !referral.owner.stripeCustomerId) {
+    console.warn(`[stripe] referral: indicador ${referral.ownerUserId} sem assinatura ativa ou stripeCustomerId — nenhum crédito concedido`)
+    return
+  }
+
+  const creditAmountCents = Math.round(Number(ownerSubscription.plan.priceMonthly) * 100)
+
+  await stripe.customers.createBalanceTransaction(referral.owner.stripeCustomerId, {
+    amount: -creditAmountCents,
+    currency: 'brl',
+    description: `Crédito por indicação — código ${referredByCode}, indicado ${referredUserId}`,
+  })
+
+  console.log(`[stripe] referral: crédito de ${creditAmountCents} centavos concedido a customer ${referral.owner.stripeCustomerId} (código ${referredByCode})`)
+}
+
 export async function handleCheckoutSessionCompleted(
   event: Stripe.CheckoutSessionCompletedEvent
 ): Promise<void> {
@@ -37,6 +69,8 @@ export async function handleCheckoutSessionCompleted(
     where: { type: planInfo.type },
   })
 
+  const referredByCode = session.metadata?.referralCode
+
   // Em Stripe API v2026+, current_period_start/end estão no SubscriptionItem
   await prisma.userSubscription.upsert({
     where: { stripeSubscriptionId },
@@ -50,6 +84,7 @@ export async function handleCheckoutSessionCompleted(
       billingCycle: planInfo.billingCycle,
       currentPeriodStart: new Date(item.current_period_start * 1000),
       currentPeriodEnd: new Date(item.current_period_end * 1000),
+      ...(referredByCode && { referredByCode }),
     },
   })
 
@@ -70,6 +105,15 @@ export async function handleCheckoutSessionCompleted(
       await sendWelcomeEmail(dbUser.email, dbUser.name)
     } catch (err) {
       console.error('[stripe] falha ao enviar e-mail de boas-vindas:', err)
+    }
+  }
+
+  // Crédito ao indicador apenas na primeira assinatura do indicado (não em renovações)
+  if (referredByCode && subscriptionCount === 1) {
+    try {
+      await grantReferralCredit(referredByCode, userId)
+    } catch (err) {
+      console.error('[stripe] falha ao conceder crédito de indicação:', err)
     }
   }
 

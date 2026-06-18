@@ -1,0 +1,46 @@
+{
+  "id": "TASK-106",
+  "title": "Aplicar cupom ao indicado via ?ref=",
+  "category": "integration",
+  "description": "Quando alguém chega em /planos com ?ref=CODE válido, aplicar automaticamente um cupom de desconto na sessão de checkout subsequente.",
+  "acceptanceCriteria": [
+    "`/planos?ref=CODE` repassa o código ao checkout se o código existir e for de outro usuário",
+    "`POST /api/subscriptions/checkout` aceita `referralCode` opcional no body e, se válido, aplica um Coupon de indicação pré-criado no Stripe via `discounts`",
+    "Código inválido ou do próprio usuário é ignorado silenciosamente (sem erro para o usuário)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Ler o ref da URL",
+      "details": "`?ref=` é lido server-side em `src/app/planos/page.tsx` (via `searchParams: Promise<{ ref?: string }>`, padrão Next.js 16) e repassado como prop `referralCode` para `PlansClient`, que o envia como `referralCode` no body de `POST /api/subscriptions/checkout`. Evitado `useSearchParams()` no client component (que exigiria Suspense) lendo o param já no server component pai. O redirecionamento para `/login` quando não autenticado preserva o `?ref=` no `next`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Validar o código no endpoint",
+      "details": "`POST /api/subscriptions/checkout` busca `ReferralCode` pelo código recebido; ignora silenciosamente (sem erro) se o código não existir ou se `ownerUserId` for igual ao usuário autenticado. Testado com script contra o servidor local: código do próprio usuário e código inexistente (`NAOEXISTE1`) resultaram em sessão criada normalmente com `allow_promotion_codes: true` e nenhum desconto/metadata de indicação aplicado.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Aplicar o desconto",
+      "details": "Quando o código é válido, a Checkout Session usa `discounts: [{ coupon: process.env.STRIPE_COUPON_ID_REFERRAL }]` em vez de `allow_promotion_codes: true` (os dois nunca são enviados juntos). Coupon de indicação dedicado criado no Stripe em modo teste via API (10% off, duration `once`, id armazenado em `STRIPE_COUPON_ID_REFERRAL` no `.env.local`). Testado de ponta a ponta: checkout do usuário indicado com `?ref=<código do indicador>` gerou invoice com `amount_paid: 7200` e `total_discount_amounts: [{amount: 800}]` (mesmo desconto de 10% sobre os R$80,00 do plano Básico).",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Persistir a origem",
+      "details": "O código de indicação válido é incluído em `metadata.referralCode` da Checkout Session; `handleCheckoutSessionCompleted` em `src/lib/stripe-handlers.ts` lê `session.metadata?.referralCode` e grava em `referredByCode` no `UserSubscription` criado. Confirmado no banco: `UserSubscription` do usuário indicado de teste tinha `referredByCode` igual ao código do indicador.",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-104",
+    "TASK-90"
+  ],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Stripe não permite `allow_promotion_codes: true` e `discounts` na mesma Checkout Session — escolher um por sessão dependendo se há `referralCode` válido.",
+    "Requer criar manualmente um Coupon fixo de indicação no Stripe Dashboard e adicionar `STRIPE_COUPON_ID_REFERRAL` ao `.env.local`."
+  ]
+}

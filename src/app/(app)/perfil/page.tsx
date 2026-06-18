@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { EditProfileForm } from '@/components/profile/EditProfileForm'
 import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm'
+import { ReferralCodeCard } from '@/components/profile/ReferralCodeCard'
 
 export default async function PerfilPage() {
   const cookieStore = await cookies()
@@ -58,6 +59,10 @@ export default async function PerfilPage() {
         <hr className="border-gray-200" />
 
         <EditProfileForm name={user.name} avatarUrl={user.avatarUrl} />
+
+        <hr className="border-gray-200" />
+
+        <ReferralCodeCard />
 
         <hr className="border-gray-200" />
 
