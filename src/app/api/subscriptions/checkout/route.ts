@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { priceId, referralCode } = parsed.data
+  const { priceId, billingCycle, referralCode } = parsed.data
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.userId },
@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Você já possui uma assinatura ativa' }, { status: 409 })
   }
 
-  const validReferralCode = referralCode
+  // Desconto de indicação é válido somente para o plano anual.
+  const validReferralCode = referralCode && billingCycle === 'annual'
     ? (await validateReferralCode(referralCode, dbUser.id)) ?? undefined
     : undefined
 

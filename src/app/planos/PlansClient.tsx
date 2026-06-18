@@ -64,12 +64,15 @@ function withReferralDiscount(value: number) {
 
 export function PlansClient({ priceIds, isAuthenticated, activeSubscription, referralCode }: Props) {
   const router = useRouter()
-  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const discount = discountPercent(PRICES.basic.monthly, PRICES.basic.annual)
-  const hasReferralDiscount = !!referralCode && !activeSubscription
+  // O desconto de indicação é válido somente no plano anual.
+  const hasReferralCode = !!referralCode && !activeSubscription
+  const hasReferralDiscount = hasReferralCode && billing === 'annual'
+  const effectiveAnnualBasic = hasReferralCode ? withReferralDiscount(PRICES.basic.annual) : PRICES.basic.annual
+  const discount = discountPercent(PRICES.basic.monthly, effectiveAnnualBasic)
   const basicBasePrice = billing === 'monthly' ? PRICES.basic.monthly : PRICES.basic.annual / 12
   const premiumBasePrice = billing === 'monthly' ? PRICES.premium.monthly : PRICES.premium.annual / 12
 
@@ -132,7 +135,7 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
       {hasReferralDiscount && (
         <div className="max-w-3xl mx-auto mb-8 bg-green-50 border border-green-200 rounded-xl p-4 text-center">
           <p className="text-sm font-semibold text-green-900">
-            🎉 Você foi indicado! Ganhe {REFERRAL_DISCOUNT_PERCENT}% de desconto na primeira cobrança.
+            🎉 Você foi indicado! Ganhe {REFERRAL_DISCOUNT_PERCENT}% de desconto na primeira cobrança do plano anual.
           </p>
           <p className="text-xs text-green-700 mt-0.5">O desconto é aplicado automaticamente no checkout.</p>
         </div>
@@ -160,11 +163,9 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
         <span className={`text-sm font-medium ${billing === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>
           Anual
         </span>
-        {billing === 'annual' && (
-          <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-            Economize {discount}%
-          </span>
-        )}
+        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+          Economize {discount}%
+        </span>
       </div>
 
       {/* Active subscription banner */}
