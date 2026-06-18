@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Checar quizzes pendentes",
-      "details": "Editar `checkCourseCompletion` em `src/lib/progress.ts` para, além do progresso por aula, verificar quizzes pendentes.",
-      "pass": false
+      "details": "Editado `checkCourseCompletion` em `src/lib/progress.ts`: após confirmar 100% das aulas, busca todos os módulos do curso com `Quiz` associado.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Bloquear certificado se houver pendência",
-      "details": "Para cada módulo do curso com `Quiz` associado, checar `QuizAttempt` aprovado do usuário; se faltar algum, não disparar a geração do certificado.",
-      "pass": false
+      "details": "Se houver módulos com quiz, verifica `QuizAttempt` aprovado (distinct por `quizId`) do usuário; falta algum aprovado → retorna sem marcar `completedAt`/gerar certificado. Testado manualmente de ponta a ponta com dados reais: (a) curso sem nenhum quiz — 100% das aulas certificou imediatamente, comportamento idêntico ao anterior; (b) curso com 1 módulo com quiz — 100% das aulas NÃO certificou enquanto o quiz não foi aprovado; reprovação (0%) manteve bloqueado; aprovação (100%) na tentativa seguinte liberou completedAt + certificado imediatamente.",
+      "pass": true
     }
   ],
   "dependencies": [

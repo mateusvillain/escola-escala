@@ -57,6 +57,7 @@ model User {
   certificates   Certificate[]
   courseReviews  CourseReview[]
   adminAuditLogs AdminAuditLog[]
+  quizAttempts   QuizAttempt[]
 }
 
 model Instructor {
@@ -98,6 +99,7 @@ model Module {
   createdAt   DateTime @default(now())
 
   lessons Lesson[]
+  quiz    Quiz?
 }
 
 model Lesson {
@@ -208,4 +210,36 @@ model AdminAuditLog {
   entityId   String
   metadata   Json?
   createdAt  DateTime @default(now())
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  moduleId  String   @unique
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id                 String @id @default(uuid())
+  quizId             String
+  quiz               Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text               String
+  options            Json
+  correctOptionIndex Int
+  order              Int
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score       Float
+  passed      Boolean
+  completedAt DateTime @default(now())
 }

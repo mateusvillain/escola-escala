@@ -20,6 +20,7 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
             select: { id: true, title: true, order: true, videoId: true, isPreview: true },
             orderBy: { order: 'asc' },
           },
+          quiz: { include: { questions: { orderBy: { order: 'asc' } } } },
         },
         orderBy: { order: 'asc' },
       },
@@ -65,6 +66,15 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
           initialModules={course.modules.map(m => ({
             ...m,
             description: m.description ?? null,
+            quiz: m.quiz
+              ? {
+                  id: m.quiz.id,
+                  questions: m.quiz.questions.map(q => ({
+                    ...q,
+                    options: q.options as string[],
+                  })),
+                }
+              : null,
           }))}
         />
       </div>

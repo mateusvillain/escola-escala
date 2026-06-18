@@ -878,36 +878,36 @@
     "id": "TASK-126",
     "title": "Tabelas de Quiz",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-126.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-126.json",
+    "passes": true
   },
   {
     "id": "TASK-127",
     "title": "Editor admin de quiz por módulo",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-127.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-127.json",
+    "passes": true
   },
   {
     "id": "TASK-128",
     "title": "POST /api/modules/[id]/quiz/attempt",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-128.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-128.json",
+    "passes": true
   },
   {
     "id": "TASK-129",
     "title": "Tela de quiz para o aluno",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-129.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-129.json",
+    "passes": true
   },
   {
     "id": "TASK-130",
     "title": "Certificado exige quiz aprovado",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-130.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-130.json",
+    "passes": true
   },
   {
     "id": "TASK-131",

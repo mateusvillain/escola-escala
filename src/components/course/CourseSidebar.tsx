@@ -12,12 +12,14 @@ interface SidebarModule {
   id: string
   title: string
   lessons: SidebarLesson[]
+  quiz: { passed: boolean } | null
 }
 
 interface CourseSidebarProps {
   modules: SidebarModule[]
   courseSlug: string
-  currentLessonId: string
+  currentLessonId?: string
+  currentQuizModuleId?: string
   progress: Record<string, boolean>
   completedCount: number
   totalCount: number
@@ -50,10 +52,35 @@ function LessonIcon({ isCompleted, isCurrent }: { isCompleted: boolean; isCurren
   )
 }
 
+function QuizIcon({ isPassed, isCurrent }: { isPassed: boolean; isCurrent: boolean }) {
+  if (isPassed) {
+    return (
+      <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clipRule="evenodd"
+        />
+      </svg>
+    )
+  }
+  return (
+    <svg
+      className={`w-4 h-4 flex-shrink-0 ${isCurrent ? 'text-blue-600' : 'text-gray-400'}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  )
+}
+
 export function CourseSidebar({
   modules,
   courseSlug,
   currentLessonId,
+  currentQuizModuleId,
   progress,
   completedCount,
   totalCount,
@@ -119,6 +146,24 @@ export function CourseSidebar({
                     </li>
                   )
                 })}
+
+                {module.quiz && module.lessons.every(l => progress[l.id]) && (
+                  <li>
+                    <Link
+                      href={`/cursos/${courseSlug}/modulos/${module.id}/quiz`}
+                      className={`flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
+                        currentQuizModuleId === module.id
+                          ? 'bg-blue-50 text-blue-700 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <QuizIcon isPassed={module.quiz.passed} isCurrent={currentQuizModuleId === module.id} />
+                      <span className="truncate">
+                        {module.quiz.passed ? 'Quiz do módulo (aprovado)' : 'Quiz do módulo'}
+                      </span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
           ))}

@@ -65,3 +65,41 @@ export async function checkLessonAccess(
 
   return { allowed: false, reason: 'plan_upgrade_required' }
 }
+
+/**
+ * Verifica se um usuário tem acesso a um curso (nível curso, não aula específica).
+ * Usado para gates que não são por aula, como tentativas de quiz por módulo.
+ */
+export async function checkCourseAccess(
+  userId: string | null,
+  courseId: string,
+  role?: string
+): Promise<AccessResult> {
+  if (role === 'admin') return { allowed: true }
+  if (!userId) return { allowed: false, reason: 'not_authenticated' }
+
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { planAccess: true },
+  })
+  if (!course) return { allowed: false }
+
+  const subscription = await prisma.userSubscription.findFirst({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    include: { plan: true },
+  })
+
+  if (!subscription) return { allowed: false, reason: 'no_subscription' }
+
+  if (subscription.status !== 'active') {
+    return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
+  }
+
+  const planType = subscription.plan.type
+
+  if (planType === 'premium') return { allowed: true }
+  if (planType === 'basic' && course.planAccess === 'basic') return { allowed: true }
+
+  return { allowed: false, reason: 'plan_upgrade_required' }
+}
