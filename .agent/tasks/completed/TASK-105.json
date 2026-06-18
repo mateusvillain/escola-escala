@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Buscar o código",
-      "details": "Editar `src/app/(app)/perfil/page.tsx` (ou componente filho) para buscar o código via `GET /api/users/me/referral-code`.",
-      "pass": false
+      "details": "Criado componente `src/components/profile/ReferralCodeCard.tsx` (client component), montado em `/perfil`, que busca o código via `GET /api/users/me/referral-code` em `useEffect` e monta o link completo `${window.location.origin}/planos?ref={code}`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar botão de copiar",
-      "details": "Montar o link completo e adicionar botão usando `navigator.clipboard.writeText`.",
-      "pass": false
+      "details": "Botão \"Copiar link\" usa `navigator.clipboard.writeText` e exibe confirmação visual temporária (\"Copiado!\" por 2s). Testado visualmente via screenshot Playwright em `/perfil`: seção \"Indique e ganhe\" exibe o link `http://localhost:3000/planos?ref=<CODE>` e o botão corretamente.",
+      "pass": true
     }
   ],
   "dependencies": [

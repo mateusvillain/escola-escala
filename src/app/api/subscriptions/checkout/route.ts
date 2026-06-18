@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type Stripe from 'stripe'
 import { z } from 'zod'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { validateReferralCode } from '@/lib/referral'
 
 const schema = z.object({
   priceId: z.string().min(1),
   billingCycle: z.enum(['monthly', 'annual']),
+  referralCode: z.string().min(1).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { priceId } = parsed.data
+  const { priceId, billingCycle, referralCode } = parsed.data
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.userId },
@@ -47,6 +50,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Você já possui uma assinatura ativa' }, { status: 409 })
   }
 
+  // Desconto de indicação é válido somente para o plano anual.
+  const validReferralCode = referralCode && billingCycle === 'annual'
+    ? (await validateReferralCode(referralCode, dbUser.id)) ?? undefined
+    : undefined
+
   let stripeCustomerId = dbUser.stripeCustomerId
 
   if (!stripeCustomerId) {
@@ -64,15 +72,26 @@ export async function POST(request: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
 
-  const session = await stripe.checkout.sessions.create({
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     customer: stripeCustomerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${appUrl}/dashboard?checkout=success`,
     cancel_url: `${appUrl}/planos`,
-    metadata: { userId: dbUser.id },
-    allow_promotion_codes: true,
-  })
+    metadata: {
+      userId: dbUser.id,
+      ...(validReferralCode && { referralCode: validReferralCode }),
+    },
+  }
+
+  // Stripe não permite `allow_promotion_codes` e `discounts` na mesma Checkout Session.
+  if (validReferralCode) {
+    sessionParams.discounts = [{ coupon: process.env.STRIPE_COUPON_ID_REFERRAL! }]
+  } else {
+    sessionParams.allow_promotion_codes = true
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams)
 
   return NextResponse.json({ checkoutUrl: session.url })
 }

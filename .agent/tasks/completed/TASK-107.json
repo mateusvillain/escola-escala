@@ -1,0 +1,42 @@
+{
+  "id": "TASK-107",
+  "title": "Crédito ao indicador",
+  "category": "integration",
+  "description": "Conceder um crédito (ex: um ciclo de cobrança) ao indicador quando o indicado completa a primeira assinatura.",
+  "acceptanceCriteria": [
+    "`handleCheckoutSessionCompleted` identifica o `ownerUserId` do `ReferralCode` quando `referredByCode` está presente no metadata",
+    "Cria uma balance transaction negativa (crédito) no Stripe Customer do indicador, equivalente a um ciclo de cobrança do plano dele",
+    "Não concede crédito em renovações, apenas na primeira assinatura do indicado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Identificar o indicador",
+      "details": "Função `grantReferralCredit` em `src/lib/stripe-handlers.ts` busca `ReferralCode` pelo código presente em `referredByCode` (lido do metadata da session) e obtém o `ownerUserId`. Chamada apenas quando `referredByCode` está presente E `subscriptionCount === 1` (primeira assinatura do indicado — não dispara em renovações, que não passam por `checkout.session.completed`).",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Calcular o valor do crédito",
+      "details": "Busca a `UserSubscription` ativa do indicador (`ownerUserId`) com seu `SubscriptionPlan`, usando `plan.priceMonthly` como valor do crédito (convertido para centavos). Se o indicador não tiver assinatura ativa ou `stripeCustomerId`, loga aviso e não concede crédito (sem lançar erro).",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Conceder o crédito",
+      "details": "Chama `stripe.customers.createBalanceTransaction(stripeCustomerId, { amount: -creditAmountCents, currency: 'brl', description })` no customer do indicador. Testado de ponta a ponta em modo teste do Stripe: usuário indicado completou assinatura usando o código do indicador, e a balance transaction foi criada no customer do indicador com `amount: -2990` (centavos), `currency: 'brl'`, valor equivalente ao `priceMonthly` do plano do indicador — confirmado via `stripe.customers.listBalanceTransactions`.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Registrar para auditoria",
+      "details": "Operação logada via `console.log` com customer, valor em centavos e código de indicação, dentro de um `try/catch` que loga erro sem interromper o processamento do webhook em caso de falha (mesmo padrão defensivo do e-mail de boas-vindas).",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-106",
+    "TASK-71"
+  ],
+  "estimatedComplexity": "high"
+}

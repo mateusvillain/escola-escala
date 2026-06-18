@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Criar a função de geração",
-      "details": "Criar `getOrCreateReferralCode(userId)` que faz upsert com geração de código aleatório e checagem de unicidade.",
-      "pass": false
+      "details": "Criada `getOrCreateReferralCode(userId)` em `src/lib/referral.ts`: retorna o código existente se já houver `ReferralCode` para o usuário; caso contrário gera um código de 8 caracteres (charset sem ambiguidade visual: sem 0/O/1/I/L), checa unicidade contra o banco antes de criar, e trata corrida (constraint única em `ownerUserId`) reconsultando o código já criado por outra requisição concorrente.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar o endpoint",
-      "details": "Criar `src/app/api/users/me/referral-code/route.ts` com handler `GET` autenticado chamando essa função.",
-      "pass": false
+      "details": "Criado `GET /api/users/me/referral-code` (`src/app/api/users/me/referral-code/route.ts`), autenticado via `getAuthUser`, retornando `{ code }`. Testado manualmente: chamada repetida para o mesmo usuário sempre retorna o mesmo código (idempotente).",
+      "pass": true
     }
   ],
   "dependencies": [

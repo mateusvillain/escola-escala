@@ -12,20 +12,20 @@
     {
       "step": 1,
       "description": "Adicionar o model ReferralCode",
-      "details": "Adicionar model `ReferralCode` (relação 1:1 com `User`) ao `prisma/schema.prisma`.",
-      "pass": false
+      "details": "Adicionado model `ReferralCode` (`id`, `code` único, `ownerUserId` único com relação 1:1 para `User`, `createdAt`) ao `prisma/schema.prisma`, com relação inversa `referralCode ReferralCode?` em `User`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar campo de rastreio",
-      "details": "Adicionar `referredByCode String?` ao model `UserSubscription`.",
-      "pass": false
+      "details": "Adicionado `referredByCode String?` ao model `UserSubscription`.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_referral_program`.",
-      "pass": false
+      "details": "Migration `20260618123112_add_referral_program` aplicada com sucesso no Neon (`npx prisma migrate dev --name add_referral_program`), seguida de `npx prisma generate`.",
+      "pass": true
     }
   ],
   "dependencies": [

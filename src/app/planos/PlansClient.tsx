@@ -20,6 +20,7 @@ interface Props {
   priceIds: PriceIds
   isAuthenticated: boolean
   activeSubscription: ActiveSubscription | null
+  referralCode?: string
 }
 
 // Update these to match your Stripe product prices
@@ -27,6 +28,9 @@ const PRICES = {
   basic: { monthly: 80, annual: 800 },
   premium: { monthly: 100, annual: 1000 },
 }
+
+// Deve ficar em sincronia com o percent_off do Coupon configurado em STRIPE_COUPON_ID_REFERRAL
+const REFERRAL_DISCOUNT_PERCENT = 10
 
 const BASIC_FEATURES = [
   'Acesso a todos os cursos do catálogo',
@@ -54,17 +58,28 @@ function discountPercent(monthly: number, annual: number) {
   return Math.round(((monthly - annualMonthly) / monthly) * 100)
 }
 
-export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: Props) {
+function withReferralDiscount(value: number) {
+  return value * (1 - REFERRAL_DISCOUNT_PERCENT / 100)
+}
+
+export function PlansClient({ priceIds, isAuthenticated, activeSubscription, referralCode }: Props) {
   const router = useRouter()
-  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const discount = discountPercent(PRICES.basic.monthly, PRICES.basic.annual)
+  // O desconto de indicação é válido somente no plano anual.
+  const hasReferralCode = !!referralCode && !activeSubscription
+  const hasReferralDiscount = hasReferralCode && billing === 'annual'
+  const effectiveAnnualBasic = hasReferralCode ? withReferralDiscount(PRICES.basic.annual) : PRICES.basic.annual
+  const discount = discountPercent(PRICES.basic.monthly, effectiveAnnualBasic)
+  const basicBasePrice = billing === 'monthly' ? PRICES.basic.monthly : PRICES.basic.annual / 12
+  const premiumBasePrice = billing === 'monthly' ? PRICES.premium.monthly : PRICES.premium.annual / 12
 
   async function handleCheckout(plan: 'basic' | 'premium') {
     if (!isAuthenticated) {
-      router.push('/login?next=/planos')
+      const next = referralCode ? `/planos?ref=${referralCode}` : '/planos'
+      router.push(`/login?next=${encodeURIComponent(next)}`)
       return
     }
 
@@ -80,7 +95,7 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
       const res = await fetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, billingCycle: billing }),
+        body: JSON.stringify({ priceId, billingCycle: billing, referralCode }),
       })
 
       const data = await res.json()
@@ -116,6 +131,16 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
         </p>
       </div>
 
+      {/* Referral discount banner */}
+      {hasReferralDiscount && (
+        <div className="max-w-3xl mx-auto mb-8 bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+          <p className="text-sm font-semibold text-green-900">
+            🎉 Você foi indicado! Ganhe {REFERRAL_DISCOUNT_PERCENT}% de desconto na primeira cobrança do plano anual.
+          </p>
+          <p className="text-xs text-green-700 mt-0.5">O desconto é aplicado automaticamente no checkout.</p>
+        </div>
+      )}
+
       {/* Billing toggle */}
       <div className="flex items-center justify-center gap-4 mb-12">
         <span className={`text-sm font-medium ${billing === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>
@@ -138,11 +163,9 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
         <span className={`text-sm font-medium ${billing === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>
           Anual
         </span>
-        {billing === 'annual' && (
-          <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-            Economize {discount}%
-          </span>
-        )}
+        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+          Economize {discount}%
+        </span>
       </div>
 
       {/* Active subscription banner */}
@@ -181,17 +204,20 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
           </div>
 
           <div className="mb-6">
-            <div className="flex items-end gap-1">
+            <div className="flex items-end gap-2 flex-wrap">
+              {hasReferralDiscount && (
+                <span className="text-xl text-gray-400 line-through">
+                  R$ {formatPrice(basicBasePrice)}
+                </span>
+              )}
               <span className="text-4xl font-bold text-gray-900">
-                R$ {billing === 'monthly'
-                  ? formatPrice(PRICES.basic.monthly)
-                  : formatPrice(PRICES.basic.annual / 12)}
+                R$ {formatPrice(hasReferralDiscount ? withReferralDiscount(basicBasePrice) : basicBasePrice)}
               </span>
               <span className="text-gray-500 mb-1">/mês</span>
             </div>
             {billing === 'annual' && (
               <p className="text-sm text-gray-500 mt-1">
-                R$ {formatPrice(PRICES.basic.annual)}/ano — cobrado anualmente
+                R$ {formatPrice(hasReferralDiscount ? withReferralDiscount(PRICES.basic.annual) : PRICES.basic.annual)}/ano — cobrado anualmente
               </p>
             )}
           </div>
@@ -240,17 +266,20 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription }: P
           </div>
 
           <div className="mb-6">
-            <div className="flex items-end gap-1">
+            <div className="flex items-end gap-2 flex-wrap">
+              {hasReferralDiscount && (
+                <span className="text-xl text-gray-400 line-through">
+                  R$ {formatPrice(premiumBasePrice)}
+                </span>
+              )}
               <span className="text-4xl font-bold text-gray-900">
-                R$ {billing === 'monthly'
-                  ? formatPrice(PRICES.premium.monthly)
-                  : formatPrice(PRICES.premium.annual / 12)}
+                R$ {formatPrice(hasReferralDiscount ? withReferralDiscount(premiumBasePrice) : premiumBasePrice)}
               </span>
               <span className="text-gray-500 mb-1">/mês</span>
             </div>
             {billing === 'annual' && (
               <p className="text-sm text-gray-500 mt-1">
-                R$ {formatPrice(PRICES.premium.annual)}/ano — cobrado anualmente
+                R$ {formatPrice(hasReferralDiscount ? withReferralDiscount(PRICES.premium.annual) : PRICES.premium.annual)}/ano — cobrado anualmente
               </p>
             )}
           </div>

@@ -717,36 +717,36 @@
     "id": "TASK-103",
     "title": "Tabela ReferralCode",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-103.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-103.json",
+    "passes": true
   },
   {
     "id": "TASK-104",
     "title": "Gerar código de indicação único por aluno",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-104.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-104.json",
+    "passes": true
   },
   {
     "id": "TASK-105",
     "title": "Exibir código de indicação no perfil",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-105.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-105.json",
+    "passes": true
   },
   {
     "id": "TASK-106",
     "title": "Aplicar cupom ao indicado via ?ref=",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-106.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-106.json",
+    "passes": true
   },
   {
     "id": "TASK-107",
     "title": "Crédito ao indicador",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-107.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-107.json",
+    "passes": true
   },
   {
     "id": "TASK-108",

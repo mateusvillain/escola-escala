@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
+import { validateReferralCode } from '@/lib/referral'
 import { PlansClient } from './PlansClient'
 import Link from 'next/link'
 
@@ -8,7 +9,12 @@ export const metadata = {
   title: 'Planos e Preços',
 }
 
-export default async function PlanosPage() {
+export default async function PlanosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>
+}) {
+  const { ref } = await searchParams
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
 
@@ -39,6 +45,8 @@ export default async function PlanosPage() {
     premiumMonthly: process.env.STRIPE_PRICE_ID_PREMIUM_MONTHLY!,
     premiumAnnual: process.env.STRIPE_PRICE_ID_PREMIUM_ANNUAL!,
   }
+
+  const validReferralCode = ref ? (await validateReferralCode(ref, userId)) ?? undefined : undefined
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -82,6 +90,7 @@ export default async function PlanosPage() {
           priceIds={priceIds}
           isAuthenticated={!!userId}
           activeSubscription={activeSubscription}
+          referralCode={validReferralCode}
         />
       </main>
     </div>
