@@ -927,29 +927,29 @@
     "id": "TASK-133",
     "title": "Campo lastPositionSeconds",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-133.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-133.json",
+    "passes": true
   },
   {
     "id": "TASK-134",
     "title": "PATCH /api/progress/[lessonId] salva posição exata",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-134.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-134.json",
+    "passes": true
   },
   {
     "id": "TASK-135",
     "title": "Player retoma do ponto salvo",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-135.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-135.json",
+    "passes": true
   },
   {
     "id": "TASK-136",
     "title": "Controle de velocidade de reprodução",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-136.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-136.json",
+    "passes": true
   },
   {
     "id": "TASK-137",

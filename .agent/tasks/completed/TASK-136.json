@@ -12,14 +12,14 @@
     {
       "step": 1,
       "description": "Testar o player atual",
-      "details": "Testar manualmente o player atual (`getEmbedUrl`) e verificar se o menu de configurações já inclui controle de velocidade.",
-      "pass": false
+      "details": "Testado via Playwright contra a página real da aula (`/cursos/[slug]/aulas/[lessonId]`), inspecionando os botões do iframe diretamente via CDP (cross-origin, mas acessível ao Playwright). Descoberta: o player embed do Bunny Stream é construído sobre a biblioteca **Plyr** (classes `plyr__control`, `plyr__controls`). O botão de engrenagem (\"Definições\") abre um menu com \"Qualidade\" e \"Velocidade\"; o submenu \"Velocidade\" lista as opções **0.5×, Normal, 1.25×, 1.5×, 1.75×, 2×** — cobrindo e excedendo a faixa pedida (0.5x a 2x). Tudo já vem localizado em português.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Documentar o resultado",
-      "details": "Se disponível nativamente, apenas confirmar e documentar; se não, registrar como gap técnico no PRD.",
-      "pass": false
+      "details": "Controle de velocidade já disponível nativamente no player, sem necessidade de nenhum código nesta task. Nenhum gap técnico a registrar no PRD — a suposição do `technicalNotes` desta task se confirmou.",
+      "pass": true
     }
   ],
   "dependencies": [

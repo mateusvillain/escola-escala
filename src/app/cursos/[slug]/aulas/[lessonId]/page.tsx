@@ -69,13 +69,14 @@ export default async function AulaPage({
   let progress: Record<string, boolean> = {}
   let completedCount = 0
   let passedQuizIds = new Set<string>()
+  let initialPositionSeconds = 0
   if (user) {
     const quizIds = course.modules.map(m => m.quiz?.id).filter((id): id is string => id != null)
 
     const [progressRecords, courseProgress, quizAttempts] = await Promise.all([
       prisma.lessonProgress.findMany({
         where: { userId: user.userId, lesson: { module: { courseId: course.id } } },
-        select: { lessonId: true, isCompleted: true },
+        select: { lessonId: true, isCompleted: true, lastPositionSeconds: true },
       }),
       getCourseProgress(user.userId, course.id),
       quizIds.length
@@ -88,6 +89,7 @@ export default async function AulaPage({
     progress = Object.fromEntries(progressRecords.map(r => [r.lessonId, r.isCompleted]))
     completedCount = courseProgress.completedLessons
     passedQuizIds = new Set(quizAttempts.map(a => a.quizId))
+    initialPositionSeconds = progressRecords.find(r => r.lessonId === lessonId)?.lastPositionSeconds ?? 0
   }
 
   const sidebarModules = course.modules.map(m => ({
@@ -121,7 +123,7 @@ export default async function AulaPage({
 
         {access.allowed ? (
           lesson.videoId ? (
-            <BunnyPlayer videoId={lesson.videoId} lessonId={lesson.id} />
+            <BunnyPlayer videoId={lesson.videoId} lessonId={lesson.id} initialPositionSeconds={initialPositionSeconds} />
           ) : (
             <div
               className="w-full rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center"

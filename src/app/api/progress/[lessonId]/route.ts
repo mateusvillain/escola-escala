@@ -9,6 +9,7 @@ import { checkCourseCompletion } from '@/lib/progress'
 const postSchema = z.object({
   watchPercentage: z.number().min(0).max(100).optional(),
   isCompleted: z.boolean().optional(),
+  positionSeconds: z.number().int().min(0).optional(),
 })
 
 export async function GET(
@@ -28,7 +29,7 @@ export async function GET(
 
   const progress = await prisma.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: user.userId, lessonId } },
-    select: { watchPercentage: true, isCompleted: true, completedAt: true },
+    select: { watchPercentage: true, isCompleted: true, completedAt: true, lastPositionSeconds: true },
   })
 
   return NextResponse.json({
@@ -36,6 +37,7 @@ export async function GET(
     watchPercentage: progress?.watchPercentage ?? 0,
     isCompleted: progress?.isCompleted ?? false,
     completedAt: progress?.completedAt ?? null,
+    lastPositionSeconds: progress?.lastPositionSeconds ?? 0,
   })
 }
 
@@ -79,11 +81,12 @@ export async function POST(
 
   const existing = await prisma.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: user.userId, lessonId } },
-    select: { watchPercentage: true, isCompleted: true, completedAt: true },
+    select: { watchPercentage: true, isCompleted: true, completedAt: true, lastPositionSeconds: true },
   })
 
-  const { watchPercentage: requestedPercentage, isCompleted: requestedCompleted } = parsed.data
+  const { watchPercentage: requestedPercentage, isCompleted: requestedCompleted, positionSeconds } = parsed.data
   const watchPercentage = requestedPercentage ?? existing?.watchPercentage ?? 0
+  const lastPositionSeconds = positionSeconds ?? existing?.lastPositionSeconds ?? 0
 
   let isCompleted: boolean
   let completedAt: Date | null
@@ -98,9 +101,9 @@ export async function POST(
 
   const progress = await prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId: user.userId, lessonId } },
-    create: { userId: user.userId, lessonId, watchPercentage, isCompleted, completedAt },
-    update: { watchPercentage, isCompleted, completedAt, lastWatchedAt: new Date() },
-    select: { watchPercentage: true, isCompleted: true, completedAt: true },
+    create: { userId: user.userId, lessonId, watchPercentage, isCompleted, completedAt, lastPositionSeconds },
+    update: { watchPercentage, isCompleted, completedAt, lastPositionSeconds, lastWatchedAt: new Date() },
+    select: { watchPercentage: true, isCompleted: true, completedAt: true, lastPositionSeconds: true },
   })
 
   await ensureEnrollment(user.userId, lesson.module.courseId, user.role)

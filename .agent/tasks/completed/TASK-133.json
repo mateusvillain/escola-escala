@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Adicionar o campo",
-      "details": "Adicionar `lastPositionSeconds Int @default(0)` ao model `LessonProgress`.",
-      "pass": false
+      "details": "Adicionado `lastPositionSeconds Int @default(0)` ao model `LessonProgress` em `prisma/schema.prisma`.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_last_position_seconds`.",
-      "pass": false
+      "details": "Migration `20260618153818_add_last_position_seconds` aplicada com sucesso no Neon (`npx prisma migrate dev --name add_last_position_seconds`), seguida de `npx prisma generate`. Registros existentes não foram afetados (default 0).",
+      "pass": true
     }
   ],
   "dependencies": [

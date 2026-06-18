@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 interface BunnyPlayerProps {
   videoId: string
   lessonId: string
+  initialPositionSeconds?: number
 }
 
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_STREAM_LIBRARY_ID
@@ -16,25 +17,26 @@ function getEmbedUrl(videoId: string): string {
   return `${EMBED_ORIGIN}/embed/${LIBRARY_ID}/${videoId}`
 }
 
-export function BunnyPlayer({ videoId, lessonId }: BunnyPlayerProps) {
+export function BunnyPlayer({ videoId, lessonId, initialPositionSeconds }: BunnyPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const lastReportedAtRef = useRef(0)
   const latestPercentageRef = useRef(0)
+  const latestSecondsRef = useRef(0)
 
   useEffect(() => {
-    function postToPlayer(method: string, value?: string) {
+    function postToPlayer(method: string, value?: string | number) {
       iframeRef.current?.contentWindow?.postMessage(
         JSON.stringify({ context: PLAYER_CONTEXT, method, value }),
         EMBED_ORIGIN
       )
     }
 
-    function reportProgress(percentage: number) {
+    function reportProgress(percentage: number, positionSeconds: number) {
       lastReportedAtRef.current = Date.now()
       fetch(`/api/progress/${lessonId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ watchPercentage: percentage }),
+        body: JSON.stringify({ watchPercentage: percentage, positionSeconds: Math.floor(positionSeconds) }),
       }).catch(() => {})
     }
 
@@ -55,6 +57,9 @@ export function BunnyPlayer({ videoId, lessonId }: BunnyPlayerProps) {
         postToPlayer('addEventListener', 'timeupdate')
         postToPlayer('addEventListener', 'pause')
         postToPlayer('addEventListener', 'ended')
+        if (initialPositionSeconds && initialPositionSeconds > 0) {
+          postToPlayer('setCurrentTime', initialPositionSeconds)
+        }
         return
       }
 
@@ -66,16 +71,17 @@ export function BunnyPlayer({ videoId, lessonId }: BunnyPlayerProps) {
 
         const percentage = Math.min(100, Math.round((seconds / duration) * 100))
         latestPercentageRef.current = percentage
+        latestSecondsRef.current = seconds
 
         if (Date.now() - lastReportedAtRef.current >= REPORT_INTERVAL_MS) {
-          reportProgress(percentage)
+          reportProgress(percentage, seconds)
         }
         return
       }
 
       if (message.event === 'pause' || message.event === 'ended') {
         if (Date.now() - lastReportedAtRef.current < 1000) return
-        reportProgress(latestPercentageRef.current)
+        reportProgress(latestPercentageRef.current, latestSecondsRef.current)
       }
     }
 
@@ -83,10 +89,10 @@ export function BunnyPlayer({ videoId, lessonId }: BunnyPlayerProps) {
     return () => {
       window.removeEventListener('message', handleMessage)
       if (latestPercentageRef.current > 0) {
-        reportProgress(latestPercentageRef.current)
+        reportProgress(latestPercentageRef.current, latestSecondsRef.current)
       }
     }
-  }, [lessonId])
+  }, [lessonId, initialPositionSeconds])
 
   return (
     <div className="w-full rounded-xl overflow-hidden bg-black" style={{ aspectRatio: '16 / 9' }}>

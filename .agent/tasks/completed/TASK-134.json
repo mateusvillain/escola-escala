@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Aceitar o novo campo",
-      "details": "Editar o schema Zod do endpoint em `src/app/api/progress/[lessonId]/route.ts` para aceitar `positionSeconds`.",
-      "pass": false
+      "details": "Schema Zod do `POST /api/progress/[lessonId]` estendido com `positionSeconds: z.number().int().min(0).optional()`. `GET` também passou a retornar `lastPositionSeconds`. Nenhum campo existente (`watchPercentage`, `isCompleted`) teve seu comportamento alterado.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Persistir o valor",
-      "details": "Persistir o valor em `lastPositionSeconds` no `prisma.lessonProgress.upsert`.",
-      "pass": false
+      "details": "Valor persistido em `lastPositionSeconds` no `prisma.lessonProgress.upsert` (create e update), com fallback para o valor já existente quando não enviado (mesmo padrão usado para `watchPercentage`). `BunnyPlayer.tsx` foi ajustado para enviar `positionSeconds` (arredondado) em todo `reportProgress`, não só na carga inicial.",
+      "pass": true
     }
   ],
   "dependencies": [

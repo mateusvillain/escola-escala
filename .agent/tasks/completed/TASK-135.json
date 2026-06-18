@@ -1,0 +1,30 @@
+{
+  "id": "TASK-135",
+  "title": "Player retoma do ponto salvo",
+  "category": "ui-ux",
+  "description": "Ao abrir uma aula já iniciada, o player deve começar a partir de lastPositionSeconds em vez do início.",
+  "acceptanceCriteria": [
+    "Página da aula busca `lastPositionSeconds` do progresso atual do aluno e passa ao `BunnyPlayer`",
+    "`BunnyPlayer` usa o parâmetro de tempo inicial do embed do Bunny Stream para começar no ponto certo",
+    "Aula nunca assistida começa do zero, normalmente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Repassar a posição salva",
+      "details": "`src/app/cursos/[slug]/aulas/[lessonId]/page.tsx` agora seleciona `lastPositionSeconds` junto com o restante do progresso e repassa via prop `initialPositionSeconds` ao `BunnyPlayer`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Usar o parâmetro de tempo do embed",
+      "details": "[Nota: validei empiricamente contra o embed real, igual à TASK-50 — a suposição original (parâmetro de URL `?t=`) não é o mecanismo certo: o player ignora um `t=` fora do range testado e, mais importante, o protocolo player.js já usado neste componente expõe o método `setCurrentTime` (confirmado na lista `methods` do evento `ready`). Usar a URL exigiria um novo carregamento de página por aula para cada posição, enquanto `postMessage` reaproveita o canal já estabelecido. Implementado: ao receber o evento `ready`, se `initialPositionSeconds > 0`, chama `postToPlayer('setCurrentTime', initialPositionSeconds)` — IMPORTANTE: o valor deve ser enviado como **número**, não string; testei com string e o player ignorava silenciosamente o seek (caía para 0). Validado de ponta a ponta na aplicação real: usuário com `lastPositionSeconds=8` salvo no banco abriu a aula e o primeiro evento `timeupdate` já reportou `seconds:8` (vídeo de teste com `duration≈20s`). Aula nunca assistida (lastPositionSeconds=0) inicia normalmente do zero, sem chamar `setCurrentTime`.]",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-134",
+    "TASK-44"
+  ],
+  "estimatedComplexity": "medium"
+}
