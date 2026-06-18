@@ -173,15 +173,16 @@ model CourseEnrollment {
 }
 
 model LessonProgress {
-  id              String    @id @default(uuid())
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  lessonId        String
-  lesson          Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  watchPercentage Float     @default(0)
-  isCompleted     Boolean   @default(false)
-  completedAt     DateTime?
-  lastWatchedAt   DateTime  @default(now())
+  id                  String    @id @default(uuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+  lessonId            String
+  lesson              Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  watchPercentage     Float     @default(0)
+  isCompleted         Boolean   @default(false)
+  completedAt         DateTime?
+  lastPositionSeconds Int       @default(0)
+  lastWatchedAt       DateTime  @default(now())
 
   @@unique([userId, lessonId])
 }
