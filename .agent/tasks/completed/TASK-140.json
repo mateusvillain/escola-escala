@@ -12,20 +12,20 @@
     {
       "step": 1,
       "description": "Criar o endpoint",
-      "details": "Criar `src/app/api/admin/subscriptions/export/route.ts` com handler `GET` (admin-only).",
-      "pass": false
+      "details": "Criado `src/app/api/admin/subscriptions/export/route.ts` com handler `GET` (admin-only via `requireRole`).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Formatar como CSV",
-      "details": "Reaproveitar a query de `GET /api/admin/subscriptions`, formatando o resultado como CSV com escape correto de vírgulas/aspas.",
-      "pass": false
+      "details": "Reaproveitados os mesmos filtros `status`/`planType` de `GET /api/admin/subscriptions` (sem paginação — exporta todos os registros filtrados). Formatação via novo helper `src/lib/csv.ts` (`toCsv`), com escape correto de campos contendo vírgula/aspas/quebra de linha (testado manualmente com nome contendo vírgula e aspas).",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Forçar o download",
-      "details": "Definir headers de resposta para forçar download do arquivo.",
-      "pass": false
+      "details": "Headers `Content-Type: text/csv; charset=utf-8` e `Content-Disposition: attachment; filename=\"assinaturas.csv\"` via helper `csvResponseHeaders`. Testado com curl autenticado como admin: 200 com CSV correto; sem cookie retorna 401.",
+      "pass": true
     }
   ],
   "dependencies": [

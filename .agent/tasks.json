@@ -976,22 +976,22 @@
     "id": "TASK-140",
     "title": "GET /api/admin/subscriptions/export",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-140.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-140.json",
+    "passes": true
   },
   {
     "id": "TASK-141",
     "title": "GET /api/admin/users/export",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-141.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-141.json",
+    "passes": true
   },
   {
     "id": "TASK-142",
     "title": "Botão \"Exportar CSV\" nas tabelas admin",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-142.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-142.json",
+    "passes": true
   },
   {
     "id": "TASK-143",
