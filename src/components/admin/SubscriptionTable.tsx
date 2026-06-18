@@ -96,6 +96,13 @@ export function SubscriptionTable() {
     [pathname, searchParams]
   )
 
+  const exportUrl = useCallback(() => {
+    const params = new URLSearchParams()
+    if (currentStatus) params.set('status', currentStatus)
+    if (currentPlanType) params.set('planType', currentPlanType)
+    return `/api/admin/subscriptions/export?${params}`
+  }, [currentStatus, currentPlanType])
+
   const fetchSubscriptions = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -125,6 +132,12 @@ export function SubscriptionTable() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <lui-heading level="1" size="xl">Assinaturas</lui-heading>
+        <a
+          href={exportUrl()}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Exportar CSV
+        </a>
       </div>
 
       {/* Filters */}

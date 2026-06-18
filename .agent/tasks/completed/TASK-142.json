@@ -10,14 +10,14 @@
     {
       "step": 1,
       "description": "Adicionar em SubscriptionTable",
-      "details": "Adicionar botão em `src/components/admin/SubscriptionTable.tsx` apontando para `/api/admin/subscriptions/export` com os filtros atuais como query string.",
-      "pass": false
+      "details": "Adicionado link \"Exportar CSV\" em `src/components/admin/SubscriptionTable.tsx`, apontando para `/api/admin/subscriptions/export` com `status`/`planType` atuais como query string (mesmos filtros usados na listagem).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar em UserTable",
-      "details": "Repetir em `src/components/admin/UserTable.tsx` apontando para `/api/admin/users/export`.",
-      "pass": false
+      "details": "Repetido em `src/components/admin/UserTable.tsx`, apontando para `/api/admin/users/export` com `role`/`search` atuais como query string. Confirmado visualmente (render server-side contém o texto \"Exportar CSV\" na página `/admin/assinaturas\").",
+      "pass": true
     }
   ],
   "dependencies": [

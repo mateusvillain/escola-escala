@@ -117,6 +117,13 @@ export function UserTable() {
     [pathname, searchParams]
   )
 
+  const exportUrl = useCallback(() => {
+    const params = new URLSearchParams()
+    if (currentRole) params.set('role', currentRole)
+    if (currentSearch) params.set('search', currentSearch)
+    return `/api/admin/users/export?${params}`
+  }, [currentRole, currentSearch])
+
   const fetchUsers = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -195,6 +202,12 @@ export function UserTable() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <lui-heading level="1" size="xl">Usuários</lui-heading>
+        <a
+          href={exportUrl()}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Exportar CSV
+        </a>
       </div>
 
       {/* Filters */}

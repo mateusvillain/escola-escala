@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Criar o endpoint",
-      "details": "Criar `src/app/api/admin/users/export/route.ts` com handler `GET` (admin-only).",
-      "pass": false
+      "details": "Criado `src/app/api/admin/users/export/route.ts` com handler `GET` (admin-only via `requireRole`).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Formatar como CSV",
-      "details": "Reaproveitar a query de `GET /api/admin/users`, formatando como CSV.",
-      "pass": false
+      "details": "Reaproveitados os mesmos filtros `role`/`search` de `GET /api/admin/users` (sem paginação). Formatação via `src/lib/csv.ts` (`toCsv`). Testado manualmente com curl: export sem filtro, com filtro `role=student`, e com `search` isolando um usuário de teste com nome contendo vírgula e aspas — escapado corretamente (`\"Teste, \"\"Especial\"\"\"`). Usuário de teste removido por ID exato ao final.",
+      "pass": true
     }
   ],
   "dependencies": [
