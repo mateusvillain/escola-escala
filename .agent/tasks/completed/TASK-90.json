@@ -12,14 +12,14 @@
     {
       "step": 1,
       "description": "Habilitar o parâmetro",
-      "details": "Editar `src/app/api/subscriptions/checkout/route.ts` incluindo `allow_promotion_codes: true`.",
-      "pass": false
+      "details": "Adicionado `allow_promotion_codes: true` à criação da Checkout Session em `src/app/api/subscriptions/checkout/route.ts`. A sessão não envia `discounts`, então não há conflito com o parâmetro (Stripe rejeita os dois juntos).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Testar com cupom de teste",
-      "details": "Criar um cupom de teste no Stripe Dashboard (modo teste) e validar o fluxo completo de checkout com o código aplicado.",
-      "pass": false
+      "details": "Cupom e Promotion Code de teste `10OFF` (10% off, duration `once`, first_time_transaction) já existiam no Stripe Dashboard em modo teste. Validado de ponta a ponta via Playwright contra um usuário de teste recém-criado: login → /planos → checkout do Plano Básico → tela de Checkout mostrou R$80,00 → clique em \"Add promotion code\" → código `10OFF` aplicado → total atualizado para R$72,00 (desconto de R$8,00, 10%) → pagamento concluído com cartão de teste 4242 4242 4242 4242 → confirmado via API da Stripe que a subscription criada teve invoice com `amount_paid: 7200` e `total_discount_amounts: [{amount: 800}]`. Subscription e customer de teste cancelados/removidos na Stripe e usuário de teste removido do banco por e-mail exato ao final.",
+      "pass": true
     }
   ],
   "dependencies": [
