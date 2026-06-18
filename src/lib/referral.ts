@@ -12,6 +12,14 @@ function generateCode(): string {
   return code
 }
 
+// Código inválido ou do próprio usuário é tratado como ausente (sem erro) por quem chama esta função.
+export async function validateReferralCode(code: string, currentUserId: string | null): Promise<string | null> {
+  const referral = await prisma.referralCode.findUnique({ where: { code } })
+  if (!referral) return null
+  if (currentUserId && referral.ownerUserId === currentUserId) return null
+  return referral.code
+}
+
 export async function getOrCreateReferralCode(userId: string): Promise<string> {
   const existing = await prisma.referralCode.findUnique({ where: { ownerUserId: userId } })
   if (existing) return existing.code

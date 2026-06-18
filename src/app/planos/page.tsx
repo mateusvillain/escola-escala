@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
+import { validateReferralCode } from '@/lib/referral'
 import { PlansClient } from './PlansClient'
 import Link from 'next/link'
 
@@ -45,6 +46,8 @@ export default async function PlanosPage({
     premiumAnnual: process.env.STRIPE_PRICE_ID_PREMIUM_ANNUAL!,
   }
 
+  const validReferralCode = ref ? (await validateReferralCode(ref, userId)) ?? undefined : undefined
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200">
@@ -87,7 +90,7 @@ export default async function PlanosPage({
           priceIds={priceIds}
           isAuthenticated={!!userId}
           activeSubscription={activeSubscription}
-          referralCode={ref}
+          referralCode={validReferralCode}
         />
       </main>
     </div>

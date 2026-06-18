@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { validateReferralCode } from '@/lib/referral'
 
 const schema = z.object({
   priceId: z.string().min(1),
@@ -49,14 +50,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Você já possui uma assinatura ativa' }, { status: 409 })
   }
 
-  // Código inválido ou do próprio usuário é ignorado silenciosamente — não bloqueia o checkout.
-  let validReferralCode: string | undefined
-  if (referralCode) {
-    const referral = await prisma.referralCode.findUnique({ where: { code: referralCode } })
-    if (referral && referral.ownerUserId !== dbUser.id) {
-      validReferralCode = referral.code
-    }
-  }
+  const validReferralCode = referralCode
+    ? (await validateReferralCode(referralCode, dbUser.id)) ?? undefined
+    : undefined
 
   let stripeCustomerId = dbUser.stripeCustomerId
 
