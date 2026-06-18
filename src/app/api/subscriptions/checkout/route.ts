@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
     success_url: `${appUrl}/dashboard?checkout=success`,
     cancel_url: `${appUrl}/planos`,
     metadata: { userId: dbUser.id },
+    allow_promotion_codes: true,
   })
 
   return NextResponse.json({ checkoutUrl: session.url })

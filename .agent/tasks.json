@@ -626,15 +626,15 @@
     "id": "TASK-90",
     "title": "Habilitar allow_promotion_codes no Checkout",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-90.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-90.json",
+    "passes": true
   },
   {
     "id": "TASK-91",
     "title": "Documentar processo de criação de cupons",
     "category": "documentation",
-    "specFilePath": ".agent/tasks/TASK-91.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-91.json",
+    "passes": true
   },
   {
     "id": "TASK-92",

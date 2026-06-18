@@ -11,14 +11,14 @@
     {
       "step": 1,
       "description": "Criar o documento",
-      "details": "Criar `docs/cupons-stripe.md` com o passo a passo de criação de Coupon + Promotion Code no Stripe Dashboard.",
-      "pass": false
+      "details": "Criado `docs/cupons-stripe.md` com o passo a passo de criação de Coupon (tipo de desconto, duration, redemption limit, expiration) e Promotion Code vinculado (código, restrições próprias como first-time-transaction e validade), além da nota sobre a incompatibilidade entre `allow_promotion_codes` e `discounts` na mesma Checkout Session (relevante para o futuro grupo de Programa de Indicação).",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Documentar relatórios",
-      "details": "Incluir descrição de onde encontrar relatórios de redemptions no Stripe Dashboard.",
-      "pass": false
+      "details": "Incluída seção \"Onde ver os relatórios de uso (redemptions)\" explicando onde consultar redemptions agregados por Coupon, por Promotion Code individual, e como cruzar com a exportação de assinaturas (`/admin/assinaturas`) para reconciliação financeira.",
+      "pass": true
     }
   ],
   "dependencies": [
