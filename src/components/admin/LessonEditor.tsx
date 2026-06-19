@@ -38,6 +38,12 @@ const ERROR_CLASS = 'mt-1 text-xs text-red-600'
 
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_STREAM_LIBRARY_ID
 
+const CAPTION_LANGUAGE_OPTIONS = [
+  { value: 'pt', label: 'Português' },
+  { value: 'en', label: 'Inglês' },
+  { value: 'es', label: 'Espanhol' },
+] as const
+
 function getEmbedUrl(videoId: string): string {
   return `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}`
 }
@@ -83,8 +89,7 @@ export function LessonEditor({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [captionLanguage, setCaptionLanguage] = useState('pt')
-  const [captionLabel, setCaptionLabel] = useState('')
+  const [captionLanguage, setCaptionLanguage] = useState<string>(CAPTION_LANGUAGE_OPTIONS[0].value)
   const [captionUploading, setCaptionUploading] = useState(false)
   const [captionError, setCaptionError] = useState<string | null>(null)
   const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
@@ -193,10 +198,13 @@ export function LessonEditor({
     setCaptionUploading(true)
 
     try {
+      const selectedOption =
+        CAPTION_LANGUAGE_OPTIONS.find(o => o.value === captionLanguage) ?? CAPTION_LANGUAGE_OPTIONS[0]
+
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('language', captionLanguage.trim() || 'pt')
-      if (captionLabel.trim()) formData.append('label', captionLabel.trim())
+      formData.append('language', selectedOption.value)
+      formData.append('label', selectedOption.label)
 
       const res = await fetch(`/api/admin/videos/${videoId}/captions`, {
         method: 'POST',
@@ -474,7 +482,12 @@ export function LessonEditor({
                                 'Excluindo...'
                               ) : (
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9.5 7V4a1 1 0 011-1h3a1 1 0 011 1v3M4 7h16"
+                                  />
                                 </svg>
                               )}
                             </button>
@@ -483,22 +496,17 @@ export function LessonEditor({
                       </ul>
                     )}
 
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="text"
-                        value={captionLanguage}
-                        onChange={e => setCaptionLanguage(e.target.value)}
-                        placeholder="Idioma (ex: pt, en)"
-                        className={`${INPUT_CLASS} !w-32 shrink-0`}
-                      />
-                      <input
-                        type="text"
-                        value={captionLabel}
-                        onChange={e => setCaptionLabel(e.target.value)}
-                        placeholder="Nome de exibição (ex: Português)"
-                        className={`${INPUT_CLASS} flex-1`}
-                      />
-                    </div>
+                    <select
+                      value={captionLanguage}
+                      onChange={e => setCaptionLanguage(e.target.value)}
+                      className={`${INPUT_CLASS} mb-2`}
+                    >
+                      {CAPTION_LANGUAGE_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                     <label className="sr-only" htmlFor="caption-upload">
                       Arquivo de legenda
                     </label>
