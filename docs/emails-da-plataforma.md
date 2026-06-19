@@ -4,19 +4,21 @@ Este documento lista os e-mails que a aplicação envia hoje, onde cada parte (c
 
 ## 1. E-mails enviados atualmente
 
-Hoje existem **3 e-mails automáticos** em produção — todos transacionais (disparados por uma ação do usuário ou pelo ciclo da própria assinatura dele, não campanhas em lote).
+Hoje existem **4 e-mails automáticos** em produção — todos transacionais (disparados por uma ação do usuário ou pelo ciclo da própria assinatura dele, não campanhas em lote).
 
 | E-mail | Quando é disparado | Assunto | Link incluído | Implementação |
 |---|---|---|---|---|
 | **Recuperação de senha** | Usuário pede redefinição em `/recuperar-senha` (`POST /api/auth/forgot-password`) | "Redefinição de senha — {nome do app}" | Link para `/redefinir-senha?token=...`, válido por **1 hora** | `sendPasswordResetEmail()` em `src/lib/email.ts`, template `passwordResetEmailHtml()` em `src/lib/email-templates.ts` |
 | **Boas-vindas** | Primeira assinatura ativada com sucesso (webhook `checkout.session.completed`) — **não** dispara em renovações | "Bem-vindo à plataforma!" | Link para `/dashboard` | `sendWelcomeEmail()` chamado em `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), template `welcomeEmailHtml()` |
 | **Aviso de fim de trial** | Webhook `customer.subscription.trial_will_end` (3 dias antes da 1ª cobrança) — só ocorre para usuários com trial concedido manualmente pelo admin (TASK-85 a 87) | "Seu período de teste está acabando" | Link para `/dashboard/assinatura` | `sendTrialEndingEmail()` chamado em `handleTrialWillEnd` (`src/lib/stripe-handlers.ts`), template `trialEndingEmailHtml()` |
+| **Cobrança falhada** | Webhook `invoice.payment_failed` (TASK-115/116) | "Não conseguimos processar seu pagamento" | Link real para o **Stripe Customer Portal**, gerado on-the-fly a cada envio (mesmo padrão de `POST /api/subscriptions/portal`, `return_url` para `/dashboard/assinatura`) | `sendPaymentFailedEmail()` chamado em `handleInvoicePaymentFailed` (`src/lib/stripe-handlers.ts`), template `paymentFailedEmailHtml()` |
 
 Detalhes de comportamento:
 
 - **Recuperação de senha** não revela se o e-mail existe ou não na base — a resposta da API é sempre a mesma mensagem genérica ("se esse e-mail estiver cadastrado..."), para não permitir enumeração de contas.
 - **Recuperação de senha** é protegida por rate limit: **10 requisições/minuto por IP** (`src/lib/rate-limit.ts`), em memória — reseta a cada deploy/restart, não é distribuído entre instâncias.
 - **Boas-vindas** só dispara uma vez por usuário: a condição é `subscriptionCount === 1` no momento do webhook, então upgrades/downgrades de plano ou renovações não geram um novo e-mail de boas-vindas.
+- **Cobrança falhada** dispara a cada tentativa de cobrança que falha (sem deduplicação) — se o Stripe tentar cobrar de novo e falhar novamente, um novo e-mail é enviado a cada `invoice.payment_failed`. A marcação da assinatura como `past_due` acontece sempre, independente do envio do e-mail; a busca do `User` pelo `stripeCustomerId`, a criação da sessão do portal e o envio do e-mail ficam num try/catch **separado**, então uma falha nessa etapa (ex: usuário não encontrado, API do Stripe fora do ar) não impede a marcação `past_due` nem interrompe o processamento do webhook.
 
 ## 2. Onde gerenciar cada parte
 
@@ -44,11 +46,10 @@ Se `SMTP_HOST` não estiver definido (ou estiver com o placeholder `TODO_FILL_MA
 
 ## 6. E-mails planejados na Fase 2 — ainda não implementados
 
-A seção 13 do PRD (`.agent/prd/PRD.md`) e `docs/fase2-grupos-de-trabalho.md` já têm tasks especificadas para mais 3 e-mails automáticos, mas **nenhum deles existe em produção ainda** (o aviso de fim de trial, TASK-85 a 87, já está implementado e listado na seção 1):
+A seção 13 do PRD (`.agent/prd/PRD.md`) e `docs/fase2-grupos-de-trabalho.md` já têm tasks especificadas para mais 2 e-mails automáticos, mas **nenhum deles existe em produção ainda** (o aviso de fim de trial, TASK-85 a 87, e o de cobrança falhada, TASK-115/116, já estão implementados e listados na seção 1):
 
 | E-mail planejado | Gatilho | Task |
 |---|---|---|
-| Cobrança falhada | Webhook `invoice.payment_failed` | TASK-115/116 |
 | Upsell (básico → premium) | Cron mensal — alunos que viram o `UpgradePrompt` há +3 dias sem converter | TASK-102 |
 | Retomada de curso ("continue de onde parou") | Cron mensal — alunos inativos há +7 dias com curso incompleto | TASK-113/114 |
 

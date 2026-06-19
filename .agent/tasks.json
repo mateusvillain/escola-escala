@@ -801,15 +801,15 @@
     "id": "TASK-115",
     "title": "E-mail de cobrança falhada",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-115.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-115.json",
+    "passes": true
   },
   {
     "id": "TASK-116",
     "title": "Template de e-mail de cobrança falhada",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-116.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-116.json",
+    "passes": true
   },
   {
     "id": "TASK-117",

@@ -1,7 +1,7 @@
 import type Stripe from 'stripe'
 import { stripe } from './stripe'
 import { prisma } from './prisma'
-import { sendWelcomeEmail, sendTrialEndingEmail } from './email'
+import { sendWelcomeEmail, sendTrialEndingEmail, sendPaymentFailedEmail } from './email'
 
 type PlanType = 'basic' | 'premium'
 type BillingCycle = 'monthly' | 'annual'
@@ -176,6 +176,28 @@ export async function handleInvoicePaymentFailed(
   })
 
   console.log(`[stripe] invoice.payment_failed: subscription ${stripeSubscriptionId} marcada como past_due`)
+
+  const stripeCustomerId =
+    typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id
+
+  if (stripeCustomerId) {
+    const user = await prisma.user.findFirst({
+      where: { stripeCustomerId },
+      select: { email: true, name: true },
+    })
+
+    if (user) {
+      try {
+        const portalSession = await stripe.billingPortal.sessions.create({
+          customer: stripeCustomerId,
+          return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/assinatura`,
+        })
+        await sendPaymentFailedEmail(user.email, user.name, portalSession.url)
+      } catch (err) {
+        console.error('[stripe] falha ao enviar e-mail de cobrança falhada:', err)
+      }
+    }
+  }
 }
 
 export async function handleCustomerSubscriptionDeleted(

@@ -1,5 +1,10 @@
 import nodemailer from "nodemailer";
-import { passwordResetEmailHtml, welcomeEmailHtml, trialEndingEmailHtml } from "./email-templates";
+import {
+  passwordResetEmailHtml,
+  welcomeEmailHtml,
+  trialEndingEmailHtml,
+  paymentFailedEmailHtml,
+} from "./email-templates";
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -88,5 +93,13 @@ export async function sendTrialEndingEmail(
     to: email,
     subject: "Seu período de teste está acabando",
     html: trialEndingEmailHtml(name, formattedDate, formattedPrice),
+  });
+}
+
+export async function sendPaymentFailedEmail(email: string, name: string, portalUrl: string) {
+  await sendEmail({
+    to: email,
+    subject: "Não conseguimos processar seu pagamento",
+    html: paymentFailedEmailHtml(name, portalUrl),
   });
 }
