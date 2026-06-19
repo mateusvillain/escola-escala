@@ -13,25 +13,25 @@
       "step": 1,
       "description": "Criar o endpoint",
       "details": "Criar `src/app/api/courses/[slug]/search/route.ts` com handler `GET`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar com contains",
       "details": "Usar `contains` (case-insensitive) do Prisma sobre os três campos das aulas do curso.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Filtrar por acesso",
       "details": "Filtrar o resultado pela mesma regra de `checkLessonAccess`/plano do curso.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Gerar o snippet",
       "details": "Gerar o snippet a partir da posição do termo encontrado no campo correspondente.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

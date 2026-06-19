@@ -913,15 +913,15 @@
     "id": "TASK-131",
     "title": "GET /api/courses/[slug]/search",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-131.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-131.json",
+    "passes": true
   },
   {
     "id": "TASK-132",
     "title": "Campo de busca na CourseSidebar",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-132.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-132.json",
+    "passes": true
   },
   {
     "id": "TASK-133",
