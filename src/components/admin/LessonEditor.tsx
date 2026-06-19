@@ -89,10 +89,11 @@ export function LessonEditor({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [captionLanguage, setCaptionLanguage] = useState<string>(CAPTION_LANGUAGE_OPTIONS[0].value)
+  const [captionLanguage, setCaptionLanguage] = useState<string>('')
   const [captionUploading, setCaptionUploading] = useState(false)
   const [captionError, setCaptionError] = useState<string | null>(null)
   const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
+  const captionFileInputRef = useRef<HTMLInputElement>(null)
 
   const [captions, setCaptions] = useState<VideoCaption[]>([])
   const [captionsLoading, setCaptionsLoading] = useState(false)
@@ -193,14 +194,18 @@ export function LessonEditor({
 
   const handleCaptionSelected = async (file: File) => {
     if (!videoId) return
+
+    const selectedOption = CAPTION_LANGUAGE_OPTIONS.find(o => o.value === captionLanguage)
+    if (!selectedOption) {
+      setCaptionError('Selecione um idioma antes de enviar o arquivo.')
+      return
+    }
+
     setCaptionError(null)
     setCaptionSuccess(null)
     setCaptionUploading(true)
 
     try {
-      const selectedOption =
-        CAPTION_LANGUAGE_OPTIONS.find(o => o.value === captionLanguage) ?? CAPTION_LANGUAGE_OPTIONS[0]
-
       const formData = new FormData()
       formData.append('file', file)
       formData.append('language', selectedOption.value)
@@ -218,6 +223,8 @@ export function LessonEditor({
       }
 
       setCaptionSuccess(`Legenda "${data.label}" (${data.language}) enviada com sucesso.`)
+      setCaptionLanguage('')
+      if (captionFileInputRef.current) captionFileInputRef.current.value = ''
       fetchCaptions(videoId)
     } catch {
       setCaptionError('Falha de conexão ao enviar a legenda.')
@@ -272,6 +279,9 @@ export function LessonEditor({
   }
 
   const durationLabel = formatDuration(videoDuration)
+  const availableCaptionLanguages = CAPTION_LANGUAGE_OPTIONS.filter(
+    option => !captions.some(c => c.srclang === option.value)
+  )
 
   return (
     <div className="max-w-2xl">
@@ -496,40 +506,52 @@ export function LessonEditor({
                       </ul>
                     )}
 
-                    <select
-                      value={captionLanguage}
-                      onChange={e => setCaptionLanguage(e.target.value)}
-                      className={`${INPUT_CLASS} mb-2`}
-                    >
-                      {CAPTION_LANGUAGE_OPTIONS.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="sr-only" htmlFor="caption-upload">
-                      Arquivo de legenda
-                    </label>
-                    <input
-                      id="caption-upload"
-                      type="file"
-                      accept=".vtt"
-                      disabled={captionUploading}
-                      onChange={e => {
-                        const file = e.target.files?.[0]
-                        if (file) handleCaptionSelected(file)
-                      }}
-                      className="block w-full text-sm text-gray-600"
-                    />
-                    <p className="mt-1 text-xs text-gray-400">
-                      Se já existir uma legenda nesse código de idioma, ela será substituída.
-                    </p>
-                    {captionUploading && (
-                      <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
-                    )}
-                    {captionError && <p className="mt-1 text-xs text-red-600">{captionError}</p>}
-                    {captionSuccess && (
-                      <p className="mt-1 text-xs text-green-600">{captionSuccess}</p>
+                    {!captionsLoading && availableCaptionLanguages.length === 0 ? (
+                      <p className="text-xs text-gray-400">
+                        Todos os idiomas disponíveis já têm legenda enviada.
+                      </p>
+                    ) : (
+                      <>
+                        <select
+                          value={captionLanguage}
+                          onChange={e => setCaptionLanguage(e.target.value)}
+                          className={`${INPUT_CLASS} mb-2`}
+                        >
+                          <option value="" disabled>
+                            Selecione um idioma
+                          </option>
+                          {availableCaptionLanguages.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="sr-only" htmlFor="caption-upload">
+                          Arquivo de legenda
+                        </label>
+                        <input
+                          ref={captionFileInputRef}
+                          id="caption-upload"
+                          type="file"
+                          accept=".vtt"
+                          disabled={captionUploading || !captionLanguage}
+                          onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (file) handleCaptionSelected(file)
+                          }}
+                          className="block w-full text-sm text-gray-600"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">
+                          Se já existir uma legenda nesse código de idioma, ela será substituída.
+                        </p>
+                        {captionUploading && (
+                          <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
+                        )}
+                        {captionError && <p className="mt-1 text-xs text-red-600">{captionError}</p>}
+                        {captionSuccess && (
+                          <p className="mt-1 text-xs text-green-600">{captionSuccess}</p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
