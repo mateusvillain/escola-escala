@@ -395,7 +395,7 @@ export function LessonEditor({
                         value={captionLanguage}
                         onChange={e => setCaptionLanguage(e.target.value)}
                         placeholder="Idioma (ex: pt, en)"
-                        className={`${INPUT_CLASS} w-32`}
+                        className={`${INPUT_CLASS} !w-32 shrink-0`}
                       />
                       <input
                         type="text"
