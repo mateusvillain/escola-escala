@@ -12,19 +12,19 @@
       "step": 1,
       "description": "Buscar o usuário",
       "details": "Editar `handleInvoicePaymentFailed` para buscar o `User` pelo `stripeCustomerId` da assinatura.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Disparar o e-mail",
       "details": "Chamar `sendPaymentFailedEmail` passando nome, e-mail e link do portal.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Tratar falha de envio",
       "details": "Envolver o envio em try/catch com log, sem interromper o processamento do webhook, igual ao padrão do e-mail de boas-vindas.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

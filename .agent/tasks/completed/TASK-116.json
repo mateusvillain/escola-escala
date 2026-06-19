@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Criar o template",
       "details": "Adicionar `paymentFailedEmailHtml` em `src/lib/email-templates.ts`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar a função de envio",
       "details": "Adicionar `sendPaymentFailedEmail` em `src/lib/email.ts`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [
