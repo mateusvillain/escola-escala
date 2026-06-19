@@ -541,9 +541,6 @@ export function LessonEditor({
                           }}
                           className="block w-full text-sm text-gray-600"
                         />
-                        <p className="mt-1 text-xs text-gray-400">
-                          Se já existir uma legenda nesse código de idioma, ela será substituída.
-                        </p>
                         {captionUploading && (
                           <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
                         )}
