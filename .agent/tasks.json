@@ -696,21 +696,21 @@
     "id": "TASK-100",
     "title": "Tabela UpgradePromptEvent",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-100.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-100.json",
     "passes": false
   },
   {
     "id": "TASK-101",
     "title": "Registrar evento ao exibir UpgradePrompt",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-101.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-101.json",
     "passes": false
   },
   {
     "id": "TASK-102",
     "title": "E-mail automático de upsell",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-102.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-102.json",
     "passes": false
   },
   {
@@ -780,21 +780,21 @@
     "id": "TASK-112",
     "title": "Identificar alunos inativos com curso incompleto",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-112.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-112.json",
     "passes": false
   },
   {
     "id": "TASK-113",
     "title": "Template de e-mail \"continue de onde parou\"",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-113.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-113.json",
     "passes": false
   },
   {
     "id": "TASK-114",
     "title": "Endpoint de cron para e-mails de reengajamento",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-114.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-114.json",
     "passes": false
   },
   {
@@ -843,14 +843,14 @@
     "id": "TASK-121",
     "title": "Calcular streak de dias consecutivos",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-121.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-121.json",
     "passes": false
   },
   {
     "id": "TASK-122",
     "title": "Indicador de streak no dashboard",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-122.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-122.json",
     "passes": false
   },
   {
