@@ -1,11 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 
 interface SidebarLesson {
   id: string
   title: string
+}
+
+interface SearchResult {
+  moduleId: string
+  lessonId: string
+  title: string
+  snippet: string
+}
+
+function highlightTerm(snippet: string, term: string): ReactNode {
+  const idx = snippet.toLowerCase().indexOf(term.toLowerCase())
+  if (!term || idx === -1) return snippet
+
+  return (
+    <>
+      {snippet.slice(0, idx)}
+      <mark className="bg-yellow-200 text-gray-900 rounded px-0.5">
+        {snippet.slice(idx, idx + term.length)}
+      </mark>
+      {snippet.slice(idx + term.length)}
+    </>
+  )
 }
 
 interface SidebarModule {
@@ -88,6 +110,38 @@ export function CourseSidebar({
   const [collapsed, setCollapsed] = useState(true)
   const percentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [searching, setSearching] = useState(false)
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+
+    const trimmed = value.trim()
+    if (!trimmed) {
+      setSearchResults([])
+      setSearching(false)
+      return
+    }
+
+    searchDebounceRef.current = setTimeout(async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(`/api/courses/${courseSlug}/search?q=${encodeURIComponent(trimmed)}`)
+        const data = await res.json()
+        setSearchResults(res.ok ? data.results ?? [] : [])
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 300)
+  }
+
+  const isSearching = searchQuery.trim().length > 0
+
   return (
     <div>
       <button
@@ -109,65 +163,107 @@ export function CourseSidebar({
 
       <div className={`${collapsed ? 'hidden' : 'block'} md:block border border-gray-200 rounded-xl overflow-hidden bg-white`}>
         <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            {completedCount} de {totalCount} aula{totalCount !== 1 ? 's' : ''} concluída{completedCount !== 1 ? 's' : ''}
-          </p>
-          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-2 bg-blue-600 rounded-full transition-all"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={e => handleSearchChange(e.target.value)}
+            placeholder="Buscar nas aulas..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
 
-        <div className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
-          {modules.map(module => (
-            <div key={module.id} className="py-2">
-              <p className="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                {module.title}
-              </p>
-              <ul>
-                {module.lessons.map(lesson => {
-                  const isCurrent = lesson.id === currentLessonId
-                  const isCompleted = progress[lesson.id] ?? false
-                  return (
-                    <li key={lesson.id}>
+        {!isSearching && (
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              {completedCount} de {totalCount} aula{totalCount !== 1 ? 's' : ''} concluída{completedCount !== 1 ? 's' : ''}
+            </p>
+            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-blue-600 rounded-full transition-all"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {isSearching ? (
+          <div className="max-h-[70vh] overflow-y-auto">
+            {searching && (
+              <p className="px-4 py-3 text-sm text-gray-400">Buscando...</p>
+            )}
+            {!searching && searchResults.length === 0 && (
+              <p className="px-4 py-3 text-sm text-gray-400">Nenhum resultado encontrado.</p>
+            )}
+            {!searching && searchResults.length > 0 && (
+              <ul className="divide-y divide-gray-50">
+                {searchResults.map(result => (
+                  <li key={result.lessonId}>
+                    <Link
+                      href={`/cursos/${courseSlug}/aulas/${result.lessonId}`}
+                      className="block px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="block text-sm font-medium text-gray-700 truncate">
+                        {result.title}
+                      </span>
+                      <span className="block text-xs text-gray-500 mt-0.5">
+                        {highlightTerm(result.snippet, searchQuery.trim())}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
+            {modules.map(module => (
+              <div key={module.id} className="py-2">
+                <p className="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                  {module.title}
+                </p>
+                <ul>
+                  {module.lessons.map(lesson => {
+                    const isCurrent = lesson.id === currentLessonId
+                    const isCompleted = progress[lesson.id] ?? false
+                    return (
+                      <li key={lesson.id}>
+                        <Link
+                          href={`/cursos/${courseSlug}/aulas/${lesson.id}`}
+                          className={`flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
+                            isCurrent
+                              ? 'bg-blue-50 text-blue-700 font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <LessonIcon isCompleted={isCompleted} isCurrent={isCurrent} />
+                          <span className="truncate">{lesson.title}</span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+
+                  {module.quiz && module.lessons.every(l => progress[l.id]) && (
+                    <li>
                       <Link
-                        href={`/cursos/${courseSlug}/aulas/${lesson.id}`}
+                        href={`/cursos/${courseSlug}/modulos/${module.id}/quiz`}
                         className={`flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
-                          isCurrent
+                          currentQuizModuleId === module.id
                             ? 'bg-blue-50 text-blue-700 font-medium'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        <LessonIcon isCompleted={isCompleted} isCurrent={isCurrent} />
-                        <span className="truncate">{lesson.title}</span>
+                        <QuizIcon isPassed={module.quiz.passed} isCurrent={currentQuizModuleId === module.id} />
+                        <span className="truncate">
+                          {module.quiz.passed ? 'Quiz do módulo (aprovado)' : 'Quiz do módulo'}
+                        </span>
                       </Link>
                     </li>
-                  )
-                })}
-
-                {module.quiz && module.lessons.every(l => progress[l.id]) && (
-                  <li>
-                    <Link
-                      href={`/cursos/${courseSlug}/modulos/${module.id}/quiz`}
-                      className={`flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${
-                        currentQuizModuleId === module.id
-                          ? 'bg-blue-50 text-blue-700 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <QuizIcon isPassed={module.quiz.passed} isCurrent={currentQuizModuleId === module.id} />
-                      <span className="truncate">
-                        {module.quiz.passed ? 'Quiz do módulo (aprovado)' : 'Quiz do módulo'}
-                      </span>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </div>
-          ))}
-        </div>
+                  )}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Adicionar o input",
       "details": "Adicionar input de busca e estado local em `src/components/course/CourseSidebar.tsx`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Implementar debounce",
       "details": "Implementar debounce de 300ms antes de chamar o endpoint de busca.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar resultados destacados",
       "details": "Renderizar resultados com snippet, destacando o termo buscado (ex: `<mark>`).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [
