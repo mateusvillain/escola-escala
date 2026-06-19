@@ -47,10 +47,33 @@ async function grantReferralCredit(referredByCode: string, referredUserId: strin
   console.log(`[stripe] referral: crédito de ${creditAmountCents} centavos concedido a customer ${referral.owner.stripeCustomerId} (código ${referredByCode})`)
 }
 
+// Compra avulsa de curso (mode: 'payment') matricula direto, sem criar UserSubscription.
+async function handleOneTimeCoursePurchase(session: Stripe.Checkout.Session): Promise<void> {
+  const userId = session.metadata?.userId
+  const courseId = session.metadata?.courseId
+  if (!userId || !courseId) {
+    throw new Error('userId ou courseId ausente no metadata da session de compra avulsa')
+  }
+
+  // Idempotente — Stripe pode reentregar o webhook.
+  await prisma.courseEnrollment.upsert({
+    where: { userId_courseId: { userId, courseId } },
+    create: { userId, courseId },
+    update: {},
+  })
+
+  console.log(`[stripe] checkout.session.completed (payment): enrollment criado para user ${userId} no curso ${courseId}`)
+}
+
 export async function handleCheckoutSessionCompleted(
   event: Stripe.CheckoutSessionCompletedEvent
 ): Promise<void> {
   const session = event.data.object
+
+  if (session.mode === 'payment') {
+    await handleOneTimeCoursePurchase(session)
+    return
+  }
 
   const userId = session.metadata?.userId
   if (!userId) throw new Error('userId ausente no metadata da session')

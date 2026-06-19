@@ -65,6 +65,9 @@ const createSchema = z.object({
   description: z.string().max(5000).optional(),
   thumbnailUrl: z.string().url().nullable().optional(),
   instructorId: z.string().uuid().optional(),
+  allowOneTimePurchase: z.boolean().optional(),
+  priceOneTime: z.number().positive().nullable().optional(),
+  stripePriceIdOneTime: z.string().min(1).nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -86,7 +89,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { title, planAccess, description, thumbnailUrl, instructorId } = parsed.data;
+  const {
+    title,
+    planAccess,
+    description,
+    thumbnailUrl,
+    instructorId,
+    allowOneTimePurchase,
+    priceOneTime,
+    stripePriceIdOneTime,
+  } = parsed.data;
 
   if (!instructorId) {
     return NextResponse.json(
@@ -106,6 +118,9 @@ export async function POST(request: NextRequest) {
       instructorId,
       planAccess,
       status: "draft",
+      allowOneTimePurchase: allowOneTimePurchase ?? false,
+      priceOneTime: priceOneTime ?? null,
+      stripePriceIdOneTime: stripePriceIdOneTime ?? null,
     },
     select: {
       id: true,

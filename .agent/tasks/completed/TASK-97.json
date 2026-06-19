@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Ramificar por modo da sessão",
       "details": "No início de `handleCheckoutSessionCompleted`, ramificar o comportamento por `session.mode`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar enrollment direto",
       "details": "Para `mode === 'payment'`, fazer `prisma.courseEnrollment.upsert` com `userId`/`courseId` do metadata.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Preservar fluxo de assinatura",
       "details": "Manter o fluxo existente intacto para `mode === 'subscription'`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

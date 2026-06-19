@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Checar enrollment direto primeiro",
       "details": "Editar `checkLessonAccess` em `src/lib/access.ts` para checar primeiro se existe `CourseEnrollment` do usuário para o curso da aula — se existir, liberar acesso direto, sem checar plano.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Preservar enrollments de compra avulsa",
       "details": "Confirmar que `ensureEnrollment` não sobrescreve nem remove enrollments criados por compra avulsa.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

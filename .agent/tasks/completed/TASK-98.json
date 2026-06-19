@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Exibir o preço e o botão",
       "details": "Editar a página de detalhe do curso para buscar e exibir `priceOneTime`/`allowOneTimePurchase`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Disparar o checkout",
       "details": "Adicionar botão que chama o endpoint de compra e faz `window.location.href = url`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

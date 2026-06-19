@@ -25,6 +25,8 @@ export async function ensureEnrollment(userId: string, courseId: string, role?: 
 
   if (!hasAccess) return false
 
+  // update: {} é intencional — nunca sobrescreve um enrollment já existente
+  // (ex: criado via compra avulsa), só garante que exista um.
   await prisma.courseEnrollment.upsert({
     where: { userId_courseId: { userId, courseId: course.id } },
     create: { userId, courseId: course.id },

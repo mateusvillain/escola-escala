@@ -73,17 +73,20 @@ model Instructor {
 }
 
 model Course {
-  id           String       @id @default(uuid())
-  title        String
-  slug         String       @unique
-  description  String
-  thumbnailUrl String?
-  instructorId String
-  instructor   Instructor   @relation(fields: [instructorId], references: [id])
-  planAccess   PlanType
-  status       CourseStatus @default(draft)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id                   String       @id @default(uuid())
+  title                String
+  slug                 String       @unique
+  description          String
+  thumbnailUrl         String?
+  instructorId         String
+  instructor           Instructor   @relation(fields: [instructorId], references: [id])
+  planAccess           PlanType
+  status               CourseStatus @default(draft)
+  allowOneTimePurchase Boolean      @default(false)
+  priceOneTime         Decimal?
+  stripePriceIdOneTime String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   modules      Module[]
   enrollments  CourseEnrollment[]

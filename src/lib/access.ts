@@ -28,6 +28,7 @@ export async function checkLessonAccess(
       isPreview: true,
       module: {
         select: {
+          courseId: true,
           course: {
             select: { planAccess: true },
           },
@@ -44,6 +45,13 @@ export async function checkLessonAccess(
   if (role === 'admin') return { allowed: true }
 
   if (!userId) return { allowed: false, reason: 'not_authenticated' }
+
+  // Compra avulsa: enrollment direto dá acesso ao curso inteiro, independente de assinatura.
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { userId_courseId: { userId, courseId: lesson.module.courseId } },
+    select: { id: true },
+  })
+  if (enrollment) return { allowed: true }
 
   const subscription = await prisma.userSubscription.findFirst({
     where: { userId },
