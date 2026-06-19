@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         email: true,
         role: true,
         isActive: true,
+        freeTrialEligible: true,
         createdAt: true,
         instructor: { select: { id: true } },
         subscriptions: {
@@ -58,6 +59,7 @@ export async function GET(request: NextRequest) {
     email: u.email,
     role: u.role,
     isActive: u.isActive,
+    freeTrialEligible: u.freeTrialEligible,
     createdAt: u.createdAt,
     instructorId: u.instructor?.id ?? null,
     subscription: u.subscriptions[0]

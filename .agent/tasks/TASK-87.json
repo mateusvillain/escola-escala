@@ -1,29 +1,51 @@
 {
   "id": "TASK-87",
-  "title": "Exibir aviso de trial ativo",
-  "category": "ui-ux",
-  "description": "Indicar visualmente ao aluno que ele está em período de teste gratuito, com a data em que a cobrança começa.",
+  "title": "Aviso de fim do trial por e-mail e indicação no dashboard",
+  "category": "functional",
+  "description": "Avisar o aluno por e-mail quando o trial concedido pelo admin estiver perto do fim, e indicar visualmente que ele está em teste grátis enquanto durar. Como o trial não é mais um benefício padrão de checkout, nenhuma menção a período de teste deve aparecer em `/planos`.",
   "acceptanceCriteria": [
+    "Webhook `customer.subscription.trial_will_end` (disparado pelo Stripe 3 dias antes do fim do trial) é tratado em `stripe-handlers.ts`",
+    "Handler dispara e-mail com template informando a data da primeira cobrança e o valor",
+    "Evento documentado como necessário na configuração do endpoint de webhook na Stripe Dashboard (local e produção)",
     "`/dashboard/assinatura` exibe badge \"Em teste — cobrança em DD/MM/AAAA\" quando `status === 'trialing'`",
-    "`/planos` informa \"7 dias gratuitos\" nos cards de plano",
+    "Nenhuma mudança visual em `/planos` — o trial não é oferecido publicamente, então a página de planos não deve mencionar período de teste",
     "Nenhuma mudança visual para usuários com assinatura `active`"
   ],
   "steps": [
     {
       "step": 1,
-      "description": "Exibir data de fim do trial no dashboard de assinatura",
-      "details": "Editar `src/app/(app)/dashboard/assinatura/page.tsx` para mostrar `currentPeriodEnd` formatada quando o status for `trialing`.",
-      "pass": false
+      "description": "Criar handler do evento",
+      "details": "Adicionar `handleTrialWillEnd` em `src/lib/stripe-handlers.ts` que busca o usuário pelo `stripeCustomerId` e dispara o e-mail.",
+      "pass": true
     },
     {
       "step": 2,
-      "description": "Adicionar texto de trial na página de planos",
-      "details": "Editar `src/app/planos/PlansClient.tsx` incluindo \"7 dias gratuitos, cancele quando quiser\" nos dois planos.",
-      "pass": false
+      "description": "Registrar o evento no endpoint do webhook",
+      "details": "Adicionar o case `customer.subscription.trial_will_end` no switch de `src/app/api/webhooks/stripe/route.ts`.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Criar template de e-mail",
+      "details": "Adicionar `trialEndingEmailHtml` em `src/lib/email-templates.ts` seguindo o padrão visual dos templates existentes.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Exibir badge de trial ativo no dashboard de assinatura",
+      "details": "Editar `src/app/(app)/dashboard/assinatura/page.tsx` para mostrar `currentPeriodEnd` formatada quando o status for `trialing`. Não tocar em `/planos` — o trial não é anunciado lá.",
+      "pass": true
+    },
+    {
+      "step": 5,
+      "description": "Documentar configuração manual no Stripe Dashboard",
+      "details": "Anotar no PRD que o evento precisa ser adicionado manualmente à lista de eventos do endpoint de webhook, em local e produção.",
+      "pass": true
     }
   ],
   "dependencies": [
-    "TASK-85"
+    "TASK-86",
+    "TASK-64"
   ],
   "estimatedComplexity": "low"
 }

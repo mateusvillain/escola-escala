@@ -98,7 +98,9 @@ export default async function AssinaturaPage() {
                 <p className="text-xl font-bold text-gray-900">{subscription.plan.name}</p>
               </div>
               <span className={`text-xs font-semibold px-3 py-1 rounded-full ${STATUS_STYLES[subscription.status] ?? 'bg-gray-100 text-gray-600'}`}>
-                {STATUS_LABELS[subscription.status] ?? subscription.status}
+                {subscription.status === 'trialing'
+                  ? `Em teste — cobrança em ${formatDate(subscription.currentPeriodEnd)}`
+                  : STATUS_LABELS[subscription.status] ?? subscription.status}
               </span>
             </div>
 

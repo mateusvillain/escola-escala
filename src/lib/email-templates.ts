@@ -76,3 +76,41 @@ export function welcomeEmailHtml(name: string): string {
 </body>
 </html>`;
 }
+
+export function trialEndingEmailHtml(name: string, formattedDate: string, formattedPrice: string): string {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seu período de teste está acabando</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px;max-width:560px;">
+          <tr>
+            <td>
+              <h2 style="margin:0 0 16px;color:#111827;font-size:22px;">Seu teste grátis está acabando, ${name}</h2>
+              <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">
+                Seu período de teste termina em <strong>${formattedDate}</strong>. A partir dessa data, o valor de
+                <strong>${formattedPrice}</strong> será cobrado automaticamente no cartão cadastrado, e sua assinatura
+                continua normalmente.
+              </p>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/dashboard/assinatura"
+                 style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;">
+                Ver minha assinatura
+              </a>
+              <p style="margin:24px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+                Se quiser cancelar antes da cobrança, você pode fazer isso a qualquer momento pelo portal de assinatura.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}

@@ -12,6 +12,7 @@ interface User {
   email: string
   role: Role
   isActive: boolean
+  freeTrialEligible: boolean
   createdAt: string
   instructorId: string | null
   subscription: { status: SubscriptionStatus; planName: string } | null
@@ -27,7 +28,7 @@ interface Pagination {
 interface ConfirmModal {
   userId: string
   userName: string
-  action: 'deactivate' | 'reactivate' | 'change-role'
+  action: 'deactivate' | 'reactivate' | 'change-role' | 'grant-trial' | 'revoke-trial'
   newRole?: Role
 }
 
@@ -166,6 +167,8 @@ export function UserTable() {
       const body =
         action === 'deactivate' ? { isActive: false }
         : action === 'reactivate' ? { isActive: true }
+        : action === 'grant-trial' ? { freeTrialEligible: true }
+        : action === 'revoke-trial' ? { freeTrialEligible: false }
         : { role: newRole }
 
       const res = await fetch(`/api/admin/users/${userId}`, {
@@ -311,12 +314,22 @@ export function UserTable() {
 
                   {/* Active status */}
                   <td className="px-4 py-3">
-                    <lui-tag
-                      label={user.isActive ? 'Ativo' : 'Inativo'}
-                      variant={user.isActive ? 'success' : 'secondary'}
-                      tag-style="subtle"
-                      size="sm"
-                    />
+                    <div className="flex flex-col gap-1 items-start">
+                      <lui-tag
+                        label={user.isActive ? 'Ativo' : 'Inativo'}
+                        variant={user.isActive ? 'success' : 'secondary'}
+                        tag-style="subtle"
+                        size="sm"
+                      />
+                      {user.freeTrialEligible && (
+                        <lui-tag
+                          label="Trial concedido — aguardando uso"
+                          variant="info"
+                          tag-style="subtle"
+                          size="sm"
+                        />
+                      )}
+                    </div>
                   </td>
 
                   {/* Created at */}
@@ -351,6 +364,25 @@ export function UserTable() {
                           </button>
                         )}
                       </div>
+
+                      {/* Grant / Revoke trial */}
+                      {user.freeTrialEligible ? (
+                        <button
+                          onClick={() => setConfirmModal({ userId: user.id, userName: user.name, action: 'revoke-trial' })}
+                          disabled={actionLoading === user.id}
+                          className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors disabled:opacity-50"
+                        >
+                          {actionLoading === user.id ? '...' : 'Revogar trial'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmModal({ userId: user.id, userName: user.name, action: 'grant-trial' })}
+                          disabled={actionLoading === user.id}
+                          className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+                        >
+                          {actionLoading === user.id ? '...' : 'Conceder trial'}
+                        </button>
+                      )}
 
                       {/* Deactivate / Reactivate */}
                       {user.isActive ? (
@@ -417,6 +449,8 @@ export function UserTable() {
               {confirmModal.action === 'deactivate' && 'Desativar usuário'}
               {confirmModal.action === 'reactivate' && 'Reativar usuário'}
               {confirmModal.action === 'change-role' && 'Alterar role'}
+              {confirmModal.action === 'grant-trial' && 'Conceder trial gratuito'}
+              {confirmModal.action === 'revoke-trial' && 'Revogar trial gratuito'}
             </h3>
             <p className="text-sm text-gray-600 mb-6">
               {confirmModal.action === 'deactivate' && (
@@ -427,6 +461,12 @@ export function UserTable() {
               )}
               {confirmModal.action === 'change-role' && (
                 <>Alterar o role de <span className="font-medium">"{confirmModal.userName}"</span> para <span className="font-medium">{ROLE_LABELS[confirmModal.newRole!]}</span>?</>
+              )}
+              {confirmModal.action === 'grant-trial' && (
+                <>Conceder 7 dias de teste grátis a <span className="font-medium">"{confirmModal.userName}"</span>? O trial será aplicado automaticamente na próxima assinatura desse usuário.</>
+              )}
+              {confirmModal.action === 'revoke-trial' && (
+                <>Revogar a concessão de trial de <span className="font-medium">"{confirmModal.userName}"</span>? O usuário deixará de receber o trial gratuito na próxima assinatura.</>
               )}
             </p>
             <div className="flex justify-end gap-3">
