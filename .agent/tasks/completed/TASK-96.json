@@ -13,25 +13,25 @@
       "step": 1,
       "description": "Criar o endpoint",
       "details": "Criar `src/app/api/courses/[slug]/purchase/route.ts` com handler `POST`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar e buscar o curso",
       "details": "Validar autenticação via `getAuthUser`; buscar curso por slug e validar `allowOneTimePurchase`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar a Checkout Session",
       "details": "Criar a sessão com `mode: 'payment'` e `metadata: { userId, courseId }`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Retornar a URL",
       "details": "Retornar `NextResponse.json({ url: session.url })`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

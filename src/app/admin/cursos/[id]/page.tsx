@@ -56,6 +56,9 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
             thumbnailUrl: course.thumbnailUrl ?? '',
             instructorId: course.instructorId,
             planAccess: course.planAccess as 'basic' | 'premium',
+            allowOneTimePurchase: course.allowOneTimePurchase,
+            priceOneTime: course.priceOneTime?.toString() ?? '',
+            stripePriceIdOneTime: course.stripePriceIdOneTime ?? '',
           }}
         />
       </div>

@@ -17,6 +17,9 @@ type FormData = {
   thumbnailUrl: string
   instructorId: string
   planAccess: 'basic' | 'premium'
+  allowOneTimePurchase: boolean
+  priceOneTime: string
+  stripePriceIdOneTime: string
 }
 
 interface CourseFormProps {
@@ -54,11 +57,15 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
       thumbnailUrl: '',
       instructorId: '',
       planAccess: 'basic',
+      allowOneTimePurchase: false,
+      priceOneTime: '',
+      stripePriceIdOneTime: '',
       ...defaultValues,
     },
   })
 
   const thumbnailUrl = watch('thumbnailUrl')
+  const allowOneTimePurchase = watch('allowOneTimePurchase')
 
   useEffect(() => {
     fetch('/api/admin/users?role=instructor&limit=100')
@@ -82,6 +89,8 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
     if (!data.thumbnailUrl.trim()) {
       payload.thumbnailUrl = null
     }
+    payload.priceOneTime = data.priceOneTime.trim() ? Number(data.priceOneTime) : null
+    payload.stripePriceIdOneTime = data.stripePriceIdOneTime.trim() || null
 
     try {
       let res: Response
@@ -243,6 +252,52 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
               <span className="text-sm text-gray-700">Premium</span>
             </label>
           </div>
+        </div>
+
+        {/* One-time purchase */}
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              {...register('allowOneTimePurchase')}
+              className="accent-blue-600"
+            />
+            <span className="text-sm font-medium text-gray-700">Permitir compra avulsa (sem assinatura)</span>
+          </label>
+
+          {allowOneTimePurchase && (
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={LABEL_CLASS} htmlFor="priceOneTime">
+                  Preço (R$)
+                </label>
+                <input
+                  id="priceOneTime"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Ex: 197.00"
+                  className={INPUT_CLASS}
+                  {...register('priceOneTime')}
+                />
+              </div>
+              <div>
+                <label className={LABEL_CLASS} htmlFor="stripePriceIdOneTime">
+                  Stripe Price ID
+                </label>
+                <input
+                  id="stripePriceIdOneTime"
+                  type="text"
+                  placeholder="price_..."
+                  className={`${INPUT_CLASS} font-mono`}
+                  {...register('stripePriceIdOneTime')}
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  Price (modo &quot;one-time&quot;) criado manualmente no Stripe Dashboard para este curso.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

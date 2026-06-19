@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
 import { StarRating } from '@/components/cursos/StarRating'
 import { ReviewReminderBanner } from '@/components/cursos/ReviewReminderBanner'
+import { BuyCourseButton } from '@/components/cursos/BuyCourseButton'
 
 const PLAN_LABELS = { basic: 'Básico', premium: 'Premium' } as const
 const PLAN_STYLES = {
@@ -38,6 +39,8 @@ export default async function CursoDetalhe({
       description: true,
       thumbnailUrl: true,
       planAccess: true,
+      allowOneTimePurchase: true,
+      priceOneTime: true,
       instructor: {
         select: {
           slug: true,
@@ -120,11 +123,13 @@ export default async function CursoDetalhe({
     ])
 
     const planType = subscription?.plan.type ?? null
+    hasEnrollment = enrollment !== null
+    // CourseEnrollment (ex: compra avulsa) dá acesso direto, independente de assinatura.
     hasAccess =
       user.role === 'admin' ||
       planType === 'premium' ||
-      (planType === 'basic' && course.planAccess === 'basic')
-    hasEnrollment = enrollment !== null
+      (planType === 'basic' && course.planAccess === 'basic') ||
+      hasEnrollment
     isCompleted = enrollment?.completedAt != null
     myReview = review
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null
@@ -240,12 +245,21 @@ export default async function CursoDetalhe({
                 : 'Disponível no Plano Básico ou Premium'}
             </p>
           </div>
-          <Link
-            href="/planos"
-            className="flex-shrink-0 px-6 py-2.5 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors text-sm"
-          >
-            Ver planos
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+            {course.allowOneTimePurchase && course.priceOneTime != null && (
+              <BuyCourseButton
+                courseSlug={course.slug}
+                price={Number(course.priceOneTime)}
+                isAuthenticated={!!user}
+              />
+            )}
+            <Link
+              href="/planos"
+              className="px-6 py-2.5 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors text-sm whitespace-nowrap"
+            >
+              Ver planos
+            </Link>
+          </div>
         </div>
       ) : !hasEnrollment ? (
         <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">

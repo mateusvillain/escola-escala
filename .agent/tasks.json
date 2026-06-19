@@ -661,36 +661,36 @@
     "id": "TASK-95",
     "title": "Campos de compra avulsa em Course",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-95.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-95.json",
+    "passes": true
   },
   {
     "id": "TASK-96",
     "title": "POST /api/courses/[slug]/purchase",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-96.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-96.json",
+    "passes": true
   },
   {
     "id": "TASK-97",
     "title": "Webhook de compra avulsa cria enrollment direto",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-97.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-97.json",
+    "passes": true
   },
   {
     "id": "TASK-98",
     "title": "CTA \"Comprar este curso\"",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-98.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-98.json",
+    "passes": true
   },
   {
     "id": "TASK-99",
     "title": "Acesso reconhece compra avulsa",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-99.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-99.json",
+    "passes": true
   },
   {
     "id": "TASK-100",

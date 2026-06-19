@@ -11,6 +11,9 @@ const patchSchema = z.object({
   thumbnailUrl: z.string().url().nullable().optional(),
   planAccess: z.enum(["basic", "premium"]).optional(),
   instructorId: z.string().uuid().optional(),
+  allowOneTimePurchase: z.boolean().optional(),
+  priceOneTime: z.number().positive().nullable().optional(),
+  stripePriceIdOneTime: z.string().min(1).nullable().optional(),
 });
 
 export async function GET(
