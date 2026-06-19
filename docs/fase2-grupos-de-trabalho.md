@@ -19,7 +19,7 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 | # | Grupo | Tasks | Depende de | Branch sugerida |
 |---|---|---|---|---|
 | 0 | Pré-requisitos da Fase 2 | TASK-84 | — | (sem PR de código) |
-| 1 | Trial gratuito | TASK-85 a 87 | Grupo 0 | `feat/fase2-trial-gratuito` |
+| 1 | Trial gratuito concedido pelo admin | TASK-85 a 87 | Grupo 0 | `feat/fase2-trial-manual-admin` |
 | 2 | Página pública de instrutor | TASK-88 a 89 | Grupo 0 | `feat/fase2-perfil-instrutor` |
 | 3 | Cupons de desconto | TASK-90 a 91 | Grupo 0 | `feat/fase2-cupons-desconto` |
 | 4 | Materiais complementares por aula | TASK-92 a 94 | Grupo 0 | `feat/fase2-materiais-aula` |
@@ -68,7 +68,7 @@ confirmado, pendente, ou bloqueado (e por quê).
 
 ---
 
-## Grupo 1 — Trial gratuito
+## Grupo 1 — Trial gratuito concedido pelo admin
 
 **Tasks**: TASK-85, TASK-86, TASK-87
 **Depende de**: Grupo 0
@@ -76,17 +76,20 @@ confirmado, pendente, ou bloqueado (e por quê).
 ### Prompt para a IA
 
 ```
-Você vai implementar o grupo "Trial gratuito" da Fase 2 da Plataforma de Cursos (Next.js 16 App Router +
-Prisma 7 + Neon + Stripe + Bunny Stream). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar —
-eles documentam os padrões obrigatórios do projeto (rotas, Zod v4, Prisma, etc.).
+Você vai implementar o grupo "Trial gratuito concedido pelo admin" da Fase 2 da Plataforma de Cursos (Next.js
+16 App Router + Prisma 7 + Neon + Stripe + Bunny Stream). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de
+começar — eles documentam os padrões obrigatórios do projeto (rotas, Zod v4, Prisma, etc.).
 
-Contexto: hoje o Stripe Checkout não oferece nenhum período de teste — o aluno é cobrado imediatamente.
-Este grupo adiciona 7 dias de trial gratuito antes da primeira cobrança.
+Contexto: a plataforma NÃO oferece trial gratuito para todo mundo que assina — decisão de produto explícita
+para evitar abuso (criar conta nova a cada trial) e não distorcer a métrica de conversão do checkout. Em vez
+disso, o admin pode conceder manualmente 7 dias de teste grátis a um usuário específico (ex: parceria,
+reativação de cliente, atendimento a um caso pontual de suporte). Quando esse usuário específico assina, o
+checkout aplica o trial e consome a concessão; para todos os outros, a cobrança continua imediata, como hoje.
 
 Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/TASK-<id>.json antes de codar):
-1. TASK-85 — Adicionar trial_period_days=7 ao Stripe Checkout
-2. TASK-86 — E-mail de aviso antes do fim do trial
-3. TASK-87 — Exibir aviso de trial ativo na UI
+1. TASK-85 — Admin concede trial gratuito manualmente (campo + endpoint + UI em /admin/usuarios)
+2. TASK-86 — Checkout aplica o trial concedido (e o consome após o uso)
+3. TASK-87 — Aviso de fim do trial por e-mail + indicação no dashboard do aluno
 
 Dependências externas: nenhuma — pode começar imediatamente.
 
@@ -94,27 +97,38 @@ Atenção a padrões do projeto:
 - `src/app/api/subscriptions/checkout/route.ts` e `src/lib/stripe-handlers.ts` seguem a API version
   `2026-05-27.dahlia` do Stripe — `current_period_start`/`end` ficam em `subscription.items.data[0]`, não no
   nível da Subscription (ver AGENTS.md, seção de webhooks).
+- `src/lib/access.ts` tem DUAS funções que checam `status !== 'active'` — `checkLessonAccess` e
+  `checkCourseAccess` — as duas precisam tratar `trialing` como acesso liberado, não só a primeira.
+- `PATCH /api/admin/users/[id]` já existe e já registra em `AdminAuditLog` via `logAdminAction` (ver
+  `src/lib/audit.ts`) as mudanças de `role`/`isActive` — siga exatamente esse padrão para o novo campo de
+  trial, em vez de criar um endpoint novo.
+- `UserTable.tsx` já tem um fluxo de ação com modal de confirmação (`deactivate`/`reactivate`/`change-role`) —
+  adicione a concessão/revogação de trial como uma nova `action` nesse mesmo fluxo, não um componente do zero.
 - Use Stripe CLI (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`) para testar localmente o
-  evento `customer.subscription.trial_will_end` da TASK-86.
+  evento `customer.subscription.trial_will_end` da TASK-87.
 
 Como trabalhar:
-1. Crie a branch `feat/fase2-trial-gratuito` a partir de `main` atualizada.
+1. Crie a branch `feat/fase2-trial-manual-admin` a partir de `main` atualizada.
 2. Implemente TASK-85, depois TASK-86, depois TASK-87, nessa ordem.
 3. Depois de cada task, confira uma a uma as `acceptanceCriteria` do spec correspondente antes de seguir para a
    próxima.
 4. Valide o código: `npx tsc --noEmit` e `npx vitest run` devem passar sem erros novos.
-5. TASK-87 muda UI (`/dashboard/assinatura` e `/planos`) — suba o dev server (`npx next dev --port 3000`) e
-   confirme visualmente o badge de trial em uma conta de teste com assinatura `trialing`.
+5. Suba o dev server (`npx next dev --port 3000`) e teste manualmente o fluxo completo: como admin, conceda o
+   trial a um usuário de teste em `/admin/usuarios`; logado como esse usuário, complete o checkout e confirme
+   que a assinatura entra como `trialing` sem cobrança imediata; confirme o badge de trial em
+   `/dashboard/assinatura`; confirme que a concessão foi consumida (cancele e assine de novo com o mesmo
+   usuário — NÃO deve ganhar trial automaticamente na segunda vez). Confirme também que um usuário sem a
+   concessão continua sendo cobrado imediatamente, como hoje, e que `/planos` não menciona trial.
 6. Marque `"pass": true` em cada step dos três JSONs de task e `"passes": true` nas entradas correspondentes de
    `.agent/tasks.json`, só depois de validar de fato.
 7. Commit(s) com mensagens claras (uma por task ou um commit único para o grupo, seguindo o estilo dos commits
    existentes no repositório — confira `git log` para o padrão).
-8. Abra um PR para `main` com `gh pr create`. Título: "feat: trial gratuito de 7 dias no checkout (TASK-85 a
-   87)". Na descrição, liste as 3 tasks concluídas, o que foi testado manualmente, e link para a seção 13.1 do
-   PRD (`.agent/prd/PRD.md`). Não faça merge — deixe para revisão humana.
+8. Abra um PR para `main` com `gh pr create`. Título: "feat: trial gratuito concedido manualmente pelo admin
+   (TASK-85 a 87)". Na descrição, liste as 3 tasks concluídas, o que foi testado manualmente, e link para a
+   seção 13.1 do PRD (`.agent/prd/PRD.md`). Não faça merge — deixe para revisão humana.
 
-Definition of Done: as acceptanceCriteria de TASK-85, 86 e 87 atendidas e marcadas; tsc e vitest passando; PR
-aberto.
+Definition of Done: as acceptanceCriteria de TASK-85, 86 e 87 atendidas e marcadas; tsc e vitest passando;
+fluxo concessão → checkout → consumo do trial testado manualmente; PR aberto.
 ```
 
 ---

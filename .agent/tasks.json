@@ -589,24 +589,24 @@
   },
   {
     "id": "TASK-85",
-    "title": "Adicionar trial_period_days=7 ao Stripe Checkout",
-    "category": "integration",
+    "title": "Admin concede trial gratuito manualmente",
+    "category": "functional",
     "specFilePath": ".agent/tasks/TASK-85.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-86",
-    "title": "E-mail de aviso antes do fim do trial",
-    "category": "functional",
+    "title": "Checkout aplica o trial concedido pelo admin",
+    "category": "integration",
     "specFilePath": ".agent/tasks/TASK-86.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-87",
-    "title": "Exibir aviso de trial ativo",
-    "category": "ui-ux",
+    "title": "Aviso de fim do trial por e-mail e indicação no dashboard",
+    "category": "functional",
     "specFilePath": ".agent/tasks/TASK-87.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-88",

@@ -1,7 +1,7 @@
 import type Stripe from 'stripe'
 import { stripe } from './stripe'
 import { prisma } from './prisma'
-import { sendWelcomeEmail } from './email'
+import { sendWelcomeEmail, sendTrialEndingEmail } from './email'
 
 type PlanType = 'basic' | 'premium'
 type BillingCycle = 'monthly' | 'annual'
@@ -71,6 +71,9 @@ export async function handleCheckoutSessionCompleted(
 
   const referredByCode = session.metadata?.referralCode
 
+  // checkout.session.completed só pode resultar em 'trialing' (trial concedido) ou 'active'.
+  const subscriptionStatus = subscription.status === 'trialing' ? 'trialing' : 'active'
+
   // Em Stripe API v2026+, current_period_start/end estão no SubscriptionItem
   await prisma.userSubscription.upsert({
     where: { stripeSubscriptionId },
@@ -80,7 +83,7 @@ export async function handleCheckoutSessionCompleted(
       planId: plan.id,
       stripeSubscriptionId,
       stripeCustomerId,
-      status: 'active',
+      status: subscriptionStatus,
       billingCycle: planInfo.billingCycle,
       currentPeriodStart: new Date(item.current_period_start * 1000),
       currentPeriodEnd: new Date(item.current_period_end * 1000),
@@ -91,11 +94,16 @@ export async function handleCheckoutSessionCompleted(
   // Garante que o User tem stripeCustomerId salvo (segurança contra race condition)
   const dbUser = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true, stripeCustomerId: true },
+    select: { email: true, name: true, stripeCustomerId: true, freeTrialEligible: true },
   })
 
   if (dbUser && !dbUser.stripeCustomerId) {
     await prisma.user.update({ where: { id: userId }, data: { stripeCustomerId } })
+  }
+
+  // A concessão de trial é de uso único — consome assim que a assinatura é criada.
+  if (dbUser?.freeTrialEligible) {
+    await prisma.user.update({ where: { id: userId }, data: { freeTrialEligible: false } })
   }
 
   // E-mail de boas-vindas apenas na primeira assinatura (não em renovações)
@@ -209,4 +217,31 @@ export async function handleCustomerSubscriptionUpdated(
   })
 
   console.log(`[stripe] customer.subscription.updated: subscription ${subscription.id} atualizada para plano ${planInfo.type}/${planInfo.billingCycle}`)
+}
+
+export async function handleTrialWillEnd(
+  event: Stripe.CustomerSubscriptionTrialWillEndEvent
+): Promise<void> {
+  const subscription = event.data.object
+
+  const userSub = await prisma.userSubscription.findUnique({
+    where: { stripeSubscriptionId: subscription.id },
+    include: { plan: true, user: { select: { email: true, name: true } } },
+  })
+
+  if (!userSub) {
+    console.warn(`[stripe] trial_will_end: subscription ${subscription.id} não encontrada em UserSubscription`)
+    return
+  }
+
+  const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : userSub.currentPeriodEnd
+  const amount = userSub.billingCycle === 'annual' ? Number(userSub.plan.priceAnnual) : Number(userSub.plan.priceMonthly)
+
+  try {
+    await sendTrialEndingEmail(userSub.user.email, userSub.user.name, trialEnd, amount, userSub.billingCycle)
+  } catch (err) {
+    console.error('[stripe] falha ao enviar e-mail de fim de trial:', err)
+  }
+
+  console.log(`[stripe] customer.subscription.trial_will_end: aviso enviado para subscription ${subscription.id}`)
 }

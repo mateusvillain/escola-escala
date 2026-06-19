@@ -45,6 +45,7 @@ model User {
   avatarUrl    String?
   stripeCustomerId  String?
   isActive          Boolean   @default(true)
+  freeTrialEligible Boolean   @default(false)
   resetToken        String?
   resetTokenExpiry  DateTime?
   createdAt         DateTime  @default(now())

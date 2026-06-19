@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { passwordResetEmailHtml, welcomeEmailHtml } from "./email-templates";
+import { passwordResetEmailHtml, welcomeEmailHtml, trialEndingEmailHtml } from "./email-templates";
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -71,5 +71,22 @@ export async function sendWelcomeEmail(email: string, name: string) {
     to: email,
     subject: "Bem-vindo à plataforma!",
     html: welcomeEmailHtml(name),
+  });
+}
+
+export async function sendTrialEndingEmail(
+  email: string,
+  name: string,
+  trialEnd: Date,
+  amount: number,
+  billingCycle: "monthly" | "annual"
+) {
+  const formattedDate = trialEnd.toLocaleDateString("pt-BR");
+  const cycleSuffix = billingCycle === "annual" ? "/ano" : "/mês";
+  const formattedPrice = `${amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}${cycleSuffix}`;
+  await sendEmail({
+    to: email,
+    subject: "Seu período de teste está acabando",
+    html: trialEndingEmailHtml(name, formattedDate, formattedPrice),
   });
 }

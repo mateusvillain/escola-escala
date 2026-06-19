@@ -7,6 +7,7 @@ import { logAdminAction } from "@/lib/audit";
 const patchSchema = z.object({
   role: z.enum(["admin", "instructor", "student"]).optional(),
   isActive: z.boolean().optional(),
+  freeTrialEligible: z.boolean().optional(),
 });
 
 export async function PATCH(
@@ -55,6 +56,7 @@ export async function PATCH(
       email: true,
       role: true,
       isActive: true,
+      freeTrialEligible: true,
     },
   });
 
@@ -75,6 +77,19 @@ export async function PATCH(
       entityType: "User",
       entityId: id,
       metadata: { email: existing.email, from: existing.isActive, to: parsed.data.isActive },
+    });
+  }
+
+  if (
+    parsed.data.freeTrialEligible !== undefined &&
+    parsed.data.freeTrialEligible !== existing.freeTrialEligible
+  ) {
+    await logAdminAction({
+      actorId: auth.user.userId,
+      action: parsed.data.freeTrialEligible ? "user.trial_granted" : "user.trial_revoked",
+      entityType: "User",
+      entityId: id,
+      metadata: { email: existing.email },
     });
   }
 

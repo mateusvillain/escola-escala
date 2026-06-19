@@ -499,7 +499,7 @@ Detalhada na seção 13. Resumo por sprint sugerido:
 - Não há suporte a múltiplos idiomas (apenas PT-BR)
 - ~~Não há funcionalidade de busca avançada por conteúdo das aulas~~ → Fase 2 entrega busca simples via `contains` (TASK-131/132), não full-text search
 - ~~Instrutores não têm painel próprio na Fase 1~~ → Fase 2 entrega painel do instrutor somente leitura (TASK-137 a TASK-139); edição de conteúdo pelo instrutor continua fora de escopo
-- ~~Não há trial gratuito de assinatura na Fase 1~~ → Fase 2 adiciona trial de 7 dias (TASK-85 a TASK-87)
+- ~~Não há trial gratuito de assinatura na Fase 1~~ → Fase 2 permite que o admin conceda manualmente 7 dias de teste grátis a um usuário específico (TASK-85 a TASK-87) — não é um trial oferecido a todo mundo que assina
 
 ### Não-Metas (Fase 2 e além)
 
@@ -516,7 +516,7 @@ Origem: `docs/oportunidades-plataforma.md`, seções 1–5 (seção 6, B2B e fó
 
 ### 13.1 Monetização (TASK-85 a TASK-110)
 
-**Trial gratuito** — TASK-85 a TASK-87: 7 dias de teste grátis no Checkout Stripe, com aviso de fim de trial por e-mail e indicação visual no dashboard/planos.
+**Trial gratuito concedido pelo admin** — TASK-85 a TASK-87: admin concede manualmente 7 dias de teste grátis a um usuário específico em `/admin/usuarios`; o checkout aplica o trial apenas para esse usuário (consumindo a concessão), com aviso de fim de trial por e-mail e indicação visual no dashboard de assinatura. Não é um benefício padrão de checkout — `/planos` não menciona trial.
 **Cupons de desconto** — TASK-90/91: `allow_promotion_codes` habilitado no Checkout; cupons criados e geridos direto no Stripe Dashboard.
 **Compra avulsa de curso** — TASK-95 a TASK-99: cursos podem ser configurados para venda em pagamento único, sem exigir assinatura, com enrollment direto via webhook.
 **Upsell contextual** — TASK-100 a TASK-102: eventos de exibição do `UpgradePrompt` são registrados e disparam e-mail de upsell automático após 3 dias sem conversão.
@@ -554,10 +554,11 @@ Origem: `docs/oportunidades-plataforma.md`, seções 1–5 (seção 6, B2B e fó
 | `STRIPE_COUPON_ID_REFERRAL` (nova variável) | Crédito de indicação (TASK-106) | Criar Coupon fixo no Stripe Dashboard antes da TASK-106 |
 | API de Captions do Bunny Stream acessível | Legendas (TASK-123) | A confirmar (TASK-84) |
 | Vercel Cron habilitado no projeto | E-mails de upsell e reengajamento (TASK-102, TASK-114) | A configurar no deploy (depende de TASK-82) |
+| Evento `customer.subscription.trial_will_end` adicionado à lista de eventos do endpoint de webhook na Stripe Dashboard | Aviso de fim de trial (TASK-87) | Pendente — adicionar manualmente em Developers → Webhooks (local, via `stripe listen`, já recebe todos os eventos; em produção, o endpoint configurado precisa ter esse evento habilitado explicitamente) |
 
 ### 13.6 Decisões de escopo assumidas (sem confirmação do cliente)
 
-- Trial gratuito: 7 dias, sem necessidade de cartão verificado além do que o próprio Stripe já exige no Checkout
+- Trial gratuito: concedido manualmente pelo admin por usuário (não é oferecido a todo mundo que assina), 7 dias fixos, consumido após o primeiro uso, sem necessidade de cartão verificado além do que o próprio Stripe já exige no Checkout
 - Quiz: aprovação mínima de 70%: para passar a contar como pré-requisito do certificado
 - Painel do instrutor: somente leitura nesta rodada — edição de conteúdo continua centralizada no admin
 - Programa de indicação: 1 nível apenas (sem cadeia de indicações), crédito equivalente a um ciclo de cobrança

@@ -91,6 +91,11 @@ export async function POST(request: NextRequest) {
     sessionParams.allow_promotion_codes = true
   }
 
+  // Trial gratuito concedido manualmente pelo admin (não é benefício padrão de checkout).
+  if (dbUser.freeTrialEligible) {
+    sessionParams.subscription_data = { trial_period_days: 7 }
+  }
+
   const session = await stripe.checkout.sessions.create(sessionParams)
 
   return NextResponse.json({ checkoutUrl: session.url })

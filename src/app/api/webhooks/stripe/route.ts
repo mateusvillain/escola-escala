@@ -6,6 +6,7 @@ import {
   handleCustomerSubscriptionUpdated,
   handleInvoicePaymentFailed,
   handleInvoicePaymentSucceeded,
+  handleTrialWillEnd,
 } from '@/lib/stripe-handlers'
 import type Stripe from 'stripe'
 
@@ -42,6 +43,9 @@ export async function POST(request: NextRequest) {
         break
       case 'customer.subscription.updated':
         await handleCustomerSubscriptionUpdated(event as Stripe.CustomerSubscriptionUpdatedEvent)
+        break
+      case 'customer.subscription.trial_will_end':
+        await handleTrialWillEnd(event as Stripe.CustomerSubscriptionTrialWillEndEvent)
         break
       default:
         // Eventos não mapeados são ignorados silenciosamente

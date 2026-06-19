@@ -1,42 +1,50 @@
 {
   "id": "TASK-86",
-  "title": "E-mail de aviso antes do fim do trial",
-  "category": "functional",
-  "description": "Avisar o aluno por e-mail quando o trial estiver perto do fim, para reduzir cancelamentos por surpresa na primeira cobrança.",
+  "title": "Checkout aplica o trial concedido pelo admin",
+  "category": "integration",
+  "description": "Quando o usuário autenticado tem `freeTrialEligible: true` (concedido pela TASK-85), o Stripe Checkout deve incluir 7 dias de trial. Para todos os outros usuários, o checkout permanece exatamente como hoje — cobrança imediata. A concessão é consumida (volta para `false`) assim que a assinatura é criada.",
   "acceptanceCriteria": [
-    "Webhook `customer.subscription.trial_will_end` (disparado pelo Stripe 3 dias antes do fim do trial) é tratado em `stripe-handlers.ts`",
-    "Handler dispara e-mail com template informando data da primeira cobrança e valor",
-    "Evento documentado como necessário na configuração do endpoint de webhook na Stripe Dashboard (local e produção)"
+    "`POST /api/subscriptions/checkout` inclui `subscription_data: { trial_period_days: 7 }` na Checkout Session somente quando o usuário autenticado tem `freeTrialEligible === true`; para os demais, a sessão é criada sem trial, como hoje",
+    "Assinatura criada no Stripe para um usuário com a concessão entra com status `trialing`, sem cobrança imediata no cartão",
+    "`handleCheckoutSessionCompleted` grava o status real retornado pelo Stripe (`trialing` ou `active`) em vez de forçar `'active'`",
+    "Ao processar `checkout.session.completed`, se o usuário tinha `freeTrialEligible: true`, o handler grava `false` de volta — a concessão é de uso único",
+    "`checkLessonAccess` e `checkCourseAccess` (`src/lib/access.ts`) tratam `status === 'trialing'` como acesso liberado, igual a `active`",
+    "Um usuário que cancela a assinatura ainda em trial e assina de novo depois NÃO recebe um novo trial automaticamente, pois a concessão já foi consumida"
   ],
   "steps": [
     {
       "step": 1,
-      "description": "Criar handler do evento",
-      "details": "Adicionar `handleTrialWillEnd` em `src/lib/stripe-handlers.ts` que busca o usuário pelo `stripeCustomerId` e dispara o e-mail.",
-      "pass": false
+      "description": "Buscar freeTrialEligible do usuário no checkout",
+      "details": "Editar `src/app/api/subscriptions/checkout/route.ts`: incluir `freeTrialEligible: true` no `select`/objeto retornado pelo `prisma.user.findUnique` (`dbUser`) e, com base nesse valor, incluir `subscription_data: { trial_period_days: 7 }` em `sessionParams` ao montar a Checkout Session.",
+      "pass": true
     },
     {
       "step": 2,
-      "description": "Registrar o evento no endpoint do webhook",
-      "details": "Adicionar o case `customer.subscription.trial_will_end` no switch de `src/app/api/webhooks/stripe/route.ts`.",
-      "pass": false
+      "description": "Usar status real da subscription e consumir a concessão",
+      "details": "Editar `handleCheckoutSessionCompleted` em `src/lib/stripe-handlers.ts`: usar `subscription.status` (pode ser `trialing`) no `upsert` de `UserSubscription` em vez de gravar sempre `'active'`; depois do upsert, se `dbUser.freeTrialEligible` for `true`, atualizar o usuário para `freeTrialEligible: false`.",
+      "pass": true
     },
     {
       "step": 3,
-      "description": "Criar template de e-mail",
-      "details": "Adicionar `trialEndingEmailHtml` em `src/lib/email-templates.ts` seguindo o padrão visual dos templates existentes.",
-      "pass": false
+      "description": "Tratar trialing como acesso válido nas duas funções de acesso",
+      "details": "Editar `checkLessonAccess` E `checkCourseAccess` em `src/lib/access.ts` (as duas têm a mesma checagem `status !== 'active'`) para tratar `status === 'trialing'` como liberado também.",
+      "pass": true
     },
     {
       "step": 4,
-      "description": "Documentar configuração manual no Stripe Dashboard",
-      "details": "Anotar no PRD que o evento precisa ser adicionado manualmente à lista de eventos do endpoint de webhook, em local e produção.",
-      "pass": false
+      "description": "Testar localmente com Stripe CLI",
+      "details": "Rodar `stripe listen --forward-to localhost:3000/api/webhooks/stripe`. Conceder o trial (TASK-85) a um usuário de teste, completar o checkout com esse usuário e confirmar status `trialing` salvo em `UserSubscription` e `freeTrialEligible` voltando a `false` no `User`. Repetir o checkout com um usuário SEM a concessão e confirmar que a cobrança é imediata, como antes.",
+      "pass": true
     }
   ],
   "dependencies": [
     "TASK-85",
-    "TASK-64"
+    "TASK-68",
+    "TASK-71"
   ],
-  "estimatedComplexity": "low"
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Hoje `handleCheckoutSessionCompleted` sempre grava `status: 'active'` — checar essa linha antes de editar.",
+    "`checkCourseAccess` existe além de `checkLessonAccess` e tem a mesma checagem de status — as duas precisam ser atualizadas, não só uma."
+  ]
 }

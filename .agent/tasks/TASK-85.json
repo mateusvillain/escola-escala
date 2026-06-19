@@ -1,47 +1,50 @@
 {
   "id": "TASK-85",
-  "title": "Adicionar trial_period_days=7 ao Stripe Checkout",
-  "category": "integration",
-  "description": "Configurar o Checkout Session para conceder 7 dias de teste gratuito antes da primeira cobrança, usando o parâmetro nativo do Stripe Subscriptions.",
+  "title": "Admin concede trial gratuito manualmente",
+  "category": "functional",
+  "description": "Permitir que um admin habilite manualmente 7 dias de teste grátis para um usuário específico em /admin/usuarios, em vez de oferecer trial para todo mundo que assina. A concessão vale para a próxima assinatura desse usuário e é consumida no checkout (TASK-86).",
   "acceptanceCriteria": [
-    "`POST /api/subscriptions/checkout` passa `subscription_data: { trial_period_days: 7 }` ao criar a Checkout Session",
-    "Assinatura criada no Stripe entra com status `trialing`, sem cobrança imediata no cartão",
-    "`handleCheckoutSessionCompleted` grava o status retornado pelo Stripe (`trialing` ou `active`) em vez de forçar `'active'`",
-    "Usuário com assinatura `trialing` tem acesso normal ao conteúdo do plano assinado"
+    "Campo `User.freeTrialEligible` (boolean, default false) existe no schema do Prisma",
+    "`PATCH /api/admin/users/[id]` aceita `freeTrialEligible: boolean` no body e atualiza o usuário",
+    "Mudança de `freeTrialEligible` é registrada em `AdminAuditLog` via `logAdminAction`, no mesmo padrão já usado nesse endpoint para `role`/`isActive`",
+    "`UserTable` em `/admin/usuarios` permite conceder/revogar o trial através de um botão de ação + modal de confirmação, seguindo o mesmo padrão visual de `deactivate`/`reactivate`",
+    "Usuário com `freeTrialEligible: true` exibe uma tag indicando 'Trial concedido — aguardando uso' na listagem"
   ],
   "steps": [
     {
       "step": 1,
-      "description": "Adicionar trial_period_days ao Checkout Session",
-      "details": "Editar `src/app/api/subscriptions/checkout/route.ts` incluindo `subscription_data: { trial_period_days: 7 }` na chamada `stripe.checkout.sessions.create`.",
-      "pass": false
+      "description": "Adicionar campo ao schema",
+      "details": "Adicionar `freeTrialEligible Boolean @default(false)` ao model `User` em `prisma/schema.prisma` e rodar `npx prisma migrate dev --name add_user_free_trial_eligible`.",
+      "pass": true
     },
     {
       "step": 2,
-      "description": "Usar status real da subscription no webhook",
-      "details": "Editar `handleCheckoutSessionCompleted` em `src/lib/stripe-handlers.ts` para usar `subscription.status` (pode ser `trialing`) em vez de gravar sempre `'active'`.",
-      "pass": false
+      "description": "Estender o endpoint de edição de usuário",
+      "details": "Editar `src/app/api/admin/users/[id]/route.ts`: adicionar `freeTrialEligible: z.boolean().optional()` ao `patchSchema` e registrar a mudança via `logAdminAction` (ação `user.trial_granted` ou `user.trial_revoked`, dependendo do novo valor), seguindo exatamente o padrão já usado nesse arquivo para `role`/`isActive`.",
+      "pass": true
     },
     {
       "step": 3,
-      "description": "Tratar trialing como acesso válido",
-      "details": "Editar `checkLessonAccess` em `src/lib/access.ts` para tratar `status === 'trialing'` como acesso liberado, igual a `active`.",
-      "pass": false
+      "description": "Adicionar ação na UserTable",
+      "details": "Editar `src/components/admin/UserTable.tsx`: adicionar uma nova `action` (`grant-trial` | `revoke-trial`) ao mesmo fluxo de modal de confirmação já usado por `deactivate`/`reactivate`, chamando o PATCH existente com `{ freeTrialEligible: true }` ou `{ freeTrialEligible: false }`.",
+      "pass": true
     },
     {
       "step": 4,
-      "description": "Testar localmente com Stripe CLI",
-      "details": "Rodar `stripe listen --forward-to localhost:3000/api/webhooks/stripe`, completar um checkout de teste e confirmar status `trialing` salvo em `UserSubscription`.",
-      "pass": false
+      "description": "Exibir indicador de trial concedido",
+      "details": "Na mesma tabela, exibir uma tag/badge quando `user.freeTrialEligible === true`, ao lado das tags de role/status já existentes.",
+      "pass": true
     }
   ],
   "dependencies": [
     "TASK-84",
-    "TASK-68",
-    "TASK-71"
+    "TASK-33",
+    "TASK-34",
+    "TASK-144"
   ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
-    "Hoje `handleCheckoutSessionCompleted` sempre grava `status: 'active'` — checar essa linha antes de editar."
+    "Não criar um endpoint novo — reaproveitar `PATCH /api/admin/users/[id]`, que já existe e já tem o padrão de auditoria via `logAdminAction` (`src/lib/audit.ts`).",
+    "Esta task NÃO altera o fluxo de checkout — apenas registra a intenção do admin. A aplicação do trial no Stripe é feita na TASK-86."
   ]
 }

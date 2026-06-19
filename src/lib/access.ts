@@ -53,7 +53,7 @@ export async function checkLessonAccess(
 
   if (!subscription) return { allowed: false, reason: 'no_subscription' }
 
-  if (subscription.status !== 'active') {
+  if (subscription.status !== 'active' && subscription.status !== 'trialing') {
     return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
   }
 
@@ -92,7 +92,7 @@ export async function checkCourseAccess(
 
   if (!subscription) return { allowed: false, reason: 'no_subscription' }
 
-  if (subscription.status !== 'active') {
+  if (subscription.status !== 'active' && subscription.status !== 'trialing') {
     return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
   }
 
