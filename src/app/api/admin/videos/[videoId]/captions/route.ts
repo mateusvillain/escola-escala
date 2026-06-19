@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
-import { uploadCaption } from '@/lib/bunny'
+import { getVideoInfo, uploadCaption } from '@/lib/bunny'
 
 const MAX_SIZE_BYTES = 1 * 1024 * 1024 // 1MB — arquivos .vtt são texto puro, bem menores que isso
+
+export async function GET(
+  request: NextRequest,
+  ctx: { params: Promise<{ videoId: string }> }
+) {
+  const auth = requireRole(request, ['admin'])
+  if (auth instanceof NextResponse) return auth
+
+  const { videoId } = await ctx.params
+
+  try {
+    const info = await getVideoInfo(videoId)
+    return NextResponse.json({ captions: info.captions ?? [] })
+  } catch (err) {
+    console.error('[bunny] erro ao listar legendas:', err)
+    return NextResponse.json({ error: 'Falha ao consultar legendas no Bunny Stream' }, { status: 502 })
+  }
+}
 
 export async function POST(
   request: NextRequest,

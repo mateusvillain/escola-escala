@@ -1,8 +1,13 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import type { LessonAttachment } from '@/lib/utils/lessons'
+
+interface VideoCaption {
+  srclang: string
+  label: string
+}
 
 interface LessonEditorProps {
   lessonId: string
@@ -84,6 +89,56 @@ export function LessonEditor({
   const [captionError, setCaptionError] = useState<string | null>(null)
   const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
 
+  const [captions, setCaptions] = useState<VideoCaption[]>([])
+  const [captionsLoading, setCaptionsLoading] = useState(false)
+  const [captionsListError, setCaptionsListError] = useState<string | null>(null)
+  const [deletingLanguage, setDeletingLanguage] = useState<string | null>(null)
+
+  const fetchCaptions = useCallback(async (id: string) => {
+    setCaptionsLoading(true)
+    setCaptionsListError(null)
+    try {
+      const res = await fetch(`/api/admin/videos/${id}/captions`)
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionsListError(data.error ?? 'Falha ao carregar legendas.')
+        return
+      }
+      setCaptions(data.captions ?? [])
+    } catch {
+      setCaptionsListError('Falha de conexão ao carregar legendas.')
+    } finally {
+      setCaptionsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (videoId) fetchCaptions(videoId)
+  }, [videoId, fetchCaptions])
+
+  const handleDeleteCaption = async (srclang: string) => {
+    if (!videoId) return
+    if (!window.confirm(`Excluir a legenda "${srclang}" deste vídeo no Bunny Stream?`)) return
+
+    setDeletingLanguage(srclang)
+    setCaptionsListError(null)
+    try {
+      const res = await fetch(`/api/admin/videos/${videoId}/captions/${srclang}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionsListError(data.error ?? 'Falha ao excluir a legenda.')
+        return
+      }
+      setCaptions(prev => prev.filter(c => c.srclang !== srclang))
+    } catch {
+      setCaptionsListError('Falha de conexão ao excluir a legenda.')
+    } finally {
+      setDeletingLanguage(null)
+    }
+  }
+
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -155,6 +210,7 @@ export function LessonEditor({
       }
 
       setCaptionSuccess(`Legenda "${data.label}" (${data.language}) enviada com sucesso.`)
+      fetchCaptions(videoId)
     } catch {
       setCaptionError('Falha de conexão ao enviar a legenda.')
     } finally {
@@ -389,6 +445,44 @@ export function LessonEditor({
 
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <span className={LABEL_CLASS}>Legenda (.vtt)</span>
+
+                    {captionsLoading && (
+                      <p className="text-xs text-gray-400 mb-2">Carregando legendas...</p>
+                    )}
+                    {captionsListError && (
+                      <p className="text-xs text-red-600 mb-2">{captionsListError}</p>
+                    )}
+                    {!captionsLoading && captions.length > 0 && (
+                      <ul className="mb-3 space-y-1">
+                        {captions.map(c => (
+                          <li
+                            key={c.srclang}
+                            className="flex items-center justify-between gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                          >
+                            <span className="text-gray-700">
+                              {c.label}{' '}
+                              <span className="text-gray-400 font-mono text-xs">({c.srclang})</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCaption(c.srclang)}
+                              disabled={deletingLanguage === c.srclang}
+                              aria-label={`Excluir legenda ${c.srclang}`}
+                              className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            >
+                              {deletingLanguage === c.srclang ? (
+                                'Excluindo...'
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
                     <div className="flex items-center gap-2 mb-2">
                       <input
                         type="text"
