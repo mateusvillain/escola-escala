@@ -591,21 +591,21 @@
     "id": "TASK-85",
     "title": "Admin concede trial gratuito manualmente",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-85.json",
+    "specFilePath": ".agent/tasks/completed/TASK-85.json",
     "passes": true
   },
   {
     "id": "TASK-86",
     "title": "Checkout aplica o trial concedido pelo admin",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-86.json",
+    "specFilePath": ".agent/tasks/completed/TASK-86.json",
     "passes": true
   },
   {
     "id": "TASK-87",
     "title": "Aviso de fim do trial por e-mail e indicação no dashboard",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-87.json",
+    "specFilePath": ".agent/tasks/completed/TASK-87.json",
     "passes": true
   },
   {
