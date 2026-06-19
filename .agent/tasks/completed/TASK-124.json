@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar o endpoint",
       "details": "Criar `src/app/api/admin/videos/[videoId]/captions/route.ts` com handler `POST` (admin-only) recebendo o arquivo via FormData e chamando `uploadCaption`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar o input no editor",
       "details": "Adicionar input de arquivo `.vtt` em `LessonEditor` e chamar o novo endpoint.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [

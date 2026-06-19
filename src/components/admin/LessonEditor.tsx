@@ -78,6 +78,10 @@ export function LessonEditor({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [captionUploading, setCaptionUploading] = useState(false)
+  const [captionError, setCaptionError] = useState<string | null>(null)
+  const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
+
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -123,6 +127,36 @@ export function LessonEditor({
     }
 
     xhr.send(formData)
+  }
+
+  const handleCaptionSelected = async (file: File) => {
+    if (!videoId) return
+    setCaptionError(null)
+    setCaptionSuccess(null)
+    setCaptionUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('language', 'pt')
+
+      const res = await fetch(`/api/admin/videos/${videoId}/captions`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionError(data.error ?? 'Falha ao enviar a legenda.')
+        return
+      }
+
+      setCaptionSuccess('Legenda enviada com sucesso.')
+    } catch {
+      setCaptionError('Falha de conexão ao enviar a legenda.')
+    } finally {
+      setCaptionUploading(false)
+    }
   }
 
   const handleManualSave = () => {
@@ -349,6 +383,30 @@ export function LessonEditor({
                     ID: <span className="font-mono">{videoId}</span>
                     {durationLabel && <> · Duração: {durationLabel}</>}
                   </p>
+
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <label className={LABEL_CLASS} htmlFor="caption-upload">
+                      Legenda (.vtt)
+                    </label>
+                    <input
+                      id="caption-upload"
+                      type="file"
+                      accept=".vtt"
+                      disabled={captionUploading}
+                      onChange={e => {
+                        const file = e.target.files?.[0]
+                        if (file) handleCaptionSelected(file)
+                      }}
+                      className="block w-full text-sm text-gray-600"
+                    />
+                    {captionUploading && (
+                      <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
+                    )}
+                    {captionError && <p className="mt-1 text-xs text-red-600">{captionError}</p>}
+                    {captionSuccess && (
+                      <p className="mt-1 text-xs text-green-600">{captionSuccess}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

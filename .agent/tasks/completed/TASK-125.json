@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Confirmar suporte nativo",
       "details": "Confirmar que o iframe embed do Bunny Stream já expõe o seletor de legenda nativamente quando o vídeo tem captions associadas, sem mudança de código em `BunnyPlayer`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Testar manualmente",
       "details": "Enviar uma legenda via TASK-124 e confirmar que o controle aparece no player da aula.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [
