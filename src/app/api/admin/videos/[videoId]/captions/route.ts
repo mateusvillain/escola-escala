@@ -33,15 +33,20 @@ export async function POST(
     return NextResponse.json({ error: 'Arquivo excede o limite de 1MB' }, { status: 413 })
   }
 
-  const language = (formData.get('language') as string | null) || 'pt'
+  const language = ((formData.get('language') as string | null) || 'pt').trim().toLowerCase()
+  if (!/^[a-z]{2,3}(-[a-z]{2,4})?$/.test(language)) {
+    return NextResponse.json({ error: 'Código de idioma inválido (ex: pt, en, pt-br)' }, { status: 400 })
+  }
+
+  const label = ((formData.get('label') as string | null) || language).trim().slice(0, 50)
   const vttContent = await file.text()
 
   try {
-    await uploadCaption(videoId, language, vttContent)
+    await uploadCaption(videoId, language, vttContent, label)
   } catch (err) {
     console.error('[bunny] erro ao enviar legenda:', err)
     return NextResponse.json({ error: 'Falha ao enviar legenda para o Bunny Stream' }, { status: 502 })
   }
 
-  return NextResponse.json({ success: true, language })
+  return NextResponse.json({ success: true, language, label })
 }

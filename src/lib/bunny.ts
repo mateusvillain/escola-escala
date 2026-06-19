@@ -60,7 +60,12 @@ export async function getVideoInfo(videoGuid: string): Promise<BunnyVideoInfo> {
   return res.json()
 }
 
-export async function uploadCaption(videoGuid: string, language: string, vttContent: string): Promise<void> {
+export async function uploadCaption(
+  videoGuid: string,
+  language: string,
+  vttContent: string,
+  label?: string
+): Promise<void> {
   const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos/${videoGuid}/captions/${language}`, {
     method: 'POST',
     headers: {
@@ -69,7 +74,7 @@ export async function uploadCaption(videoGuid: string, language: string, vttCont
     },
     body: JSON.stringify({
       srclang: language,
-      label: language,
+      label: label || language,
       captionsFile: Buffer.from(vttContent, 'utf-8').toString('base64'),
     }),
   })

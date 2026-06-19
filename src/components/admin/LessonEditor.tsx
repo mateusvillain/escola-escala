@@ -78,6 +78,8 @@ export function LessonEditor({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [captionLanguage, setCaptionLanguage] = useState('pt')
+  const [captionLabel, setCaptionLabel] = useState('')
   const [captionUploading, setCaptionUploading] = useState(false)
   const [captionError, setCaptionError] = useState<string | null>(null)
   const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
@@ -138,7 +140,8 @@ export function LessonEditor({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('language', 'pt')
+      formData.append('language', captionLanguage.trim() || 'pt')
+      if (captionLabel.trim()) formData.append('label', captionLabel.trim())
 
       const res = await fetch(`/api/admin/videos/${videoId}/captions`, {
         method: 'POST',
@@ -151,7 +154,7 @@ export function LessonEditor({
         return
       }
 
-      setCaptionSuccess('Legenda enviada com sucesso.')
+      setCaptionSuccess(`Legenda "${data.label}" (${data.language}) enviada com sucesso.`)
     } catch {
       setCaptionError('Falha de conexão ao enviar a legenda.')
     } finally {
@@ -385,8 +388,25 @@ export function LessonEditor({
                   </p>
 
                   <div className="mt-3 pt-3 border-t border-gray-100">
-                    <label className={LABEL_CLASS} htmlFor="caption-upload">
-                      Legenda (.vtt)
+                    <span className={LABEL_CLASS}>Legenda (.vtt)</span>
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={captionLanguage}
+                        onChange={e => setCaptionLanguage(e.target.value)}
+                        placeholder="Idioma (ex: pt, en)"
+                        className={`${INPUT_CLASS} w-32`}
+                      />
+                      <input
+                        type="text"
+                        value={captionLabel}
+                        onChange={e => setCaptionLabel(e.target.value)}
+                        placeholder="Nome de exibição (ex: Português)"
+                        className={`${INPUT_CLASS} flex-1`}
+                      />
+                    </div>
+                    <label className="sr-only" htmlFor="caption-upload">
+                      Arquivo de legenda
                     </label>
                     <input
                       id="caption-upload"
@@ -399,6 +419,9 @@ export function LessonEditor({
                       }}
                       className="block w-full text-sm text-gray-600"
                     />
+                    <p className="mt-1 text-xs text-gray-400">
+                      Se já existir uma legenda nesse código de idioma, ela será substituída.
+                    </p>
                     {captionUploading && (
                       <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
                     )}
