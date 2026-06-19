@@ -9,8 +9,14 @@ interface BunnyVideo {
   status: number
 }
 
+interface BunnyCaption {
+  srclang: string
+  label: string
+}
+
 interface BunnyVideoInfo extends BunnyVideo {
   length: number
+  captions: BunnyCaption[]
 }
 
 export async function createVideo(title: string): Promise<BunnyVideo> {
@@ -58,6 +64,43 @@ export async function getVideoInfo(videoGuid: string): Promise<BunnyVideoInfo> {
   }
 
   return res.json()
+}
+
+export async function uploadCaption(
+  videoGuid: string,
+  language: string,
+  vttContent: string,
+  label?: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos/${videoGuid}/captions/${language}`, {
+    method: 'POST',
+    headers: {
+      AccessKey: API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      srclang: language,
+      label: label || language,
+      captionsFile: Buffer.from(vttContent, 'utf-8').toString('base64'),
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Bunny Stream uploadCaption falhou (${res.status}): ${text}`)
+  }
+}
+
+export async function deleteCaption(videoGuid: string, language: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos/${videoGuid}/captions/${language}`, {
+    method: 'DELETE',
+    headers: { AccessKey: API_KEY },
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Bunny Stream deleteCaption falhou (${res.status}): ${text}`)
+  }
 }
 
 export function getEmbedUrl(videoGuid: string): string {

@@ -1,8 +1,13 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import type { LessonAttachment } from '@/lib/utils/lessons'
+
+interface VideoCaption {
+  srclang: string
+  label: string
+}
 
 interface LessonEditorProps {
   lessonId: string
@@ -32,6 +37,12 @@ const LABEL_CLASS = 'block text-sm font-medium text-gray-700 mb-1'
 const ERROR_CLASS = 'mt-1 text-xs text-red-600'
 
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_STREAM_LIBRARY_ID
+
+const CAPTION_LANGUAGE_OPTIONS = [
+  { value: 'pt', label: 'Português' },
+  { value: 'en', label: 'Inglês' },
+  { value: 'es', label: 'Espanhol' },
+] as const
 
 function getEmbedUrl(videoId: string): string {
   return `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}`
@@ -77,6 +88,62 @@ export function LessonEditor({
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [captionLanguage, setCaptionLanguage] = useState<string>('')
+  const [captionUploading, setCaptionUploading] = useState(false)
+  const [captionError, setCaptionError] = useState<string | null>(null)
+  const [captionSuccess, setCaptionSuccess] = useState<string | null>(null)
+  const captionFileInputRef = useRef<HTMLInputElement>(null)
+
+  const [captions, setCaptions] = useState<VideoCaption[]>([])
+  const [captionsLoading, setCaptionsLoading] = useState(false)
+  const [captionsListError, setCaptionsListError] = useState<string | null>(null)
+  const [deletingLanguage, setDeletingLanguage] = useState<string | null>(null)
+
+  const fetchCaptions = useCallback(async (id: string) => {
+    setCaptionsLoading(true)
+    setCaptionsListError(null)
+    try {
+      const res = await fetch(`/api/admin/videos/${id}/captions`)
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionsListError(data.error ?? 'Falha ao carregar legendas.')
+        return
+      }
+      setCaptions(data.captions ?? [])
+    } catch {
+      setCaptionsListError('Falha de conexão ao carregar legendas.')
+    } finally {
+      setCaptionsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (videoId) fetchCaptions(videoId)
+  }, [videoId, fetchCaptions])
+
+  const handleDeleteCaption = async (srclang: string) => {
+    if (!videoId) return
+    if (!window.confirm(`Excluir a legenda "${srclang}" deste vídeo no Bunny Stream?`)) return
+
+    setDeletingLanguage(srclang)
+    setCaptionsListError(null)
+    try {
+      const res = await fetch(`/api/admin/videos/${videoId}/captions/${srclang}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionsListError(data.error ?? 'Falha ao excluir a legenda.')
+        return
+      }
+      setCaptions(prev => prev.filter(c => c.srclang !== srclang))
+    } catch {
+      setCaptionsListError('Falha de conexão ao excluir a legenda.')
+    } finally {
+      setDeletingLanguage(null)
+    }
+  }
 
   const [saving, setSaving] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -125,6 +192,47 @@ export function LessonEditor({
     xhr.send(formData)
   }
 
+  const handleCaptionSelected = async (file: File) => {
+    if (!videoId) return
+
+    const selectedOption = CAPTION_LANGUAGE_OPTIONS.find(o => o.value === captionLanguage)
+    if (!selectedOption) {
+      setCaptionError('Selecione um idioma antes de enviar o arquivo.')
+      return
+    }
+
+    setCaptionError(null)
+    setCaptionSuccess(null)
+    setCaptionUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('language', selectedOption.value)
+      formData.append('label', selectedOption.label)
+
+      const res = await fetch(`/api/admin/videos/${videoId}/captions`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        setCaptionError(data.error ?? 'Falha ao enviar a legenda.')
+        return
+      }
+
+      setCaptionSuccess(`Legenda "${data.label}" (${data.language}) enviada com sucesso.`)
+      setCaptionLanguage('')
+      if (captionFileInputRef.current) captionFileInputRef.current.value = ''
+      fetchCaptions(videoId)
+    } catch {
+      setCaptionError('Falha de conexão ao enviar a legenda.')
+    } finally {
+      setCaptionUploading(false)
+    }
+  }
+
   const handleManualSave = () => {
     const trimmed = manualVideoId.trim()
     if (!trimmed) return
@@ -171,6 +279,9 @@ export function LessonEditor({
   }
 
   const durationLabel = formatDuration(videoDuration)
+  const availableCaptionLanguages = CAPTION_LANGUAGE_OPTIONS.filter(
+    option => !captions.some(c => c.srclang === option.value)
+  )
 
   return (
     <div className="max-w-2xl">
@@ -349,6 +460,97 @@ export function LessonEditor({
                     ID: <span className="font-mono">{videoId}</span>
                     {durationLabel && <> · Duração: {durationLabel}</>}
                   </p>
+
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <span className={LABEL_CLASS}>Legenda (.vtt)</span>
+
+                    {captionsLoading && (
+                      <p className="text-xs text-gray-400 mb-2">Carregando legendas...</p>
+                    )}
+                    {captionsListError && (
+                      <p className="text-xs text-red-600 mb-2">{captionsListError}</p>
+                    )}
+                    {!captionsLoading && captions.length > 0 && (
+                      <ul className="mb-3 space-y-1">
+                        {captions.map(c => (
+                          <li
+                            key={c.srclang}
+                            className="flex items-center justify-between gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm"
+                          >
+                            <span className="text-gray-700">
+                              {c.label}{' '}
+                              <span className="text-gray-400 font-mono text-xs">({c.srclang})</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCaption(c.srclang)}
+                              disabled={deletingLanguage === c.srclang}
+                              aria-label={`Excluir legenda ${c.srclang}`}
+                              className="text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            >
+                              {deletingLanguage === c.srclang ? (
+                                'Excluindo...'
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9.5 7V4a1 1 0 011-1h3a1 1 0 011 1v3M4 7h16"
+                                  />
+                                </svg>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {!captionsLoading && availableCaptionLanguages.length === 0 ? (
+                      <p className="text-xs text-gray-400">
+                        Todos os idiomas disponíveis já têm legenda enviada.
+                      </p>
+                    ) : (
+                      <>
+                        <select
+                          value={captionLanguage}
+                          onChange={e => setCaptionLanguage(e.target.value)}
+                          className={`${INPUT_CLASS} mb-2`}
+                        >
+                          <option value="" disabled>
+                            Selecione um idioma
+                          </option>
+                          {availableCaptionLanguages.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="sr-only" htmlFor="caption-upload">
+                          Arquivo de legenda
+                        </label>
+                        <input
+                          ref={captionFileInputRef}
+                          id="caption-upload"
+                          type="file"
+                          accept=".vtt"
+                          disabled={captionUploading || !captionLanguage}
+                          onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (file) handleCaptionSelected(file)
+                          }}
+                          className="block w-full text-sm text-gray-600"
+                        />
+                        {captionUploading && (
+                          <p className="mt-1 text-xs text-gray-500">Enviando legenda...</p>
+                        )}
+                        {captionError && <p className="mt-1 text-xs text-red-600">{captionError}</p>}
+                        {captionSuccess && (
+                          <p className="mt-1 text-xs text-green-600">{captionSuccess}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

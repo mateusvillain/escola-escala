@@ -857,22 +857,22 @@
     "id": "TASK-123",
     "title": "Upload de captions via Bunny Stream API",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-123.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-123.json",
+    "passes": true
   },
   {
     "id": "TASK-124",
     "title": "Upload de legenda no LessonEditor",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-124.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-124.json",
+    "passes": true
   },
   {
     "id": "TASK-125",
     "title": "Seletor de legendas no player",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-125.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-125.json",
+    "passes": true
   },
   {
     "id": "TASK-126",
