@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
+import * as tus from 'tus-js-client'
 import type { LessonAttachment } from '@/lib/utils/lessons'
 
 interface VideoCaption {
@@ -149,47 +150,68 @@ export function LessonEditor({
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const handleFileSelected = (file: File) => {
+  const handleFileSelected = async (file: File) => {
     setUploadError(null)
     setUploadProgress(0)
     setUploading(true)
 
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('title', defaultValues.title)
-
-    const xhr = new XMLHttpRequest()
-    xhr.open('POST', '/api/admin/videos/upload')
-
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable) {
-        setUploadProgress(Math.round((e.loaded / e.total) * 100))
-      }
+    let initData: {
+      videoId: string
+      libraryId: string
+      uploadEndpoint: string
+      authorizationSignature: string
+      authorizationExpire: number
     }
-
-    xhr.onload = () => {
-      setUploading(false)
-      if (xhr.status < 200 || xhr.status >= 300) {
-        try {
-          const data = JSON.parse(xhr.responseText)
-          setUploadError(data.error ?? 'Falha ao enviar o vídeo.')
-        } catch {
-          setUploadError('Falha ao enviar o vídeo.')
-        }
+    try {
+      const res = await fetch('/api/admin/videos/upload-init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: defaultValues.title }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setUploading(false)
+        setUploadError(data.error ?? 'Falha ao iniciar o upload.')
         return
       }
-      const data = JSON.parse(xhr.responseText)
-      setVideoId(data.videoId)
-      setVideoDuration(data.videoDuration ?? null)
-      setManualVideoId(data.videoId)
-    }
-
-    xhr.onerror = () => {
+      initData = data
+    } catch {
       setUploading(false)
-      setUploadError('Falha de conexão ao enviar o vídeo.')
+      setUploadError('Falha de conexão ao iniciar o upload.')
+      return
     }
 
-    xhr.send(formData)
+    const { videoId: newVideoId, libraryId, uploadEndpoint, authorizationSignature, authorizationExpire } = initData
+
+    const upload = new tus.Upload(file, {
+      endpoint: uploadEndpoint,
+      retryDelays: [0, 1000, 3000, 5000],
+      headers: {
+        AuthorizationSignature: authorizationSignature,
+        AuthorizationExpire: String(authorizationExpire),
+        VideoId: newVideoId,
+        LibraryId: libraryId,
+      },
+      metadata: {
+        filetype: file.type,
+        title: defaultValues.title,
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        setUploadProgress(Math.round((bytesUploaded / bytesTotal) * 100))
+      },
+      onSuccess: () => {
+        setUploading(false)
+        setVideoId(newVideoId)
+        setVideoDuration(null)
+        setManualVideoId(newVideoId)
+      },
+      onError: error => {
+        setUploading(false)
+        setUploadError(error.message || 'Falha ao enviar o vídeo.')
+      },
+    })
+
+    upload.start()
   }
 
   const handleCaptionSelected = async (file: File) => {
