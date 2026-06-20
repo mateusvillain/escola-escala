@@ -1,4 +1,8 @@
+import crypto from 'crypto'
+
 const API_BASE = 'https://video.bunnycdn.com'
+const TUS_UPLOAD_ENDPOINT = 'https://video.bunnycdn.com/tusupload'
+const TUS_SIGNATURE_TTL_SECONDS = 60 * 60 // 1h
 const LIBRARY_ID = process.env.BUNNY_STREAM_LIBRARY_ID!
 const API_KEY = process.env.BUNNY_STREAM_API_KEY!
 const CDN_HOSTNAME = process.env.BUNNY_STREAM_CDN_HOSTNAME!
@@ -37,19 +41,27 @@ export async function createVideo(title: string): Promise<BunnyVideo> {
   return res.json()
 }
 
-export async function uploadVideo(videoGuid: string, buffer: ArrayBuffer): Promise<void> {
-  const res = await fetch(`${API_BASE}/library/${LIBRARY_ID}/videos/${videoGuid}`, {
-    method: 'PUT',
-    headers: {
-      AccessKey: API_KEY,
-      'Content-Type': 'application/octet-stream',
-    },
-    body: buffer,
-  })
+export interface TusCredentials {
+  videoId: string
+  libraryId: string
+  uploadEndpoint: string
+  authorizationSignature: string
+  authorizationExpire: number
+}
 
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Bunny Stream uploadVideo falhou (${res.status}): ${text}`)
+export function generateTusCredentials(videoGuid: string): TusCredentials {
+  const authorizationExpire = Math.floor(Date.now() / 1000) + TUS_SIGNATURE_TTL_SECONDS
+  const authorizationSignature = crypto
+    .createHash('sha256')
+    .update(`${LIBRARY_ID}${API_KEY}${authorizationExpire}${videoGuid}`)
+    .digest('hex')
+
+  return {
+    videoId: videoGuid,
+    libraryId: LIBRARY_ID,
+    uploadEndpoint: TUS_UPLOAD_ENDPOINT,
+    authorizationSignature,
+    authorizationExpire,
   }
 }
 
