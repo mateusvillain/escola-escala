@@ -1,0 +1,33 @@
+{
+  "id": "TASK-195",
+  "title": "Seção de funil de conversão no AdminDashboard",
+  "category": "ui-ux",
+  "description": "Exibir o funil de conversão e os principais pontos de abandono de aula no painel administrativo, complementando as métricas financeiras (MRR/churn/LTV) já existentes.",
+  "acceptanceCriteria": [
+    "`AdminDashboard` ganha uma seção \"Funil de conversão\" mostrando `plansViewed → checkoutsStarted → subscriptionsActivated` com taxas de conversão entre etapas",
+    "Seção \"Aulas com maior abandono\" lista as 5 aulas retornadas por `GET /api/admin/events/funnel`, com link direto para editar a aula no admin",
+    "Seletor de período (últimos 7/30/90 dias) reaproveita o padrão de filtro já usado em outras telas admin, se existir"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar os dados do funil",
+      "details": "No componente/página do `AdminDashboard`, buscar `GET /api/admin/events/funnel` (TASK-194) junto com as métricas financeiras já existentes.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Renderizar o funil",
+      "details": "Exibir as três etapas com contagem absoluta e percentual de conversão entre etapas consecutivas, reaproveitando `<lui-card>`/`<lui-heading>` do design system.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Renderizar a lista de abandono",
+      "details": "Listar as 5 aulas de maior drop-off com título, curso e link para `/admin/cursos/[id]` (ou direto para a aula, se a rota existir).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-194"],
+  "estimatedComplexity": "medium"
+}

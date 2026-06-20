@@ -1,0 +1,34 @@
+{
+  "id": "TASK-165",
+  "title": "CTA \"Para empresas\" e página de planos B2B",
+  "category": "ui-ux",
+  "description": "Página pública que apresenta o plano B2B (acesso por seats para equipes) e permite que um visitante autenticado inicie o fluxo de criação de organização + checkout, análoga à página `/planos` já existente para assinatura individual.",
+  "acceptanceCriteria": [
+    "Nova página `/planos/empresas` descreve o modelo de cobrança por seat, com seletor de quantidade de seats e ciclo (mensal/anual)",
+    "`/planos` ganha um CTA \"Para empresas\" linkando para `/planos/empresas`",
+    "Usuário autenticado sem organização que confirma o plano é direcionado ao fluxo de criação de organização (TASK-156) seguido do checkout (TASK-162)",
+    "Usuário não autenticado é direcionado ao cadastro antes de criar a organização, mesmo padrão do fluxo de assinatura individual"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página de planos B2B",
+      "details": "Criar `src/app/planos/empresas/page.tsx`, com input numérico de seats e seleção de ciclo, reaproveitando componentes do design system já usados em `/planos`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar CTA em /planos",
+      "details": "Em `src/app/planos/page.tsx`, adicionar um link/card \"Para empresas\" apontando para `/planos/empresas`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Encadear criação de organização + checkout",
+      "details": "Ao confirmar, se o usuário não tiver organização, chamar `POST /api/organizations` (TASK-156) com um nome padrão editável e, em seguida, `POST /api/organizations/me/checkout` (TASK-162) com os seats/ciclo escolhidos, redirecionando para a `checkoutUrl` retornada.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-156", "TASK-162"],
+  "estimatedComplexity": "medium"
+}

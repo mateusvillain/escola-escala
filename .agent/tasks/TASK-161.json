@@ -1,0 +1,34 @@
+{
+  "id": "TASK-161",
+  "title": "DELETE /api/organizations/me/members/[userId] remove membro",
+  "category": "api-endpoint",
+  "description": "Endpoint que permite ao `owner` remover um membro da organização, liberando o seat imediatamente.",
+  "acceptanceCriteria": [
+    "`DELETE /api/organizations/me/members/[userId]` exige que o usuário autenticado seja `owner` da organização (403 caso contrário — ver TASK-166)",
+    "Owner não pode remover a si mesmo por este endpoint (retorna 400 com mensagem clara, orientando a cancelar a assinatura via Customer Portal em vez disso)",
+    "Remoção exclui o `OrganizationMember` correspondente; o seat fica imediatamente disponível para novo convite",
+    "Usuário removido perde acesso premium herdado da organização na próxima verificação de `checkLessonAccess`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/members/[userId]/route.ts` com `DELETE`, usando `RouteContext<'/api/organizations/me/members/[userId]'>` para o `ctx.params`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar papel e impedir auto-remoção",
+      "details": "Verificar que o usuário autenticado é `owner`; se o `userId` do path for o próprio usuário autenticado, retornar 400.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Remover o membership",
+      "details": "Deletar o `OrganizationMember` com `where: { userId, organizationId }` (escopado à organização do owner autenticado, nunca a outra organização).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-152", "TASK-157"],
+  "estimatedComplexity": "low"
+}

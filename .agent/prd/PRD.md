@@ -1,10 +1,10 @@
 # PRD — Plataforma de Cursos Online por Assinatura
 
-**Versão**: 2.0  
-**Data**: 2026-06-16  
-**Fase**: 1 — MVP B2C (completa) + Fase 2 — Crescimento e Engajamento (em planejamento)
+**Versão**: 3.0  
+**Data**: 2026-06-20  
+**Fase**: 1 — MVP B2C (completa) + Fase 2 — Crescimento e Engajamento (completa) + Fase 3 — Expansão e Maturidade (em planejamento)
 
-> A Fase 1 (seções 1–10 abaixo) está implementada — ver `CLAUDE.md`/`AGENTS.md` do repositório para o estado real de cada funcionalidade. A seção 13 detalha a Fase 2, derivada de `docs/oportunidades-plataforma.md`.
+> A Fase 1 (seções 1–10 abaixo) e a Fase 2 (seção 13, TASK-84 a TASK-145) estão implementadas — ver `CLAUDE.md`/`AGENTS.md` do repositório para o estado real de cada funcionalidade. A seção 14 detalha a Fase 3 (TASK-146 a TASK-195), derivada de `docs/fase3-oportunidades.md`.
 
 ---
 
@@ -463,9 +463,24 @@ Detalhada na seção 13. Resumo por sprint sugerido:
 **Sprint 9 — Operação**
 - Página pública de instrutor, área própria do instrutor (somente leitura), materiais complementares por aula, exportação CSV, auditoria de ações admin
 
-### Fase 3+ (fora do escopo desta rodada)
+### Fase 3 — Expansão e Maturidade (TASK-146 a TASK-195)
 
-- Gestão B2B com painel de equipes e seats corporativos
+Detalhada na seção 14. Resumo por sprint sugerido (ordem de prioridade conforme `docs/fase3-oportunidades.md`):
+
+**Sprint 10 — Monetização rápida**
+- Pix e Boleto via Stripe na compra avulsa, com tratamento de pagamento assíncrono
+
+**Sprint 11 — B2B / licenciamento corporativo**
+- Modelo de organização com seats, convite de membros, checkout por seat, painel da própria organização — demanda ainda não validada com o cliente (ver seção 14.6)
+
+**Sprint 12 — Expansão de catálogo**
+- Trilhas e bundles de cursos, conteúdo programado (drip content)
+
+**Sprint 13 — Confiabilidade e dados de produto**
+- Testes E2E com Playwright, rate limiting distribuído (Upstash Redis), monitoramento de erro (Sentry), event tracking de produto
+
+### Fase 4+ (fora do escopo desta rodada)
+
 - Gamificação pesada (pontos, ranking competitivo)
 - Fórum e comunidade de alunos
 - App mobile nativo (iOS e Android)
@@ -503,10 +518,21 @@ Detalhada na seção 13. Resumo por sprint sugerido:
 
 ### Não-Metas (Fase 2 e além)
 
-- Gestão B2B, fórum/comunidade, app mobile nativo, gamificação competitiva e live streaming — ver "Fase 3+" na seção 11
 - Edição de conteúdo de curso pelo próprio instrutor (painel do instrutor é somente leitura na Fase 2)
 - Sistema de afiliados completo com múltiplos níveis de comissão (Fase 2 entrega só indicação direta 1 nível)
 - Full-text search (tsvector/Elasticsearch) — Fase 2 usa busca simples via `contains`
+
+### Não-Metas (Fase 3)
+
+- ~~Gestão B2B fora de escopo~~ → Fase 3 entrega um modelo de organização com seats (TASK-151 a TASK-166), mas a demanda real ainda não foi validada com o cliente — ver decisão na seção 14.6
+- Self-service de aumento de seats de uma organização já assinante (Fase 3 entrega seats fixados no checkout inicial; aumentar exige novo contato/checkout)
+- Assinatura recorrente de trilha — Fase 3 entrega só bundle em pagamento único (TASK-167 a TASK-173)
+- Liberação programada por aula individual — Fase 3 entrega granularidade por módulo (TASK-174 a TASK-178)
+- Multi-tenancy de usuário em mais de uma organização (Fase 3 limita 1 usuário a 1 organização — TASK-152)
+
+### Não-Metas (Fase 3 e além)
+
+- Gamificação pesada (pontos, ranking competitivo), fórum/comunidade, app mobile nativo e live streaming — ver "Fase 4+" na seção 11
 
 ---
 
@@ -563,5 +589,63 @@ Origem: `docs/oportunidades-plataforma.md`, seções 1–5 (seção 6, B2B e fó
 - Painel do instrutor: somente leitura nesta rodada — edição de conteúdo continua centralizada no admin
 - Programa de indicação: 1 nível apenas (sem cadeia de indicações), crédito equivalente a um ciclo de cobrança
 - Churn/LTV: calculados de forma aproximada a partir do histórico de `UserSubscription`, sem tabela de snapshot mensal dedicada
+
+Essas decisões devem ser validadas com o cliente antes ou durante a implementação das tasks correspondentes; ajustar a task específica se a decisão mudar.
+
+---
+
+## 14. Fase 3 — Expansão e Maturidade
+
+Origem: `docs/fase3-oportunidades.md`. Documento de visão original — não previa quebra em tasks até validação com o cliente; esta seção converte os 7 itens do documento em tasks de implementação, com a ressalva de que B2B (14.1) ainda não teve a demanda validada (ver 14.6). Cada requisito referencia o ID de task correspondente em `.agent/tasks/`.
+
+### 14.1 Monetização e Expansão de Mercado (TASK-147 a TASK-173)
+
+**Pix e Boleto via Stripe** — TASK-147 a TASK-150: Pix e Boleto habilitados na Checkout Session de compra avulsa (`mode: 'payment'`), com tratamento dos webhooks de pagamento assíncrono (`checkout.session.async_payment_succeeded`/`async_payment_failed`) e estado de "pagamento pendente" na UI. Suporte de Boleto na assinatura recorrente fica como investigação separada (TASK-150), já que cobrança recorrente com método assíncrono tem implicações de `past_due` temporário a cada ciclo.
+**B2B / licenciamento corporativo** — TASK-151 a TASK-166: modelo `Organization` com seats (`OrganizationMember`, `OrganizationInvite`, `OrganizationSubscription`), controle de acesso estendido em `access.ts` para conceder nível premium a membros de organização ativa, fluxo de convite por e-mail, checkout por seat via Stripe (`quantity` no line item) e painel `/organizacao` para o owner gerenciar membros e assinatura.
+**Trilhas e bundles de cursos** — TASK-167 a TASK-173: `CourseTrack`/`CourseTrackItem` agrupam cursos em sequência; trilha pode ser vendida como bundle em pagamento único (reaproveitando o padrão de compra avulsa individual), com matrícula em lote em todos os cursos da trilha via webhook.
+
+### 14.2 Conteúdo (TASK-174 a TASK-178)
+
+**Conteúdo programado (drip content)** — TASK-174 a TASK-178: módulos ganham `releaseType` (`immediate`/`fixed_date`/`days_after_enrollment`), com liberação calculada a partir de `CourseEnrollment.enrolledAt` para o caso de dias após matrícula. Granularidade por módulo, não por aula individual.
+
+### 14.3 Confiabilidade e Dados de Produto (TASK-179 a TASK-195)
+
+**Testes E2E com Playwright** — TASK-179 a TASK-184: `playwright.config.ts` configurado e specs cobrindo os fluxos críticos identificados no documento de oportunidades (cadastro/login, checkout de assinatura, player e progresso, conclusão de curso e certificado).
+**Rate limiting distribuído** — TASK-185 a TASK-187: `src/lib/rate-limit.ts` migrado de `Map` em memória para Upstash Redis (via Vercel Marketplace), validado entre múltiplas instâncias.
+**Monitoramento de erro em produção** — TASK-188 a TASK-190: `@sentry/nextjs` instalado e configurado, com captura explícita de erros nos fluxos financeiramente críticos (webhook Stripe, checkout, certificado) e alerta de erro configurado para produção.
+**Event tracking de produto** — TASK-191 a TASK-195: tabela `ProductEvent` simples, helper `trackEvent` fire-and-forget, instrumentação dos eventos-chave do funil (visualização de planos, início de checkout, ativação de assinatura, início de aula) e seção de funil/abandono no `AdminDashboard`.
+
+### 14.4 Fluxo de Usuário — B2B (Criação de Organização e Convite)
+
+```
+1. Usuário autenticado acessa /planos/empresas → escolhe quantidade de seats e ciclo
+2. Confirma → cria Organization (torna-se owner) → redireciona para Stripe Checkout (cobrança por seat)
+3. Pagamento confirmado → webhook ativa OrganizationSubscription
+4. Owner acessa /organizacao → convida membros por e-mail (respeitando o seatLimit contratado)
+5. Convidado recebe e-mail com link /convite/[token] → aceita (cria conta se necessário)
+6. Membro aceito ganha acesso de nível premium a todo o catálogo, herdado da organização
+```
+
+### 14.5 Pré-requisitos específicos da Fase 3
+
+| Item | Necessário para | Status |
+|---|---|---|
+| `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`/`STRIPE_PRICE_ID_B2B_SEAT_ANNUAL` (novas variáveis) | Checkout B2B por seat (TASK-162) | Criar produto/preço por seat no Stripe Dashboard antes da TASK-162 (TASK-146) |
+| Pix e Boleto habilitados na conta Stripe (BRL/BR) | Compra avulsa com Pix/Boleto (TASK-147) | A confirmar (TASK-146) |
+| `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` (novas variáveis) | Rate limiting distribuído (TASK-185/186) | Provisionar via Vercel Marketplace (TASK-146/185) |
+| `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` (novas variáveis) | Monitoramento de erro (TASK-188) | Criar projeto Sentry (TASK-146/188) |
+| Eventos `checkout.session.async_payment_succeeded`/`async_payment_failed` adicionados à lista de eventos do endpoint de webhook na Stripe Dashboard | Pix/Boleto assíncrono (TASK-148) | Pendente — mesmo padrão já usado para `trial_will_end` na Fase 2 (local via `stripe listen` já recebe todos os eventos; produção precisa habilitar explicitamente) |
+
+### 14.6 Decisões de escopo assumidas (sem confirmação do cliente)
+
+- **B2B (maior risco de escopo):** demanda de clientes corporativos ainda não validada — o documento de origem (`docs/fase3-oportunidades.md`) classifica B2B como "maior alavanca de receita do roadmap atual", mas recomenda "validação de demanda antes de investir". As tasks foram geradas (TASK-151 a TASK-166) para não bloquear a implementação caso a direção seja confirmada, mas a prioridade de execução deve ser revisitada com o cliente antes de iniciar o Sprint 11.
+- B2B: 1 usuário pertence a no máximo 1 organização (sem multi-tenancy de usuário)
+- B2B: acesso de organização equivale a nível `premium` (catálogo completo), sem distinção básico/premium por seat
+- B2B: seats fixados no checkout inicial; aumentar seats depois exige novo checkout/contato, sem self-service de ajuste de quantidade nesta rodada
+- B2B: convite por e-mail expira em 7 dias
+- Trilhas/bundles: bundle dá acesso permanente via enrollment direto em cada curso da trilha (igual à compra avulsa individual) — sem assinatura recorrente de trilha
+- Drip content: liberação programada por módulo, não por aula individual
+- Boleto recorrente (assinatura): decisão não assumida — fica para investigação dedicada na TASK-150, podendo concluir como "não habilitar nesta rodada"
+- Event tracking: tabela própria simples (`ProductEvent`), sem ferramenta de analytics externa nesta rodada
 
 Essas decisões devem ser validadas com o cliente antes ou durante a implementação das tasks correspondentes; ajustar a task específica se a decisão mudar.

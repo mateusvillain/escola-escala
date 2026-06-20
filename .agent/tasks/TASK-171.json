@@ -1,0 +1,34 @@
+{
+  "id": "TASK-171",
+  "title": "Página pública /trilhas/[slug]",
+  "category": "ui-ux",
+  "description": "Página pública de detalhe de uma trilha publicada, listando os cursos em sequência com indicador de progresso agregado para alunos autenticados, e CTA de compra do bundle (quando aplicável) ou de assinatura.",
+  "acceptanceCriteria": [
+    "`/trilhas/[slug]` exibe título, descrição e a lista de cursos da trilha em ordem, cada um com link para `/cursos/[slug]`",
+    "Aluno autenticado com matrícula em algum curso da trilha vê progresso individual por curso e um indicador agregado (ex.: \"2 de 5 cursos concluídos\")",
+    "Quando `isBundle: true`, exibe preço e CTA \"Comprar trilha\" (TASK-172); quando `false`, mantém apenas os CTAs individuais de cada curso já existentes",
+    "Trilha com `status` diferente de `published` retorna 404"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint público de detalhe",
+      "details": "Criar `GET /api/tracks/[slug]` (`src/app/api/tracks/[slug]/route.ts`), retornando a trilha publicada com seus cursos em ordem e, se autenticado, o enrollment/progresso de cada curso para o usuário.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a página pública",
+      "details": "Criar `src/app/trilhas/[slug]/page.tsx`, reaproveitando os componentes de card de curso já usados em `/cursos` e o padrão de barra de progresso do dashboard do aluno.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Adicionar CTA de compra do bundle",
+      "details": "Quando `isBundle: true`, exibir preço (`bundlePriceOneTime`) e botão que chama `POST /api/tracks/[slug]/purchase` (TASK-172).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-168", "TASK-169"],
+  "estimatedComplexity": "medium"
+}

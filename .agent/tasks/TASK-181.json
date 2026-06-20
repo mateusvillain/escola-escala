@@ -1,0 +1,36 @@
+{
+  "id": "TASK-181",
+  "title": "Spec E2E do fluxo de checkout de assinatura",
+  "category": "functional",
+  "description": "Cobrir com Playwright o fluxo de assinatura de um plano via Stripe Checkout em modo teste, usando o cartão de teste padrão do Stripe.",
+  "acceptanceCriteria": [
+    "`e2e/checkout.spec.ts` cobre: usuário logado seleciona um plano em `/planos`, é redirecionado ao Stripe Checkout hospedado, completa o pagamento com o cartão de teste `4242 4242 4242 4242`, e retorna para `/dashboard?checkout=success`",
+    "Teste aguarda a confirmação do webhook antes de validar o estado final (ex.: polling em `GET /api/dashboard` até a assinatura aparecer ativa, com timeout razoável)",
+    "Spec roda contra o Stripe em modo teste (`STRIPE_SECRET_KEY` de teste), nunca contra a conta de produção"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Garantir Stripe CLI/webhook ativo durante o teste",
+      "details": "Documentar no spec (comentário) que o teste requer `stripe listen --forward-to localhost:3000/api/webhooks/stripe` rodando localmente, ou rodar via `stripe trigger` integrado ao setup do teste.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Escrever o teste de checkout completo",
+      "details": "Em `e2e/checkout.spec.ts`: login, navegar para `/planos`, clicar em assinar um plano, preencher o formulário hospedado do Stripe Checkout com o cartão de teste, confirmar pagamento, validar retorno a `/dashboard?checkout=success`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Validar a ativação da assinatura",
+      "details": "Após o retorno, fazer polling (com timeout, ex.: 10s) na UI do dashboard até o plano ativo aparecer, confirmando que o webhook processou a ativação.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-180"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Teste depende de o webhook do Stripe estar acessível durante a execução — em CI, isso normalmente requer `stripe listen` em background ou um túnel; documentar a limitação caso o pipeline de CI não suporte isso ainda."
+  ]
+}

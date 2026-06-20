@@ -1,0 +1,35 @@
+{
+  "id": "TASK-175",
+  "title": "Helper isModuleReleased para calcular liberação programada",
+  "category": "functional",
+  "description": "Criar a função que calcula se um módulo já está liberado para um aluno, usando `CourseEnrollment.enrolledAt` como referência temporal para `days_after_enrollment`, conforme já previsto no PRD original (seção 8, relacionamento-chave de `course_enrollments`).",
+  "acceptanceCriteria": [
+    "Função `isModuleReleased(module, enrollment)` retorna `true` imediatamente para `releaseType: 'immediate'`",
+    "Para `releaseType: 'fixed_date'`, retorna `true` somente quando `new Date() >= module.releaseDate`",
+    "Para `releaseType: 'days_after_enrollment'`, retorna `true` somente quando `new Date() >= enrollment.enrolledAt + releaseAfterDays dias`",
+    "Função retorna `false` (módulo bloqueado) quando não há `enrollment` e o tipo é `days_after_enrollment` (sem referência temporal)",
+    "Testes unitários cobrindo os três tipos de liberação e a borda de data exata"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o helper",
+      "details": "Criar `src/lib/drip-content.ts` com `isModuleReleased(module: { releaseType: ModuleReleaseType; releaseDate: Date | null; releaseAfterDays: number | null }, enrollment: { enrolledAt: Date } | null): boolean`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar a lógica de cada tipo",
+      "details": "`immediate` → `true`. `fixed_date` → comparar `Date.now() >= module.releaseDate.getTime()`. `days_after_enrollment` → se `!enrollment`, `false`; senão comparar `Date.now() >= enrollment.enrolledAt.getTime() + releaseAfterDays * 24*60*60*1000`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Adicionar testes unitários",
+      "details": "Criar `src/lib/__tests__/drip-content.test.ts` cobrindo os três tipos e o caso de `enrollment: null` com `days_after_enrollment`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-174"],
+  "estimatedComplexity": "low"
+}

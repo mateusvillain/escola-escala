@@ -1,0 +1,40 @@
+{
+  "id": "TASK-193",
+  "title": "Instrumentar eventos-chave de checkout e consumo de aula",
+  "category": "functional",
+  "description": "Chamar `trackEvent` (TASK-192) nos pontos do funil que o documento de oportunidades identifica como interessantes para análise: abandono de checkout e drop-off de aula.",
+  "acceptanceCriteria": [
+    "Evento `plans_viewed` disparado ao carregar `/planos`",
+    "Evento `checkout_started` disparado em `POST /api/subscriptions/checkout` e em `POST /api/courses/[slug]/purchase` antes de retornar a `checkoutUrl`",
+    "Evento `subscription_activated` disparado em `handleCheckoutSessionCompleted` (assinatura) quando a `UserSubscription` é criada com sucesso",
+    "Evento `lesson_started` disparado ao carregar a página de uma aula, e `lesson_abandoned` quando o progresso registrado fica entre 1% e 79% sem nunca atingir conclusão dentro de uma janela razoável (ex.: calculado depois, na agregação da TASK-194, a partir de `lesson_started` sem `is_completed` correspondente — não precisa de um evento dedicado de abandono em tempo real)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Instrumentar a página de planos",
+      "details": "Em `src/app/planos/page.tsx`, disparar `trackEvent('plans_viewed', user?.id ?? null)` no carregamento (client-side, em `useEffect`, ou via Server Component logando no servidor).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Instrumentar o início de checkout",
+      "details": "Em `src/app/api/subscriptions/checkout/route.ts` e `src/app/api/courses/[slug]/purchase/route.ts`, chamar `void trackEvent('checkout_started', dbUser.id, { billingCycle, priceId })` (ou equivalente) antes do `return`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Instrumentar a ativação de assinatura",
+      "details": "Em `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), chamar `void trackEvent('subscription_activated', userId, { planType: planInfo.type, billingCycle: planInfo.billingCycle })` após o `upsert` de `UserSubscription`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Instrumentar o início de aula",
+      "details": "Na página de aula (`src/app/cursos/[slug]/aulas/[lessonId]`), disparar `trackEvent('lesson_started', userId, { lessonId, courseId })` ao carregar.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-192"],
+  "estimatedComplexity": "medium"
+}

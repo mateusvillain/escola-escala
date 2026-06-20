@@ -1,0 +1,33 @@
+{
+  "id": "TASK-178",
+  "title": "Configuração admin de liberação programada por módulo",
+  "category": "ui-ux",
+  "description": "Permitir que o admin configure o tipo de liberação de cada módulo (imediata, data fixa ou X dias após a matrícula) ao criar/editar o módulo.",
+  "acceptanceCriteria": [
+    "`ModuleList` (`src/components/admin/ModuleList.tsx`) ganha um seletor de `releaseType` por módulo, com campo de data (quando `fixed_date`) ou número de dias (quando `days_after_enrollment`)",
+    "`PATCH /api/admin/modules/[id]` aceita os três novos campos (`releaseType`, `releaseDate`, `releaseAfterDays`), validados via Zod (ex.: `releaseDate` obrigatório quando `releaseType: 'fixed_date'`)",
+    "Resumo da liberação configurada é exibido ao lado do título do módulo na listagem (ex.: \"Liberação: 5 dias após matrícula\")"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Atualizar a validação do endpoint",
+      "details": "Em `src/app/api/admin/modules/[id]/route.ts`, estender o schema Zod para os três campos, com `.refine()` garantindo que `releaseDate` seja preenchido quando `releaseType === 'fixed_date'` e `releaseAfterDays` quando `releaseType === 'days_after_enrollment'`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar os campos ao formulário inline de módulo",
+      "details": "Em `src/components/admin/ModuleList.tsx`, adicionar um `<select>` para `releaseType` e, condicionalmente, um input de data ou número, seguindo o padrão de inputs nativos já usado nos formulários admin.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Exibir o resumo na listagem",
+      "details": "Ao lado do título do módulo, exibir um texto curto derivado de `releaseType`/`releaseDate`/`releaseAfterDays` (ex.: badge \"Imediato\", \"A partir de 12/08\", \"5 dias após matrícula\").",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-174"],
+  "estimatedComplexity": "medium"
+}

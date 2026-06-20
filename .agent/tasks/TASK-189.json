@@ -1,0 +1,33 @@
+{
+  "id": "TASK-189",
+  "title": "Capturar erros de rotas críticas no Sentry",
+  "category": "functional",
+  "description": "Garantir que falhas em fluxos financeiramente críticos (webhook Stripe, checkout, geração de certificado) sejam capturadas explicitamente pelo Sentry, complementando a captura automática de erros não tratados já oferecida pelo SDK.",
+  "acceptanceCriteria": [
+    "`POST /api/webhooks/stripe` captura qualquer exceção lançada pelos handlers de `src/lib/stripe-handlers.ts` via `Sentry.captureException`, antes de responder com erro ao Stripe",
+    "`POST /api/subscriptions/checkout`, `POST /api/courses/[slug]/purchase` e a geração de certificado (`src/lib/certificate.ts`) capturam exceções de forma equivalente",
+    "Erros capturados incluem contexto útil (`userId`, `courseId`/`stripeSubscriptionId` quando disponível) via `Sentry.setContext` ou `extra`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Instrumentar o webhook do Stripe",
+      "details": "Em `src/app/api/webhooks/stripe/route.ts`, envolver a chamada aos handlers em try/catch, chamando `Sentry.captureException(err, { extra: { eventType: event.type } })` antes de retornar o erro.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Instrumentar checkout e compra avulsa",
+      "details": "Aplicar o mesmo padrão de captura em `src/app/api/subscriptions/checkout/route.ts` e `src/app/api/courses/[slug]/purchase/route.ts`, com contexto de `userId`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Instrumentar a geração de certificado",
+      "details": "Em `src/lib/certificate.ts`, capturar falhas na geração do PDF com contexto de `userId`/`courseId`, sem impedir que o erro original ainda seja propagado/logado como hoje.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-188"],
+  "estimatedComplexity": "medium"
+}

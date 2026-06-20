@@ -1,0 +1,33 @@
+{
+  "id": "TASK-159",
+  "title": "E-mail transacional de convite para organização",
+  "category": "functional",
+  "description": "Criar o template e a função de envio do e-mail de convite para organização, seguindo o mesmo padrão dos e-mails transacionais já existentes (boas-vindas, fim de trial, cobrança falhada).",
+  "acceptanceCriteria": [
+    "Novo template `organizationInviteEmailHtml` em `src/lib/email-templates.ts`, com nome do convidador, nome da organização e link de aceite",
+    "Nova função `sendOrganizationInviteEmail` em `src/lib/email.ts`, seguindo a assinatura dos `send*Email` já existentes",
+    "E-mail enviado de forma assíncrona sem bloquear a resposta da API (mesmo padrão de try/catch + log usado em `stripe-handlers.ts`)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o template HTML",
+      "details": "Em `src/lib/email-templates.ts`, adicionar `organizationInviteEmailHtml(inviterName: string, organizationName: string, inviteUrl: string): string`, reaproveitando o estilo dos templates existentes (`welcomeEmailHtml`, `trialEndingEmailHtml`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a função de envio",
+      "details": "Em `src/lib/email.ts`, adicionar `sendOrganizationInviteEmail(to: string, inviterName: string, organizationName: string, inviteUrl: string)` chamando `sendEmail` com o template do passo 1.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Chamar a função no endpoint de convite",
+      "details": "Em `src/app/api/organizations/me/invites/route.ts` (TASK-158), envolver a chamada em try/catch — falha no envio de e-mail não deve impedir a criação do convite, apenas logar o erro.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-153"],
+  "estimatedComplexity": "low"
+}

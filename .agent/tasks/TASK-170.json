@@ -1,0 +1,41 @@
+{
+  "id": "TASK-170",
+  "title": "Tela admin /admin/trilhas",
+  "category": "ui-ux",
+  "description": "Tela administrativa para criar, editar, publicar trilhas e gerenciar os cursos associados (adicionar, remover, reordenar), seguindo o mesmo padrão visual e de componentes de `/admin/cursos`.",
+  "acceptanceCriteria": [
+    "`/admin/trilhas` lista trilhas existentes com status e quantidade de cursos, com busca e paginação (mesmo padrão de `CourseTable`)",
+    "`/admin/trilhas/novo` cria uma trilha (título, descrição, thumbnail, se é bundle, preço do bundle)",
+    "`/admin/trilhas/[id]` edita a trilha e gerencia os cursos: adicionar curso existente por busca/seleção, remover, reordenar (drag ou botões de subir/descer, mesmo padrão de `ModuleList`)",
+    "Botão de publicar fica desabilitado com tooltip explicativo quando a trilha tem menos de 2 cursos",
+    "Verificado em navegador usando Playwright (ou manualmente) cobrindo criação, adição/remoção de curso e publicação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a listagem",
+      "details": "Criar `src/app/admin/trilhas/page.tsx` e um componente `TrackTable`, espelhando `CourseTable` (`src/components/admin/CourseTable.tsx`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o formulário de trilha",
+      "details": "Criar `src/components/admin/TrackForm.tsx` (react-hook-form, native inputs, mesmo padrão de `CourseForm`) usado em `/admin/trilhas/novo` e `/admin/trilhas/[id]`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar o gerenciador de cursos da trilha",
+      "details": "Criar `src/components/admin/TrackCourseList.tsx`, espelhando `ModuleList`: busca/seleção de curso publicado existente para adicionar, botão de remover, reordenação inline. Refetch via `GET /api/admin/tracks/[id]` após cada mutação, com `onUpdate` callback igual ao padrão de `ModuleList`/`LessonList`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Adicionar link na navegação admin",
+      "details": "Adicionar item \"Trilhas\" em `LINKS` de `src/components/admin/AdminSidebar.tsx`, entre \"Cursos\" e \"Usuários\".",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-169"],
+  "estimatedComplexity": "high"
+}

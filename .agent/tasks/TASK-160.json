@@ -1,0 +1,41 @@
+{
+  "id": "TASK-160",
+  "title": "Fluxo de aceite de convite de organização",
+  "category": "functional",
+  "description": "Implementar a página e o endpoint que processam o aceite de um convite de organização, cobrindo tanto o caso de usuário já cadastrado quanto o de e-mail convidado sem conta ainda.",
+  "acceptanceCriteria": [
+    "Página `/convite/[token]` exibe o nome da organização convidante e um botão de aceite",
+    "Se o usuário não estiver logado: redireciona para `/cadastro` pré-preenchendo o e-mail do convite, e retorna ao convite após o cadastro/login para concluir o aceite",
+    "Se o usuário estiver logado com e-mail diferente do convidado: mensagem de erro clara, sem aceitar o convite",
+    "Convite expirado (`expiresAt` no passado) ou já `accepted` exibe mensagem apropriada, sem permitir novo aceite",
+    "Aceite cria `OrganizationMember` (`role: 'member'`) e atualiza `OrganizationInvite.status` para `accepted`, em transação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o endpoint de aceite",
+      "details": "Criar `POST /api/organizations/invites/[token]/accept` (`src/app/api/organizations/invites/[token]/accept/route.ts`). Validar token existente, `status: 'pending'` e `expiresAt` no futuro. Validar que `getAuthUser(request).email === invite.email`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar membership e atualizar convite em transação",
+      "details": "Usar `prisma.$transaction` para criar `OrganizationMember` (`role: 'member'`) e atualizar `OrganizationInvite.status` para `accepted`. Retornar 409 se o usuário já pertence a outra organização (regra da TASK-152).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar a página de convite",
+      "details": "Criar `src/app/convite/[token]/page.tsx`, buscando os dados do convite (endpoint público `GET /api/organizations/invites/[token]`) e tratando os três estados: usuário deslogado, e-mail divergente, convite válido pronto para aceite.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Encadear com cadastro",
+      "details": "Em `/cadastro`, aceitar um parâmetro de retorno (`?next=/convite/[token]`) para redirecionar de volta ao convite após o cadastro ser concluído.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-159"],
+  "estimatedComplexity": "high"
+}

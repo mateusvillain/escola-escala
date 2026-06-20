@@ -1,0 +1,27 @@
+{
+  "id": "TASK-177",
+  "title": "Indicador visual de módulo bloqueado por liberação programada",
+  "category": "ui-ux",
+  "description": "Exibir de forma clara, na sidebar do curso e na página de detalhe, quando um módulo ainda não está liberado e quando ficará disponível.",
+  "acceptanceCriteria": [
+    "Módulo não liberado aparece com ícone de cadeado e aulas desabilitadas para clique na sidebar do curso",
+    "Texto indica a data exata (\"Disponível em 12/08\") para `fixed_date` ou a contagem de dias (\"Disponível em 3 dias\") para `days_after_enrollment`",
+    "Tentativa de acessar a URL da aula diretamente (sem clicar na sidebar) redireciona com mensagem de módulo bloqueado, usando o `reason: 'module_not_released'` da TASK-176"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Atualizar a sidebar do curso",
+      "details": "Em `src/lib/course-sidebar.ts` (ou no componente que a consome), calcular `isModuleReleased` por módulo e marcar aulas como não clicáveis quando bloqueado, exibindo o texto de liberação.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Tratar o reason na página da aula",
+      "details": "Na página de aula (`src/app/cursos/[slug]/aulas/[lessonId]`), tratar `reason: 'module_not_released'` retornado por `checkLessonAccess`, exibindo uma mensagem (reaproveitando o padrão visual de `UpgradePrompt`) em vez do player.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-176"],
+  "estimatedComplexity": "medium"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "TASK-174",
+  "title": "Campos de liberação programada (drip content) em Module",
+  "category": "data-model",
+  "description": "Adicionar os campos necessários para liberar módulos em datas fixas ou X dias após a matrícula, em vez de tudo disponível de uma vez. Decisão de escopo v1: a liberação programada é por módulo, não por aula individual.",
+  "acceptanceCriteria": [
+    "Enum `ModuleReleaseType` com valores `immediate`, `fixed_date`, `days_after_enrollment` criado",
+    "`Module` ganha `releaseType ModuleReleaseType @default(immediate)`, `releaseDate DateTime?` (usado quando `fixed_date`) e `releaseAfterDays Int?` (usado quando `days_after_enrollment`)",
+    "Migration aplicada sem alterar módulos existentes (default `immediate`, liberados como hoje)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar enum e campos ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nenum ModuleReleaseType {\n  immediate\n  fixed_date\n  days_after_enrollment\n}\n```\nE em `Module`, adicionar `releaseType ModuleReleaseType @default(immediate)`, `releaseDate DateTime?`, `releaseAfterDays Int?`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_module_drip_content`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "low"
+}

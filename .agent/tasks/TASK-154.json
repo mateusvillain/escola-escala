@@ -1,0 +1,29 @@
+{
+  "id": "TASK-154",
+  "title": "Modelo OrganizationSubscription",
+  "category": "data-model",
+  "description": "Criar o model `OrganizationSubscription`, análogo a `UserSubscription` mas escopado por organização, com `seats` (quantidade contratada) em vez de uma assinatura 1:1 por pessoa.",
+  "acceptanceCriteria": [
+    "Model `OrganizationSubscription` com `id`, `organizationId` (único — uma organização tem no máximo uma assinatura), `stripeSubscriptionId` (único), `stripeCustomerId`, `status SubscriptionStatus`, `billingCycle BillingCycle`, `seats Int`, `currentPeriodStart`, `currentPeriodEnd`, `createdAt`, `updatedAt`",
+    "Reaproveita os enums `SubscriptionStatus` e `BillingCycle` já existentes no schema, sem duplicar"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nmodel OrganizationSubscription {\n  id                   String             @id @default(uuid())\n  organizationId       String             @unique\n  organization         Organization       @relation(fields: [organizationId], references: [id])\n  stripeSubscriptionId String             @unique\n  stripeCustomerId     String\n  status               SubscriptionStatus\n  billingCycle         BillingCycle\n  seats                Int\n  currentPeriodStart   DateTime\n  currentPeriodEnd     DateTime\n  createdAt            DateTime           @default(now())\n  updatedAt            DateTime           @updatedAt\n}\n```",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Incluir na migration do grupo",
+      "details": "Incluir este model na mesma migration da TASK-151 a TASK-153 (`npx prisma migrate dev --name add_organization_models`).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-151"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Decisão de escopo v1: acesso de organização equivale ao nível `premium` (todo o catálogo), sem distinção básico/premium por seat — não há campo `planId` aqui como em `UserSubscription`. Ver seção 14.6 do PRD."
+  ]
+}

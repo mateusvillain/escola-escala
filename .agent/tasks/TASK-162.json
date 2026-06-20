@@ -1,0 +1,38 @@
+{
+  "id": "TASK-162",
+  "title": "Checkout de assinatura B2B por seat",
+  "category": "integration",
+  "description": "Endpoint que cria a Checkout Session da assinatura B2B, cobrando por quantidade de seats contratados via Stripe Billing (`quantity` no line item). Decisão de escopo v1: seats são fixados no checkout inicial; aumentar seats depois exige novo contato/checkout (sem self-service de upgrade de quantidade nesta rodada).",
+  "acceptanceCriteria": [
+    "`POST /api/organizations/me/checkout` aceita `{ seats: number, billingCycle: 'monthly' | 'annual' }` e exige que o usuário autenticado seja `owner` da organização (403 caso contrário)",
+    "Retorna 409 se a organização já tem `OrganizationSubscription` com status `active` ou `trialing`",
+    "Cria/reaproveita `stripeCustomerId` da organização (não do usuário) e cria Checkout Session `mode: 'subscription'` com `line_items: [{ price: <STRIPE_PRICE_ID_B2B_SEAT_*>, quantity: seats }]`",
+    "Metadata da session inclui `organizationId` (sem `userId`, para diferenciar de assinatura individual no webhook da TASK-163)",
+    "`seatLimit` da organização é atualizado para `seats` somente após confirmação via webhook (TASK-163), não na criação do checkout"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/checkout/route.ts` com `POST`, seguindo o padrão de `src/app/api/subscriptions/checkout/route.ts` (Zod, `getAuthUser`, criação de customer Stripe).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar ou reaproveitar o Stripe Customer da organização",
+      "details": "Se `organization.stripeCustomerId` for nulo, criar via `stripe.customers.create({ name: organization.name })` e persistir em `Organization.stripeCustomerId`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Montar a Checkout Session com quantity",
+      "details": "Selecionar `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY` ou `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL` conforme `billingCycle`, e usar `quantity: seats` no line item. `metadata: { organizationId: organization.id }`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146", "TASK-154", "TASK-157"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Diferente do checkout individual, aqui `quantity` representa os seats — o Stripe cobra `price * quantity` automaticamente, sem necessidade de lógica adicional de cálculo no app."
+  ]
+}

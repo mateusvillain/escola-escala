@@ -1,0 +1,37 @@
+{
+  "id": "TASK-155",
+  "title": "Estender controle de acesso para organizações em access.ts",
+  "category": "functional",
+  "description": "`src/lib/access.ts` (`checkLessonAccess`/`checkCourseAccess`) é a fonte única de verdade de controle de acesso. Estendê-la para conceder acesso de nível `premium` quando o usuário é membro de uma `Organization` com `OrganizationSubscription` ativa, sem duplicar a lógica existente de assinatura individual.",
+  "acceptanceCriteria": [
+    "Usuário membro (`OrganizationMember`) de uma organização com `OrganizationSubscription.status` em `active` ou `trialing` tem acesso a qualquer curso, igual a um assinante `premium` individual",
+    "Usuário sem assinatura individual e sem organização continua recebendo `reason: 'no_subscription'` como hoje",
+    "Lógica de assinatura individual (`UserSubscription`) permanece inalterada para quem não pertence a organização",
+    "Testes existentes de `checkLessonAccess`/`checkCourseAccess` continuam passando"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar checagem de organização em checkLessonAccess",
+      "details": "Em `src/lib/access.ts`, antes de retornar `no_subscription`, buscar `prisma.organizationMember.findUnique({ where: { userId }, include: { organization: { include: { subscription: true } } } })`. Se existir membro com `organization.subscription.status` em `('active', 'trialing')`, retornar `{ allowed: true }` (equivalente a premium).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Replicar a mesma checagem em checkCourseAccess",
+      "details": "Aplicar a mesma lógica do passo 1 em `checkCourseAccess`, mantendo as duas funções consistentes entre si (mesmo padrão hoje usado para assinatura individual).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Adicionar testes unitários",
+      "details": "Em `src/lib/__tests__/`, adicionar casos cobrindo: membro de organização ativa acessa curso `premium`; membro de organização com assinatura `past_due`/`canceled` não acessa; usuário sem organização e sem assinatura individual continua bloqueado.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-152", "TASK-154"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Esta função é chamada em todo acesso a aula/curso — evitar N+1 queries; uma única consulta com `include` aninhado (como no passo 1) é suficiente, sem round-trips adicionais."
+  ]
+}

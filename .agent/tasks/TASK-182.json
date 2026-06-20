@@ -1,0 +1,33 @@
+{
+  "id": "TASK-182",
+  "title": "Spec E2E do player de aula e progresso",
+  "category": "functional",
+  "description": "Cobrir com Playwright o fluxo de consumo de aula: carregamento do player, navegação entre aulas e marcação automática de conclusão ao atingir 80% do vídeo assistido.",
+  "acceptanceCriteria": [
+    "`e2e/player.spec.ts` cobre: aluno com assinatura/matrícula ativa acessa uma aula, o player Bunny Stream carrega, e a navegação anterior/próxima funciona",
+    "Teste simula o evento de progresso do player (via chamada direta a `POST /api/progress/[lessonId]` simulando 80%+ de watch percentage, já que controlar o player de vídeo real via Playwright é frágil) e valida que a aula aparece marcada como concluída na sidebar",
+    "Teste usa um usuário e curso de teste fixos (seed) com assinatura ativa, evitando depender de checkout real"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Preparar dados de teste",
+      "details": "Garantir, via seed (`prisma/seed.ts`) ou setup do teste, um usuário com assinatura ativa e um curso publicado com pelo menos duas aulas.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Escrever o teste de navegação",
+      "details": "Em `e2e/player.spec.ts`: login, acessar a primeira aula do curso de teste, validar que o player carrega (presença do iframe/elemento do Bunny Stream) e que o botão \"próxima aula\" navega corretamente.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Escrever o teste de conclusão automática",
+      "details": "Chamar `POST /api/progress/[lessonId]` via `request.post` do Playwright simulando `watchPercentage: 85`, recarregar a página da aula/sidebar e validar que a aula aparece com indicador de concluída.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-180"],
+  "estimatedComplexity": "medium"
+}

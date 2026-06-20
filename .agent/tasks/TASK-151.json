@@ -1,0 +1,35 @@
+{
+  "id": "TASK-151",
+  "title": "Modelo Organization",
+  "category": "data-model",
+  "description": "Criar o model `Organization`, base da gestão B2B/licenciamento corporativo. Cada organização representa um cliente corporativo com seats contratados e um `stripeCustomerId` próprio, separado dos `User.stripeCustomerId` individuais já existentes.",
+  "acceptanceCriteria": [
+    "Model `Organization` criado em `prisma/schema.prisma` com `id`, `name`, `slug` (único), `stripeCustomerId String?`, `seatLimit Int @default(0)`, `createdAt`, `updatedAt`",
+    "Migration aplicada sem alterar nenhuma tabela existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model ao schema",
+      "details": "Em `prisma/schema.prisma`, adicionar:\n```prisma\nmodel Organization {\n  id               String   @id @default(uuid())\n  name             String\n  slug             String   @unique\n  stripeCustomerId String?\n  seatLimit        Int      @default(0)\n  createdAt        DateTime @default(now())\n  updatedAt        DateTime @updatedAt\n\n  members      OrganizationMember[]\n  invites      OrganizationInvite[]\n  subscription OrganizationSubscription?\n}\n```\nAs relações `members`, `invites` e `subscription` só compilam depois das TASK-152 a TASK-154 — adicionar os três models antes de rodar a migration.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Reaproveitar generateSlug/getUniqueSlug",
+      "details": "Usar `generateSlug`/`getUniqueSlug` de `src/lib/utils/slug.ts` (mesmo helper usado em `Course.slug`) ao criar organizações via API, em vez de gerar o slug manualmente.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_organization_models` após adicionar também os models das TASK-152 a TASK-154 (uma única migration para o grupo, evitando estados intermediários inválidos).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Demanda de mercado B2B ainda não validada com o cliente — ver decisão registrada na seção 14.6 do PRD. Esta task e as demais de B2B (TASK-152 a TASK-166) devem ser confirmadas com o cliente antes ou durante a implementação."
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "TASK-187",
+  "title": "Validar rate limiting distribuído entre múltiplas instâncias",
+  "category": "functional",
+  "description": "Confirmar que o rate limiting migrado (TASK-186) de fato compartilha estado entre processos diferentes, validando o problema original que motivou a migração (rate limit em memória zera por instância/deploy).",
+  "acceptanceCriteria": [
+    "Teste manual ou script simula requisições partindo de dois processos Node distintos (ou duas abas/conexões) contra a mesma rota protegida, confirmando que o contador é compartilhado (a segunda instância já vê requisições feitas pela primeira)",
+    "Resultado documentado (ex.: nota em `docs/` ou no PRD) confirmando que o rate limit agora é efetivo mesmo com múltiplas instâncias da função serverless"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Reproduzir o cenário de múltiplas instâncias localmente",
+      "details": "Rodar duas instâncias do servidor de dev em portas diferentes apontando para o mesmo `UPSTASH_REDIS_REST_URL`, ou simular diretamente chamando a função `rateLimit` de dois processos `node` separados.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar o contador compartilhado",
+      "details": "Disparar requisições alternando entre as duas instâncias até atingir o limite configurado, confirmando que o bloqueio ocorre no total combinado, não por instância isolada.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-186"],
+  "estimatedComplexity": "low"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "TASK-169",
+  "title": "CRUD admin de trilhas e seus cursos",
+  "category": "api-endpoint",
+  "description": "Endpoints administrativos para criar, editar e publicar trilhas, e para adicionar/remover/reordenar cursos dentro de uma trilha, seguindo os padrões já estabelecidos para módulos de curso (`ModuleList`/`PATCH /api/admin/modules/[id]`).",
+  "acceptanceCriteria": [
+    "`GET/POST /api/admin/tracks` lista (com filtro de status/busca) e cria trilhas",
+    "`GET/PATCH/DELETE /api/admin/tracks/[id]` detalha, atualiza e remove (hard-delete, como módulos) uma trilha",
+    "Publicar uma trilha (`PATCH` com `status: 'published'`) exige pelo menos 2 cursos associados",
+    "`POST /api/admin/tracks/[id]/courses` adiciona um curso existente à trilha (`order = count + 1`)",
+    "`DELETE /api/admin/tracks/[id]/courses/[courseId]` remove o curso da trilha, fechando o gap de `order` dos cursos remanescentes (mesmo padrão de gap-closing usado em módulos)",
+    "Reordenação de cursos na trilha via `PATCH /api/admin/tracks/[id]/courses/[courseId]` com `{ order: N }`, reordenando os irmãos automaticamente (mesmo padrão de `PATCH /api/admin/modules/[id]`)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar endpoints de CRUD de trilha",
+      "details": "Criar `src/app/api/admin/tracks/route.ts` (GET/POST) e `src/app/api/admin/tracks/[id]/route.ts` (GET/PATCH/DELETE), protegidos por `requireRole(request, ['admin'])`, seguindo a estrutura de `src/app/api/admin/courses/route.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar regra de publicação",
+      "details": "No `PATCH` de `/api/admin/tracks/[id]`, ao alterar `status` para `published`, validar `items.length >= 2`, retornando 400 caso contrário.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar endpoints de gestão de cursos da trilha",
+      "details": "Criar `src/app/api/admin/tracks/[id]/courses/route.ts` (POST, `order = count + 1`) e `src/app/api/admin/tracks/[id]/courses/[courseId]/route.ts` (PATCH para reordenar com reordenação dos irmãos, DELETE com gap-closing), espelhando a lógica de `PATCH /api/admin/modules/[id]` e `DELETE /api/admin/modules/[id]`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-167"],
+  "estimatedComplexity": "medium"
+}

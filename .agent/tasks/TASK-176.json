@@ -1,0 +1,40 @@
+{
+  "id": "TASK-176",
+  "title": "Aplicar checagem de liberação programada no acesso à aula",
+  "category": "functional",
+  "description": "Integrar `isModuleReleased` (TASK-175) a `checkLessonAccess` em `src/lib/access.ts`, bloqueando o acesso a aulas de módulos ainda não liberados mesmo quando o aluno tem assinatura/matrícula/compra avulsa válida — a liberação programada é uma camada adicional sobre o controle de acesso por plano, não um substituto.",
+  "acceptanceCriteria": [
+    "Novo `AccessReason`: `'module_not_released'`",
+    "`checkLessonAccess` retorna `{ allowed: false, reason: 'module_not_released' }` quando o plano permite acesso mas o módulo da aula ainda não foi liberado para o aluno",
+    "Aulas `isPreview: true` continuam liberadas independentemente da liberação programada (preview é sempre imediato)",
+    "Admin (`role: 'admin'`) continua com acesso irrestrito, ignorando a liberação programada (útil para revisar conteúdo antes da data de liberação)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o novo AccessReason",
+      "details": "Em `src/lib/access.ts`, adicionar `'module_not_released'` ao union type `AccessReason`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar os campos de liberação e o enrollment",
+      "details": "Ajustar a query de `lesson` em `checkLessonAccess` para incluir `module.releaseType`, `module.releaseDate`, `module.releaseAfterDays`. Buscar o `CourseEnrollment` do usuário para o curso (já buscado para a checagem de compra avulsa) e reaproveitar para `isModuleReleased`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Aplicar a checagem após a checagem de plano",
+      "details": "Depois de confirmar que o plano/assinatura permite acesso ao curso, mas antes do `return { allowed: true }` final, chamar `isModuleReleased` (TASK-175); se `false`, retornar `{ allowed: false, reason: 'module_not_released' }`. Pular esta checagem para `role === 'admin'` e para `isPreview: true`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Atualizar testes existentes",
+      "details": "Adicionar casos em `src/lib/__tests__/` cobrindo módulo com `fixed_date` futura (bloqueado) e passada (liberado), e `days_after_enrollment` antes/depois do prazo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-175"],
+  "estimatedComplexity": "medium"
+}

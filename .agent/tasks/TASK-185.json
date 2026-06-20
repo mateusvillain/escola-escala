@@ -1,0 +1,33 @@
+{
+  "id": "TASK-185",
+  "title": "Provisionar Upstash Redis via Vercel Marketplace",
+  "category": "integration",
+  "description": "`src/lib/rate-limit.ts` é em memória — zera a cada deploy e não protege nada quando a Vercel escala para múltiplas instâncias (Fluid Compute reaproveita instâncias, mas múltiplas instâncias concorrentes ainda podem existir sob carga). Provisionar Upstash Redis via Vercel Marketplace como armazenamento distribuído antes de migrar o código (TASK-186).",
+  "acceptanceCriteria": [
+    "Integração Upstash Redis adicionada ao projeto na Vercel (Marketplace)",
+    "`UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` preenchidos no `.env.local` local e nas variáveis de ambiente do projeto na Vercel (produção e preview)",
+    "Dependência `@upstash/redis` adicionada ao `package.json`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar a integração na Vercel",
+      "details": "No dashboard do projeto na Vercel, em Storage/Marketplace, adicionar a integração Upstash Redis. A Vercel provisiona as credenciais automaticamente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Sincronizar variáveis de ambiente",
+      "details": "Copiar `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` para o `.env.local` (`vercel env pull` pode ser usado para isso) e confirmar que já estão disponíveis nos ambientes de produção/preview do projeto na Vercel.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Instalar o SDK",
+      "details": "Rodar `npm install @upstash/redis`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "low"
+}

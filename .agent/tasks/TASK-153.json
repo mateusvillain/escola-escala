@@ -1,0 +1,33 @@
+{
+  "id": "TASK-153",
+  "title": "Modelo OrganizationInvite",
+  "category": "data-model",
+  "description": "Criar o model `OrganizationInvite` para suportar convite de membros por e-mail, incluindo o caso em que o e-mail convidado ainda não tem conta na plataforma.",
+  "acceptanceCriteria": [
+    "Enum `InviteStatus` com valores `pending`, `accepted`, `expired` criado",
+    "Model `OrganizationInvite` com `id`, `organizationId`, `email`, `token` (único), `status InviteStatus @default(pending)`, `invitedByUserId`, `createdAt`, `expiresAt`",
+    "Índice ou constraint que evite múltiplos convites `pending` simultâneos para o mesmo e-mail na mesma organização"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar enum e model ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nenum InviteStatus {\n  pending\n  accepted\n  expired\n}\n\nmodel OrganizationInvite {\n  id              String       @id @default(uuid())\n  organizationId  String\n  organization    Organization @relation(fields: [organizationId], references: [id])\n  email           String\n  token           String       @unique\n  status          InviteStatus @default(pending)\n  invitedByUserId String\n  createdAt       DateTime     @default(now())\n  expiresAt       DateTime\n\n  @@unique([organizationId, email, status])\n}\n```\nA constraint `@@unique([organizationId, email, status])` impede dois convites `pending` para o mesmo e-mail na mesma organização ao mesmo tempo (convites `accepted`/`expired` não colidem entre si por terem status diferente, permitindo reenvio histórico).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Gerar token de convite de forma segura",
+      "details": "Ao criar o convite (TASK-158), gerar `token` com `crypto.randomBytes(32).toString('hex')` (Node `crypto`), nunca um valor previsível.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Incluir na migration do grupo",
+      "details": "Incluir este model na mesma migration da TASK-151/TASK-152.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-151"],
+  "estimatedComplexity": "low"
+}

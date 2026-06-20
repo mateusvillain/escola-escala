@@ -1,0 +1,43 @@
+{
+  "id": "TASK-163",
+  "title": "Estender webhooks Stripe para OrganizationSubscription",
+  "category": "integration",
+  "description": "Estender os handlers de webhook existentes em `src/lib/stripe-handlers.ts` para também tratar eventos cuja `session`/`subscription` pertence a uma organização (distinguindo via `metadata.organizationId` em vez de `metadata.userId`), criando/atualizando `OrganizationSubscription` em vez de `UserSubscription`.",
+  "acceptanceCriteria": [
+    "`handleCheckoutSessionCompleted`, ao receber uma session com `metadata.organizationId` (e sem `metadata.userId`), cria `OrganizationSubscription` com `seats` igual ao `quantity` do line item, em vez de `UserSubscription`",
+    "`handleInvoicePaymentSucceeded`, `handleInvoicePaymentFailed`, `handleCustomerSubscriptionDeleted` e `handleCustomerSubscriptionUpdated` localizam a subscription tanto em `UserSubscription` quanto em `OrganizationSubscription` por `stripeSubscriptionId`, atualizando a tabela correta",
+    "`Organization.seatLimit` é atualizado para o `quantity` da subscription sempre que `OrganizationSubscription` é criada ou atualizada (cobre aumento de seats feito diretamente no Stripe Dashboard)",
+    "Nenhuma regressão no fluxo de assinatura individual existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Diferenciar o tipo de checkout em handleCheckoutSessionCompleted",
+      "details": "No branch `session.mode === 'subscription'` de `handleCheckoutSessionCompleted`, checar `session.metadata?.organizationId` antes de `session.metadata?.userId`. Se for organização, extrair `quantity` de `subscription.items.data[0].quantity` e criar `OrganizationSubscription` (sem lógica de plano via `buildPriceMap`, já que B2B usa um price fixo por seat, não um mapeamento de planos básico/premium).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar helper para localizar a subscription por tipo",
+      "details": "Criar uma função utilitária que tenta `prisma.userSubscription.findUnique` e, se não encontrar, `prisma.organizationSubscription.findUnique`, ambas por `stripeSubscriptionId`. Usar esse helper nos handlers de invoice e de subscription updated/deleted para decidir qual tabela atualizar.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar seatLimit ao sincronizar a subscription",
+      "details": "Sempre que `OrganizationSubscription` for criada/atualizada com um novo `quantity`, atualizar `Organization.seatLimit` para o mesmo valor, dentro da mesma transação.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Adicionar testes",
+      "details": "Cobrir nos testes de webhook (se existentes) ou via teste manual com `stripe trigger` os eventos para uma subscription de organização: criação, renovação, falha de pagamento e cancelamento.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-154", "TASK-162"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Mesma armadilha de API version já documentada em AGENTS.md: `current_period_start`/`end` ficam em `subscription.items.data[0]`, e o ID da subscription em invoices vem de `invoice.parent.subscription_details` — válido tanto para `UserSubscription` quanto para `OrganizationSubscription`."
+  ]
+}

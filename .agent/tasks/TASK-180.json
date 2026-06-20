@@ -1,0 +1,33 @@
+{
+  "id": "TASK-180",
+  "title": "Spec E2E do fluxo de cadastro e login",
+  "category": "functional",
+  "description": "Cobrir com Playwright o fluxo crítico de cadastro de novo aluno e login, usando um usuário de teste criado dinamicamente para não depender de dados fixos do seed.",
+  "acceptanceCriteria": [
+    "`e2e/auth.spec.ts` cobre: cadastro com e-mail único (timestamp no e-mail para evitar colisão entre execuções), login com as credenciais recém-criadas, e tentativa de login com senha errada exibindo mensagem de erro",
+    "Teste de cadastro confirma redirecionamento para `/dashboard` após sucesso",
+    "Specs passam localmente com `npx playwright test e2e/auth.spec.ts`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Escrever o teste de cadastro",
+      "details": "Em `e2e/auth.spec.ts`, navegar para `/cadastro`, preencher nome/e-mail (`teste+${Date.now()}@example.com`)/senha, submeter, e validar `expect(page).toHaveURL(/\\/dashboard/)`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Escrever o teste de login",
+      "details": "Reaproveitar o e-mail criado no passo 1 (ou um `beforeAll` que cadastra um usuário), navegar para `/login`, preencher as credenciais e validar o redirecionamento para `/dashboard`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Escrever o teste de senha incorreta",
+      "details": "Tentar login com a senha errada e validar que a mensagem de erro aparece na tela e que a navegação permanece em `/login`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-179"],
+  "estimatedComplexity": "medium"
+}

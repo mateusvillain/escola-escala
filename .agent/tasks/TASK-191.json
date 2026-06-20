@@ -1,0 +1,30 @@
+{
+  "id": "TASK-191",
+  "title": "Modelo ProductEvent",
+  "category": "data-model",
+  "description": "As métricas atuais (`GET /api/admin/metrics`) são agregados financeiros (MRR, churn, LTV) — não há rastreamento de eventos de uso. Criar uma tabela simples de eventos de produto para habilitar decisões orientadas a dado (onde o aluno abandona o checkout, quais aulas têm maior drop-off).",
+  "acceptanceCriteria": [
+    "Model `ProductEvent` com `id`, `userId String?` (nullable — cobre eventos de visitante não autenticado), `eventType String`, `metadata Json?`, `createdAt`",
+    "Índice em `eventType` e `createdAt` para consultas de agregação eficientes",
+    "Migration aplicada sem impacto em tabelas existentes"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o model ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nmodel ProductEvent {\n  id        String   @id @default(uuid())\n  userId    String?\n  user      User?    @relation(fields: [userId], references: [id])\n  eventType String\n  metadata  Json?\n  createdAt DateTime @default(now())\n\n  @@index([eventType, createdAt])\n}\n```",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_product_event`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Tabela própria simples, sem dependência de ferramenta de analytics externa — suficiente para o volume atual da plataforma; reavaliar se o volume de eventos crescer muito (ex.: migrar para um data warehouse dedicado)."
+  ]
+}

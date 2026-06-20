@@ -1,0 +1,27 @@
+{
+  "id": "TASK-157",
+  "title": "GET /api/organizations/me retorna dados da organização do usuário",
+  "category": "api-endpoint",
+  "description": "Endpoint que retorna a organização do usuário autenticado (se houver), incluindo membros, seats usados/disponíveis e status da assinatura — base de dados para o painel `/organizacao` (TASK-164).",
+  "acceptanceCriteria": [
+    "`GET /api/organizations/me` retorna 404 se o usuário não pertence a nenhuma organização",
+    "Resposta inclui `organization` (id, name, slug, seatLimit), `members` (lista com nome, e-mail, role, joinedAt), `seatsUsed` (contagem de members), `subscription` (status, billingCycle, currentPeriodEnd) quando existir, e `myRole` (owner ou member)",
+    "Endpoint acessível por qualquer membro, não só o owner"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/route.ts` com `GET`, usando `getAuthUser` e buscando `prisma.organizationMember.findUnique({ where: { userId }, include: { organization: { include: { members: { include: { user: { select: { name: true, email: true } } } }, subscription: true } } } })`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Montar a resposta",
+      "details": "Retornar 404 se não houver membership. Caso contrário, montar o objeto de resposta com `seatsUsed: organization.members.length` e `myRole` extraído do membership do próprio usuário.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-154"],
+  "estimatedComplexity": "low"
+}

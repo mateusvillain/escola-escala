@@ -1,0 +1,34 @@
+{
+  "id": "TASK-156",
+  "title": "POST /api/organizations cria organização",
+  "category": "api-endpoint",
+  "description": "Endpoint que permite a um usuário autenticado criar a própria organização, tornando-se automaticamente `owner`. Pré-requisito para o restante do fluxo B2B (convites, checkout).",
+  "acceptanceCriteria": [
+    "`POST /api/organizations` aceita `{ name: string }` e exige usuário autenticado",
+    "Usuário que já pertence a uma organização (como `owner` ou `member`) recebe 409 ao tentar criar outra",
+    "Sucesso cria `Organization` (slug gerado via `getUniqueSlug`) e `OrganizationMember` com `role: 'owner'` para o usuário, em uma única transação Prisma",
+    "Resposta 201 retorna a organização criada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/route.ts` com `POST` seguindo o padrão estabelecido (`getAuthUser`, parse com Zod, `z.object({ name: z.string().min(2).max(255) })`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar que o usuário não pertence a outra organização",
+      "details": "Consultar `prisma.organizationMember.findUnique({ where: { userId } })`; se existir, retornar 409 com mensagem clara.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar organização e membership em transação",
+      "details": "Usar `prisma.$transaction` para criar `Organization` (com slug único via `getUniqueSlug` de `src/lib/utils/slug.ts`) e `OrganizationMember` (`role: 'owner'`) atomicamente.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-152"],
+  "estimatedComplexity": "low"
+}

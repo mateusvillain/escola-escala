@@ -1,0 +1,30 @@
+{
+  "id": "TASK-168",
+  "title": "Campos de bundle (pagamento único) em CourseTrack",
+  "category": "data-model",
+  "description": "Permitir que uma trilha seja vendida como bundle em pagamento único, reaproveitando o mesmo padrão de campos já usado em `Course.allowOneTimePurchase`/`priceOneTime`/`stripePriceIdOneTime` (TASK-95).",
+  "acceptanceCriteria": [
+    "`CourseTrack` ganha `isBundle Boolean @default(false)`, `bundlePriceOneTime Decimal?` e `stripePriceIdBundle String?`",
+    "Migration aplicada sem alterar trilhas existentes (default `false`/null)",
+    "Campos expostos como opcionais no formulário admin de trilhas (TASK-170)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar os campos ao schema",
+      "details": "Adicionar `isBundle Boolean @default(false)`, `bundlePriceOneTime Decimal?` e `stripePriceIdBundle String?` ao model `CourseTrack` em `prisma/schema.prisma`, na mesma migration da TASK-167.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o produto/preço no Stripe",
+      "details": "Para cada trilha vendida como bundle, criar manualmente um produto/preço de pagamento único no Stripe Dashboard e preencher `stripePriceIdBundle` no admin (mesmo fluxo manual já usado para `stripePriceIdOneTime` em cursos individuais).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-167"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Decisão de escopo v1: bundle dá acesso permanente via enrollment direto em cada curso da trilha (igual à compra avulsa individual) — não há assinatura recorrente de trilha nesta rodada. Ver seção 14.6 do PRD."
+  ]
+}

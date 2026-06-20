@@ -1,0 +1,34 @@
+{
+  "id": "TASK-179",
+  "title": "Configurar playwright.config.ts",
+  "category": "setup",
+  "description": "`playwright` já está instalado como devDependency desde a Fase 1, mas não existe `playwright.config.ts` nem nenhum spec escrito. Criar a configuração base antes de escrever os specs das TASK-180 a TASK-183.",
+  "acceptanceCriteria": [
+    "`playwright.config.ts` criado na raiz do projeto, com `testDir: './e2e'`, `baseURL` apontando para `process.env.NEXT_PUBLIC_APP_URL` ou `http://localhost:3000`",
+    "`webServer` configurado para iniciar `npx next dev` automaticamente antes dos testes (reaproveitando o banco de dados local de desenvolvimento)",
+    "Projeto `chromium` configurado como navegador padrão de execução",
+    "`npx playwright test --list` executa sem erros (mesmo sem specs ainda, ou listando um spec de smoke vazio)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o arquivo de configuração",
+      "details": "Criar `playwright.config.ts` na raiz, usando `defineConfig` de `@playwright/test` (confirmar se é necessário adicionar a dependência `@playwright/test`, já que hoje só `playwright` está no `package.json`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Configurar webServer e baseURL",
+      "details": "Definir `webServer: { command: 'npx next dev', url: 'http://localhost:3000', reuseExistingServer: !process.env.CI }` e `use: { baseURL: 'http://localhost:3000' }`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar a pasta e um spec de smoke",
+      "details": "Criar `e2e/smoke.spec.ts` com um teste mínimo (ex.: `expect(page).toHaveTitle(/.../)` na home) para validar que a configuração funciona antes de escrever os specs reais.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "low"
+}

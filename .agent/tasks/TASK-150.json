@@ -1,0 +1,38 @@
+{
+  "id": "TASK-150",
+  "title": "Investigar e decidir sobre Boleto na assinatura recorrente",
+  "category": "integration",
+  "description": "Diferente da compra avulsa, a assinatura recorrente (`mode: 'subscription'`, `src/app/api/subscriptions/checkout/route.ts`) tem restrições de compatibilidade com métodos assíncronos: Boleto pode demorar dias para compensar a cada ciclo de cobrança, o que pode gerar `past_due` temporário; Pix não tem suporte confirmado em Checkout Session de assinatura. Esta task é de investigação, não assume habilitar nada.",
+  "acceptanceCriteria": [
+    "Documentação oficial do Stripe consultada para confirmar (ou não) suporte de Boleto em Checkout Session `mode: 'subscription'` na API version em uso (`2026-05-27.dahlia`)",
+    "Decisão registrada na seção Fase 3 do PRD: habilitar Boleto recorrente ou manter assinatura só com cartão (Pix/Boleto ficam restritos à compra avulsa)",
+    "Se habilitado: comportamento de `handleInvoicePaymentFailed` (src/lib/stripe-handlers.ts) validado em modo teste para não bloquear acesso prematuramente durante a janela normal de compensação do Boleto",
+    "Se não habilitado: decisão registrada como não-meta da Fase 3, com nota de que pode ser revisitada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Consultar documentação oficial do Stripe",
+      "details": "Verificar na documentação atual do Stripe (não no conhecimento de treinamento do agente, que pode estar desatualizado) se Boleto é suportado em Checkout Session `mode: 'subscription'`, e quais as implicações de cobrança recorrente com este método.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Testar em modo teste, se suportado",
+      "details": "Se a documentação confirmar suporte, habilitar `boleto` em `payment_method_types` da Checkout Session de assinatura em modo teste, simular um ciclo de renovação e observar o comportamento de `invoice.payment_failed`/`past_due` durante a janela de compensação.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Registrar a decisão no PRD",
+      "details": "Atualizar a seção Fase 3 do `.agent/prd/PRD.md` com a decisão tomada (habilitar ou não) e a justificativa, incluindo a fonte da documentação consultada.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Esta task pode legitimamente concluir como 'não habilitar nesta rodada' — o objetivo é decidir com base em documentação atual, não forçar a feature.",
+    "Pix está fora de escopo para assinatura recorrente independentemente do resultado desta investigação — não é uma forma de pagamento recorrente nativa do Stripe."
+  ]
+}

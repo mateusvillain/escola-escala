@@ -1,0 +1,27 @@
+{
+  "id": "TASK-173",
+  "title": "Matrícula em lote nos cursos da trilha ao comprar o bundle",
+  "category": "functional",
+  "description": "Estender `src/lib/stripe-handlers.ts` para, ao confirmar o pagamento de um bundle de trilha (`metadata.trackId`), criar `CourseEnrollment` para cada curso da trilha de uma vez, em vez de para um único curso.",
+  "acceptanceCriteria": [
+    "`handleOneTimeCoursePurchase` (ou uma nova função `handleTrackBundlePurchase`) reconhece `session.metadata.trackId` e cria `CourseEnrollment` (via `upsert`, idempotente) para cada curso listado em `CourseTrackItem` da trilha",
+    "Pagamento via Pix/Boleto segue o mesmo fluxo assíncrono já tratado nas TASK-147/148 (matrícula só ocorre em `payment_status: 'paid'` ou no evento `async_payment_succeeded`)",
+    "Reentrega do webhook pelo Stripe não duplica nem falha (idempotente, mesmo padrão já usado para compra avulsa individual)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o handler de bundle",
+      "details": "Em `src/lib/stripe-handlers.ts`, criar `handleTrackBundlePurchase(session)`: buscar `CourseTrackItem` da trilha (`trackId` do metadata) e, para cada `courseId`, fazer `prisma.courseEnrollment.upsert` (mesmo padrão de `handleOneTimeCoursePurchase`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rotear pelo tipo de metadata",
+      "details": "No branch `session.mode === 'payment'` de `handleCheckoutSessionCompleted` (e nos handlers assíncronos da TASK-148), checar `session.metadata?.trackId` antes de `session.metadata?.courseId`, chamando o handler correspondente.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-148", "TASK-172"],
+  "estimatedComplexity": "medium"
+}

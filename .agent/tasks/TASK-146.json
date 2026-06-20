@@ -1,0 +1,58 @@
+{
+  "id": "TASK-146",
+  "title": "Verificar pré-requisitos da Fase 3",
+  "category": "setup",
+  "description": "Confirmar que os pré-requisitos específicos da Fase 3 (novas variáveis de ambiente, produto/preço B2B no Stripe Dashboard, ativação de Pix/Boleto e integrações de Upstash Redis e Sentry via Vercel Marketplace) estão disponíveis antes de iniciar a implementação das novas funcionalidades.",
+  "acceptanceCriteria": [
+    "`.env.local` contém placeholders para `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`, `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` e `SENTRY_AUTH_TOKEN`",
+    "Pix e Boleto confirmados como payment methods habilitados na conta Stripe para BRL/BR",
+    "Produto e preço recorrente por seat (B2B) criados no Stripe Dashboard, com Price IDs mensal e anual",
+    "Integração Upstash Redis provisionada via Vercel Marketplace, ou decisão alternativa registrada",
+    "Projeto Sentry criado para a aplicação Next.js, com DSN disponível, ou decisão de adiar registrada",
+    "Gaps de pré-requisito documentados na seção Fase 3 do PRD com decisão de seguir/bloquear"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Revisar a seção Fase 3 do PRD e listar pré-requisitos",
+      "details": "Ler `.agent/prd/PRD.md` seção 14 (Fase 3) e listar variáveis, contas e configurações necessárias antes de iniciar TASK-147 em diante.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar novas variáveis de ambiente ao .env.local",
+      "details": "Adicionar `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY=TODO_FILL_MANUALLY`, `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL=TODO_FILL_MANUALLY`, `UPSTASH_REDIS_REST_URL=TODO_FILL_MANUALLY`, `UPSTASH_REDIS_REST_TOKEN=TODO_FILL_MANUALLY`, `SENTRY_DSN=TODO_FILL_MANUALLY`, `NEXT_PUBLIC_SENTRY_DSN=TODO_FILL_MANUALLY`, `SENTRY_AUTH_TOKEN=TODO_FILL_MANUALLY` ao `.env.local`. Não preencher valores reais nesta task.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar Pix e Boleto no Stripe Dashboard",
+      "details": "Acessar Stripe Dashboard → Settings → Payment methods e confirmar que Pix e Boleto estão habilitados para a conta. Caso a conta exija verificação adicional de negócio para o Brasil, registrar o status.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Criar produto/preço B2B por seat",
+      "details": "Criar um produto 'Plano Empresas' no Stripe Dashboard com dois preços recorrentes (mensal e anual) configurados para cobrança por quantidade (seat). Preencher os Price IDs no `.env.local`.",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Provisionar Upstash Redis via Vercel Marketplace",
+      "details": "No painel do projeto na Vercel, adicionar a integração Upstash Redis (Marketplace) e copiar `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` para o `.env.local`.",
+      "pass": false
+    },
+    {
+      "step": 6,
+      "description": "Criar projeto Sentry",
+      "details": "Criar um projeto Next.js no Sentry (sentry.io) e obter o DSN. Preencher `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` no `.env.local`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-1"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Esta task gate as tasks de Pix/Boleto (TASK-147 em diante), B2B (TASK-151 em diante), rate limiting distribuído (TASK-185 em diante) e monitoramento de erro (TASK-188 em diante).",
+    "Nenhum valor real de secret deve ser escrito no PRD, nas tasks, em logs ou no chat — apenas placeholders em `.env.local`."
+  ]
+}

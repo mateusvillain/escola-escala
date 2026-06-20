@@ -1,0 +1,37 @@
+{
+  "id": "TASK-186",
+  "title": "Migrar rate-limit.ts de memória para Upstash Redis",
+  "category": "functional",
+  "description": "Substituir o `Map` em memória de `src/lib/rate-limit.ts` por contadores no Upstash Redis, mantendo a mesma assinatura de função (`rateLimit(ip, options)`) para não exigir mudança em nenhum dos call sites já existentes nas rotas de autenticação.",
+  "acceptanceCriteria": [
+    "`rateLimit(ip: string, options: RateLimitOptions): Promise<RateLimitResult>` passa a ser assíncrona (todos os call sites precisam de `await`) e usa `@upstash/redis` internamente",
+    "Contador por IP expira automaticamente via TTL do Redis (`windowMs`), sem necessidade de limpeza manual",
+    "Todos os call sites de `rateLimit` (rotas de autenticação) atualizados para `await`",
+    "Comportamento observável (limite, janela, retryAfter) idêntico ao da implementação em memória, validado nos testes existentes"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Reimplementar rateLimit com Redis",
+      "details": "Em `src/lib/rate-limit.ts`, criar um client `Redis` do `@upstash/redis` (`Redis.fromEnv()`), e reimplementar `rateLimit` usando `INCR` + `EXPIRE` (ou o comando atômico equivalente do SDK) por chave `ratelimit:${ip}`, tornando a função `async`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Atualizar os call sites",
+      "details": "Buscar todos os usos de `rateLimit(` no projeto (rotas de login, cadastro, recuperação de senha) e adicionar `await`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar os testes existentes",
+      "details": "Ajustar os testes de `src/lib/__tests__/` que cobrem `rateLimit` para `async`/`await` e, se necessário, mockar o client Redis.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-185"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Manter `getClientIp` inalterado — só a função `rateLimit` muda de síncrona/em memória para assíncrona/Redis."
+  ]
+}

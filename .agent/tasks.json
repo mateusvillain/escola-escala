@@ -1013,5 +1013,355 @@
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/completed/TASK-145.json",
     "passes": true
+  },
+  {
+    "id": "TASK-146",
+    "title": "Verificar pré-requisitos da Fase 3",
+    "category": "setup",
+    "specFilePath": ".agent/tasks/TASK-146.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-147",
+    "title": "Habilitar Pix e Boleto na Checkout Session de compra avulsa",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-147.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-148",
+    "title": "Tratar webhooks de pagamento assíncrono para Pix/Boleto",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-148.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-149",
+    "title": "Página de retorno com estado \"pagamento pendente\" para Pix/Boleto",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-149.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-150",
+    "title": "Investigar e decidir sobre Boleto na assinatura recorrente",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-150.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-151",
+    "title": "Modelo Organization",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-151.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-152",
+    "title": "Modelo OrganizationMember",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-152.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-153",
+    "title": "Modelo OrganizationInvite",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-153.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-154",
+    "title": "Modelo OrganizationSubscription",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-154.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-155",
+    "title": "Estender controle de acesso para organizações em access.ts",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-155.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-156",
+    "title": "POST /api/organizations cria organização",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-156.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-157",
+    "title": "GET /api/organizations/me retorna dados da organização do usuário",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-157.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-158",
+    "title": "POST /api/organizations/me/invites convida membro por e-mail",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-158.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-159",
+    "title": "E-mail transacional de convite para organização",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-159.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-160",
+    "title": "Fluxo de aceite de convite de organização",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-160.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-161",
+    "title": "DELETE /api/organizations/me/members/[userId] remove membro",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-161.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-162",
+    "title": "Checkout de assinatura B2B por seat",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-162.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-163",
+    "title": "Estender webhooks Stripe para OrganizationSubscription",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-163.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-164",
+    "title": "Painel /organizacao para o owner gerenciar membros e assinatura",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-164.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-165",
+    "title": "CTA \"Para empresas\" e página de planos B2B",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-165.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-166",
+    "title": "Autorização por papel dentro da organização (owner vs member)",
+    "category": "security",
+    "specFilePath": ".agent/tasks/TASK-166.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-167",
+    "title": "Modelos CourseTrack e CourseTrackItem",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-167.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-168",
+    "title": "Campos de bundle (pagamento único) em CourseTrack",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-168.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-169",
+    "title": "CRUD admin de trilhas e seus cursos",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-169.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-170",
+    "title": "Tela admin /admin/trilhas",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-170.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-171",
+    "title": "Página pública /trilhas/[slug]",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-171.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-172",
+    "title": "Checkout de bundle de trilha",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-172.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-173",
+    "title": "Matrícula em lote nos cursos da trilha ao comprar o bundle",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-173.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-174",
+    "title": "Campos de liberação programada (drip content) em Module",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-174.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-175",
+    "title": "Helper isModuleReleased para calcular liberação programada",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-175.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-176",
+    "title": "Aplicar checagem de liberação programada no acesso à aula",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-176.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-177",
+    "title": "Indicador visual de módulo bloqueado por liberação programada",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-177.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-178",
+    "title": "Configuração admin de liberação programada por módulo",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-178.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-179",
+    "title": "Configurar playwright.config.ts",
+    "category": "setup",
+    "specFilePath": ".agent/tasks/TASK-179.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-180",
+    "title": "Spec E2E do fluxo de cadastro e login",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-180.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-181",
+    "title": "Spec E2E do fluxo de checkout de assinatura",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-181.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-182",
+    "title": "Spec E2E do player de aula e progresso",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-182.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-183",
+    "title": "Spec E2E de conclusão de curso e certificado",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-183.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-184",
+    "title": "Script npm run test:e2e e documentação de execução",
+    "category": "setup",
+    "specFilePath": ".agent/tasks/TASK-184.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-185",
+    "title": "Provisionar Upstash Redis via Vercel Marketplace",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-185.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-186",
+    "title": "Migrar rate-limit.ts de memória para Upstash Redis",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-186.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-187",
+    "title": "Validar rate limiting distribuído entre múltiplas instâncias",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-187.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-188",
+    "title": "Instalar e configurar @sentry/nextjs",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-188.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-189",
+    "title": "Capturar erros de rotas críticas no Sentry",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-189.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-190",
+    "title": "Configurar alerta de erro em produção no Sentry",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-190.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-191",
+    "title": "Modelo ProductEvent",
+    "category": "data-model",
+    "specFilePath": ".agent/tasks/TASK-191.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-192",
+    "title": "Helper trackEvent para registrar eventos de produto",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-192.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-193",
+    "title": "Instrumentar eventos-chave de checkout e consumo de aula",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-193.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-194",
+    "title": "GET /api/admin/events/funnel agregação de funil",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-194.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-195",
+    "title": "Seção de funil de conversão no AdminDashboard",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-195.json",
+    "passes": false
   }
 ]

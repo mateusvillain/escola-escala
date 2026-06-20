@@ -1,0 +1,33 @@
+{
+  "id": "TASK-194",
+  "title": "GET /api/admin/events/funnel agregação de funil",
+  "category": "api-endpoint",
+  "description": "Endpoint admin que agrega os eventos registrados pela TASK-193 em um funil simples de conversão e nos pontos de maior drop-off de aula, para consumo pelo `AdminDashboard` (TASK-195).",
+  "acceptanceCriteria": [
+    "`GET /api/admin/events/funnel` retorna contagens agregadas: `plansViewed`, `checkoutsStarted`, `subscriptionsActivated` para um período (padrão: últimos 30 dias, com parâmetro opcional de range)",
+    "Retorna também as 5 aulas com maior proporção de `lesson_started` sem conclusão correspondente em `LessonProgress.isCompleted`, como proxy de maior drop-off",
+    "Protegido por `requireRole(request, ['admin'])`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/admin/events/funnel/route.ts` com `GET`, protegido por `requireRole`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Agregar as contagens do funil",
+      "details": "Usar `prisma.productEvent.groupBy({ by: ['eventType'], where: { eventType: { in: ['plans_viewed', 'checkout_started', 'subscription_activated'] }, createdAt: { gte: rangeStart } }, _count: true })` para montar o funil.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Calcular o drop-off por aula",
+      "details": "Para cada `lessonId` presente em eventos `lesson_started` no período, contar quantos têm `LessonProgress.isCompleted: true` correspondente para o mesmo `userId`/`lessonId`, ordenando pela maior proporção de não concluídos e retornando o top 5.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-193"],
+  "estimatedComplexity": "medium"
+}

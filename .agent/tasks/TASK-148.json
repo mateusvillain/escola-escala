@@ -1,0 +1,43 @@
+{
+  "id": "TASK-148",
+  "title": "Tratar webhooks de pagamento assíncrono para Pix/Boleto",
+  "category": "integration",
+  "description": "Pix e Boleto são métodos de pagamento assíncronos: o evento `checkout.session.completed` dispara quando o comprador conclui o checkout, mas o pagamento ainda pode estar `unpaid` nesse momento. A confirmação (ou falha) chega depois, via `checkout.session.async_payment_succeeded`/`checkout.session.async_payment_failed`. `src/lib/stripe-handlers.ts` hoje só trata o fluxo síncrono de cartão.",
+  "acceptanceCriteria": [
+    "`POST /api/webhooks/stripe` trata os eventos `checkout.session.async_payment_succeeded` e `checkout.session.async_payment_failed`",
+    "Matrícula (`CourseEnrollment`) só é criada para Pix/Boleto quando `checkout.session.async_payment_succeeded` é recebido, nunca em `checkout.session.completed` com `payment_status` diferente de `paid`",
+    "Boleto que expira sem pagamento (`checkout.session.async_payment_failed`) não cria matrícula",
+    "Eventos habilitados no endpoint de webhook do Stripe Dashboard em produção (local via `stripe listen` já recebe todos os eventos)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Ajustar handleCheckoutSessionCompleted para não assumir pagamento confirmado",
+      "details": "Em `src/lib/stripe-handlers.ts`, dentro do branch `session.mode === 'payment'`, só chamar `handleOneTimeCoursePurchase` quando `session.payment_status === 'paid'`. Para `payment_status === 'unpaid'` (caso de Pix/Boleto recém-criado), apenas logar e retornar sem matricular.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar handlers para os eventos assíncronos",
+      "details": "Adicionar `handleCheckoutSessionAsyncPaymentSucceeded` (chama a mesma lógica de `handleOneTimeCoursePurchase` usando `event.data.object` como a session) e `handleCheckoutSessionAsyncPaymentFailed` (apenas loga, sem matricular) em `src/lib/stripe-handlers.ts`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Registrar os novos eventos no endpoint de webhook",
+      "details": "Adicionar os cases `checkout.session.async_payment_succeeded` e `checkout.session.async_payment_failed` no switch de `POST /api/webhooks/stripe`, chamando os handlers da TASK anterior.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Habilitar os eventos no Stripe Dashboard de produção",
+      "details": "Em Developers → Webhooks, adicionar `checkout.session.async_payment_succeeded` e `checkout.session.async_payment_failed` à lista de eventos do endpoint configurado em produção (mesmo padrão já usado para `customer.subscription.trial_will_end` na TASK-87).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-147"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Sem este tratamento, um Boleto que demora de 1 a 3 dias úteis para compensar resultaria em matrícula nunca criada (se o handler de completed ignorar `unpaid`) ou matrícula prematura mesmo sem pagamento confirmado (se mantido o comportamento atual sem checar `payment_status`)."
+  ]
+}

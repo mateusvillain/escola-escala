@@ -1,0 +1,27 @@
+{
+  "id": "TASK-184",
+  "title": "Script npm run test:e2e e documentação de execução",
+  "category": "setup",
+  "description": "Adicionar o script de execução dos testes E2E ao `package.json` e documentar como rodá-los localmente, incluindo a dependência de `stripe listen` para o spec de checkout (TASK-181).",
+  "acceptanceCriteria": [
+    "`package.json` ganha o script `\"test:e2e\": \"playwright test\"`",
+    "`AGENTS.md`, seção \"Comandos úteis\", passa a listar `npx playwright test` (ou `npm run test:e2e`) como o comando de testes E2E, substituindo a nota atual de que Playwright não tem specs",
+    "Documentado o pré-requisito de `stripe listen` rodando localmente para o spec de checkout (TASK-181) passar"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o script ao package.json",
+      "details": "Em `package.json`, adicionar `\"test:e2e\": \"playwright test\"` ao bloco `scripts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Atualizar AGENTS.md",
+      "details": "Em `AGENTS.md`, seção \"Comandos úteis\", atualizar a linha de testes para incluir `npx playwright test` (E2E) ao lado de `npx vitest run` (unitário), e remover a observação de que Playwright \"ainda não tem config nem specs\" (TASK-179 a 183 resolvem isso).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-183"],
+  "estimatedComplexity": "low"
+}

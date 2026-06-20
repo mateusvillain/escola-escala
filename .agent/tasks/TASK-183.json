@@ -1,0 +1,26 @@
+{
+  "id": "TASK-183",
+  "title": "Spec E2E de conclusão de curso e certificado",
+  "category": "functional",
+  "description": "Cobrir com Playwright o fluxo final de conclusão de um curso (100% das aulas) e download do certificado em PDF gerado automaticamente.",
+  "acceptanceCriteria": [
+    "`e2e/certificate.spec.ts` cobre: aluno completa a última aula pendente de um curso de teste (via `POST /api/progress/[lessonId]` simulando conclusão de todas as aulas), o curso passa a aparecer em \"Concluídos\" no dashboard",
+    "Teste valida que o botão de download do certificado fica disponível e que `GET /api/certificates/[courseId]/download` retorna um PDF válido (`content-type: application/pdf`, tamanho de resposta maior que zero)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Completar todas as aulas do curso de teste",
+      "details": "Usando o curso de teste da TASK-182 (ou um curso de teste dedicado, mais simples, com poucas aulas), chamar `POST /api/progress/[lessonId]` para cada aula simulando conclusão (`watchPercentage: 100` ou conclusão manual).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar a geração do certificado",
+      "details": "Acessar `/dashboard`, confirmar que o curso aparece em \"Concluídos\" com botão de certificado, e validar via `request.get` que `GET /api/certificates/[courseId]/download` retorna PDF válido.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-182"],
+  "estimatedComplexity": "medium"
+}

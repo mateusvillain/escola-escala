@@ -1,0 +1,34 @@
+{
+  "id": "TASK-166",
+  "title": "Autorização por papel dentro da organização (owner vs member)",
+  "category": "security",
+  "description": "Garantir de forma centralizada que apenas o `owner` de uma organização pode convidar/remover membros, iniciar ou alterar a assinatura B2B e acessar o Customer Portal da organização; membros (`role: 'member'`) têm acesso somente de leitura aos dados da própria organização.",
+  "acceptanceCriteria": [
+    "`POST /api/organizations/me/invites`, `DELETE /api/organizations/me/members/[userId]`, `POST /api/organizations/me/checkout` e `POST /api/organizations/me/portal` retornam 403 para usuários com `role: 'member'`",
+    "`GET /api/organizations/me` funciona para qualquer membro, mas a UI (TASK-164) omite os controles de gestão para `member`",
+    "Usuário sem organização recebe 404 (não 403) ao acessar `/api/organizations/me`, para não revelar a existência de organizações de outros usuários",
+    "Teste automatizado cobre um `member` tentando convidar/remover/checkout e recebendo 403 em todos os casos"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar helper requireOrgOwner",
+      "details": "Criar `requireOrgOwner(userId: string)` em `src/lib/access.ts` (ou novo `src/lib/organization.ts`), que busca o `OrganizationMember` do usuário e retorna a organização se `role === 'owner'`, ou lança/retorna um erro 403 padronizado caso contrário.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar o helper nos endpoints de gestão",
+      "details": "Usar `requireOrgOwner` em `src/app/api/organizations/me/invites/route.ts` (TASK-158), `src/app/api/organizations/me/members/[userId]/route.ts` (TASK-161), `src/app/api/organizations/me/checkout/route.ts` (TASK-162) e `src/app/api/organizations/me/portal/route.ts` (TASK-164), seguindo o mesmo padrão `instanceof NextResponse` usado por `requireRole`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Escrever testes de autorização",
+      "details": "Em `src/lib/__tests__/`, escrever testes (Vitest) que simulam um `member` chamando cada um dos quatro endpoints e confirmam resposta 403, e um cenário sem organização confirmando 404 em `GET /api/organizations/me`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-152", "TASK-158", "TASK-161", "TASK-162"],
+  "estimatedComplexity": "low"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "TASK-152",
+  "title": "Modelo OrganizationMember",
+  "category": "data-model",
+  "description": "Criar o model `OrganizationMember`, vinculando um `User` a uma `Organization` com um papel (`owner` ou `member`). Decisão de escopo v1: cada usuário pertence a no máximo uma organização (`userId` único).",
+  "acceptanceCriteria": [
+    "Enum `OrgRole` com valores `owner` e `member` criado em `prisma/schema.prisma`",
+    "Model `OrganizationMember` com `id`, `organizationId`, `userId` (único — 1 usuário pertence a no máximo 1 organização), `role OrgRole`, `joinedAt`",
+    "Relação `User → OrganizationMember?` adicionada ao model `User` para facilitar consultas de acesso (TASK-155)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar enum e model ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nenum OrgRole {\n  owner\n  member\n}\n\nmodel OrganizationMember {\n  id             String       @id @default(uuid())\n  organizationId String\n  organization   Organization @relation(fields: [organizationId], references: [id])\n  userId         String       @unique\n  user           User         @relation(fields: [userId], references: [id])\n  role           OrgRole\n  joinedAt       DateTime     @default(now())\n}\n```",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar relação inversa em User",
+      "details": "Adicionar `organizationMember OrganizationMember?` ao model `User` em `prisma/schema.prisma`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Incluir na migration do grupo",
+      "details": "Incluir este model na mesma migration da TASK-151 (`npx prisma migrate dev --name add_organization_models`), já que os models são interdependentes.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-151"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`userId @unique` é a decisão de escopo que impede múltiplas organizações por usuário na v1 — documentado na seção 14.6 do PRD. Se isso mudar, esta constraint precisa ser revisitada."
+  ]
+}

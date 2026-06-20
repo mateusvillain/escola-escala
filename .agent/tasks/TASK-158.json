@@ -1,0 +1,41 @@
+{
+  "id": "TASK-158",
+  "title": "POST /api/organizations/me/invites convida membro por e-mail",
+  "category": "api-endpoint",
+  "description": "Endpoint que permite ao `owner` da organização convidar um novo membro por e-mail, respeitando o limite de seats contratados (`seatLimit`).",
+  "acceptanceCriteria": [
+    "`POST /api/organizations/me/invites` aceita `{ email: string }` e exige que o usuário autenticado seja `owner` da organização (403 caso contrário — ver TASK-166)",
+    "Retorna 409 se `seatsUsed + convites pendentes >= seatLimit`",
+    "Retorna 409 se já existir convite `pending` para o mesmo e-mail na mesma organização",
+    "Cria `OrganizationInvite` com `token` gerado via `crypto.randomBytes(32).toString('hex')` e `expiresAt` 7 dias no futuro",
+    "Dispara o e-mail de convite (TASK-159) após criar o registro"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/invites/route.ts` com `POST`. Validar `{ email: z.string().email() }` via Zod.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Verificar papel de owner e limite de seats",
+      "details": "Buscar o membership do usuário autenticado; se `role !== 'owner'`, retornar 403. Contar `members.length + invites com status 'pending'` e comparar com `organization.seatLimit`; retornar 409 se atingido o limite.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Criar o convite",
+      "details": "Gerar `token` com `crypto.randomBytes(32).toString('hex')`, `expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)`, criar `OrganizationInvite` com `status: 'pending'`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Disparar e-mail de convite",
+      "details": "Chamar a função de envio de e-mail criada na TASK-159 com o link `${NEXT_PUBLIC_APP_URL}/convite/${token}`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-153", "TASK-157"],
+  "estimatedComplexity": "medium"
+}
