@@ -5,6 +5,17 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button, Alert } from '@/components/ui'
 import { registerSchema } from '@/lib/schemas/auth'
+import { EmbeddedCheckoutForm } from '@/components/checkout/EmbeddedCheckoutForm'
+import { PlanPicker } from '@/components/checkout/PlanPicker'
+import { resolvePriceId, type PlanBillingCycle, type PlanPriceIds, type PlanType } from '@/lib/plans'
+
+interface Props {
+  priceIds: PlanPriceIds
+  plan?: PlanType
+  billingCycle?: PlanBillingCycle
+  referralCode?: string
+  checkoutError?: boolean
+}
 
 function readShadowValue(form: HTMLFormElement, name: string): string {
   const el = form.querySelector(`lui-input[name="${name}"]`)
@@ -27,22 +38,25 @@ function validate(values: Record<string, string>): Record<string, string> {
     }
   }
 
-  if (!values.confirmPassword) {
-    errors.confirmPassword = 'Campo obrigatório'
-  } else if (values.password !== values.confirmPassword) {
-    errors.confirmPassword = 'As senhas não coincidem'
-  }
-
   return errors
 }
 
-export function RegisterForm() {
+export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isFormValid, setIsFormValid] = useState(false)
+
+  const preselectedPriceId = plan && billingCycle ? resolvePriceId(priceIds, plan, billingCycle) : undefined
+  const wantsSubscription = !!preselectedPriceId
+  const [step, setStep] = useState<'account' | 'plans' | 'checkout' | 'checkout-error'>(
+    checkoutError ? 'checkout-error' : 'account',
+  )
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [checkoutErrorMsg, setCheckoutErrorMsg] = useState<string | null>(null)
+  const [planLoading, setPlanLoading] = useState<'free' | PlanType | null>(null)
 
   function getValues() {
     const form = formRef.current
@@ -51,7 +65,6 @@ export function RegisterForm() {
       name: readShadowValue(form, 'name'),
       email: readShadowValue(form, 'email'),
       password: readShadowValue(form, 'password'),
-      confirmPassword: readShadowValue(form, 'confirmPassword'),
     }
   }
 
@@ -59,8 +72,45 @@ export function RegisterForm() {
     const values = getValues()
     if (!values) return
     const errors = validate(values)
-    const allFilled = !!(values.name && values.email && values.password && values.confirmPassword)
+    const allFilled = !!(values.name && values.email && values.password)
     setIsFormValid(allFilled && Object.keys(errors).length === 0)
+  }
+
+  async function startCheckout(checkoutPriceId: string, checkoutBilling: PlanBillingCycle) {
+    try {
+      const res = await fetch('/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: checkoutPriceId,
+          billingCycle: checkoutBilling,
+          referralCode,
+          uiMode: 'embedded',
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setCheckoutErrorMsg(data.error ?? 'Não foi possível iniciar a assinatura.')
+        return
+      }
+
+      setClientSecret(data.clientSecret)
+      setStep('checkout')
+    } catch {
+      setCheckoutErrorMsg('Erro de conexão ao iniciar a assinatura.')
+    }
+  }
+
+  function handleSelectFree() {
+    router.push('/dashboard')
+  }
+
+  async function handleSelectPaid(selectedPlan: PlanType, selectedBilling: PlanBillingCycle) {
+    setPlanLoading(selectedPlan)
+    await startCheckout(resolvePriceId(priceIds, selectedPlan, selectedBilling), selectedBilling)
+    setPlanLoading(null)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +141,13 @@ export function RegisterForm() {
       })
 
       if (res.status === 201) {
-        router.push('/dashboard')
+        if (wantsSubscription && preselectedPriceId && billingCycle) {
+          await startCheckout(preselectedPriceId, billingCycle)
+          setLoading(false)
+        } else {
+          setStep('plans')
+          setLoading(false)
+        }
         return
       }
 
@@ -108,13 +164,87 @@ export function RegisterForm() {
     setLoading(false)
   }
 
+  if (step === 'checkout-error') {
+    return (
+      <lui-card aria-label="Pagamento não concluído">
+        <lui-heading level="2">Pagamento não concluído</lui-heading>
+        <lui-stack space="md">
+          <Alert
+            variant="caution"
+            title="Sua conta já foi criada"
+            content="O pagamento da assinatura não foi confirmado. Você pode tentar novamente quando quiser — sua conta já existe e está pronta para uso."
+          />
+          <lui-flex justify="center" gap="md">
+            <Link href="/planos" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Ver planos novamente
+            </Link>
+            <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Ir para o login
+            </Link>
+          </lui-flex>
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
+  if (step === 'plans') {
+    return (
+      <lui-card aria-label="Escolha seu plano">
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 2 de 2</lui-body>
+        <lui-heading level="2">Sua conta foi criada. Escolha um plano</lui-heading>
+        <lui-stack space="md">
+          {checkoutErrorMsg && (
+            <Alert
+              variant="caution"
+              title="Não foi possível iniciar a assinatura"
+              content={`${checkoutErrorMsg} Você pode tentar de novo ou continuar gratuitamente por enquanto.`}
+            />
+          )}
+          <PlanPicker onSelectFree={handleSelectFree} onSelectPaid={handleSelectPaid} loadingPlan={planLoading} />
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
+  if (step === 'checkout' && clientSecret) {
+    return (
+      <lui-card aria-label="Concluir assinatura">
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 2 de 2' : 'Etapa 3 de 3'}
+        </lui-body>
+        <lui-heading level="2">Quase lá — conclua sua assinatura</lui-heading>
+        <lui-stack space="md">
+          <EmbeddedCheckoutForm
+            clientSecret={clientSecret}
+            onComplete={() => router.push('/dashboard?checkout=success')}
+          />
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
   return (
     <lui-card aria-label="Criar conta">
+      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 1 de 2</lui-body>
       <lui-heading level="2">Criar conta</lui-heading>
 
       <lui-stack space="md">
         {submitError && (
           <Alert variant="danger" title="Erro ao criar conta" content={submitError} />
+        )}
+
+        {checkoutErrorMsg && (
+          <Alert
+            variant="caution"
+            title="Conta criada, mas a assinatura não foi iniciada"
+            content={`${checkoutErrorMsg} Você já pode acessar sua conta e assinar mais tarde em /planos.`}
+          />
+        )}
+
+        {checkoutErrorMsg && (
+          <Link href="/dashboard" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+            Ir para o Dashboard
+          </Link>
         )}
 
         <form ref={formRef} onSubmit={handleSubmit}>
@@ -148,18 +278,8 @@ export function RegisterForm() {
               error-text={fieldErrors.password}
               onInput={handleFormInput}
             />
-            <lui-input
-              label="Confirmar Senha"
-              type="password"
-              name="confirmPassword"
-              placeholder="Repita a senha"
-              required
-              error={!!fieldErrors.confirmPassword}
-              error-text={fieldErrors.confirmPassword}
-              onInput={handleFormInput}
-            />
             <Button
-              label="Criar conta"
+              label="Continuar"
               type="submit"
               loading={loading}
               loadingText="Criando conta..."

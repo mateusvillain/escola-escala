@@ -10,6 +10,7 @@ const schema = z.object({
   priceId: z.string().min(1),
   billingCycle: z.enum(['monthly', 'annual']),
   referralCode: z.string().min(1).optional(),
+  uiMode: z.enum(['hosted', 'embedded']).optional().default('hosted'),
 })
 
 export async function POST(request: NextRequest) {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Dados inválidos', issues: parsed.error.issues }, { status: 400 })
   }
 
-  const { priceId, billingCycle, referralCode } = parsed.data
+  const { priceId, billingCycle, referralCode, uiMode } = parsed.data
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.userId },
@@ -76,12 +77,19 @@ export async function POST(request: NextRequest) {
     customer: stripeCustomerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${appUrl}/dashboard?checkout=success`,
-    cancel_url: `${appUrl}/planos`,
     metadata: {
       userId: dbUser.id,
       ...(validReferralCode && { referralCode: validReferralCode }),
     },
+  }
+
+  if (uiMode === 'embedded') {
+    // A API version do projeto (`2026-05-27.dahlia`) usa `embedded_page`, não `embedded` — ver Stripe.Checkout.SessionCreateParams.UiMode.
+    sessionParams.ui_mode = 'embedded_page'
+    sessionParams.return_url = `${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}`
+  } else {
+    sessionParams.success_url = `${appUrl}/dashboard?checkout=success`
+    sessionParams.cancel_url = `${appUrl}/planos`
   }
 
   // Stripe não permite `allow_promotion_codes` e `discounts` na mesma Checkout Session.
@@ -97,6 +105,10 @@ export async function POST(request: NextRequest) {
   }
 
   const session = await stripe.checkout.sessions.create(sessionParams)
+
+  if (uiMode === 'embedded') {
+    return NextResponse.json({ clientSecret: session.client_secret })
+  }
 
   return NextResponse.json({ checkoutUrl: session.url })
 }

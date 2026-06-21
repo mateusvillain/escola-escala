@@ -1,32 +1,34 @@
 {
   "id": "TASK-199",
-  "title": "Cadastro com checkout integrado (Embedded Checkout)",
+  "title": "Cadastro com checkout integrado (Embedded Checkout) e seleção de plano pós-cadastro",
   "category": "functional",
-  "description": "Peça central da feature: quando o usuário chega em `/cadastro` com um plano selecionado (TASK-198), o formulário de criação de conta continua igual, mas ao concluir o registro com sucesso a página não redireciona mais direto para `/dashboard` — em vez disso, chama `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` (TASK-196) e renderiza o `EmbeddedCheckoutForm` (TASK-197) na mesma página, deixando o usuário concluir o pagamento sem sair do fluxo de cadastro.",
+  "description": "Peça central da feature: quando o usuário chega em `/cadastro` com um plano selecionado (TASK-198), o formulário de criação de conta continua igual, mas ao concluir o registro com sucesso a página não redireciona mais direto para `/dashboard` — em vez disso, chama `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` (TASK-196) e renderiza o `EmbeddedCheckoutForm` (TASK-197) na mesma página, deixando o usuário concluir o pagamento sem sair do fluxo de cadastro. **Escopo ampliado em 2026-06-21** (decisão de produto, não fazia parte do desenho original desta task): quando o cadastro acontece SEM plano pré-selecionado (`/cadastro` direto, o caminho mais comum), em vez de redirecionar direto para `/dashboard`, a página passa a mostrar um seletor de planos com 3 opções — Gratuito, Básico, Premium — antes de seguir.",
   "acceptanceCriteria": [
-    "`RegisterForm` aceita `plan`/`billing`/`referralCode` opcionais; quando `plan`+`billing` estão presentes e `POST /api/auth/register` retorna 201, a página avança para um segundo passo (mesma rota `/cadastro`, troca de conteúdo no client, sem navegação) chamando `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` e o `priceId` correspondente ao plano/ciclo escolhido",
-    "Enquanto o `clientSecret` carrega, exibir estado de loading; em caso de erro (ex.: `priceId` não configurado), exibir mensagem e oferecer um link para `/dashboard` sem assinar — a conta já foi criada e não deve ficar inacessível",
-    "Sem `plan`/`billing` na query string, o comportamento é o atual: registra e redireciona direto para `/dashboard`, sem nenhum passo adicional",
-    "Ao completar o pagamento no Embedded Checkout (callback `onComplete`), redirecionar para `/dashboard?checkout=success` — mesmo destino já usado pelo fluxo hosted existente"
+    "`RegisterForm` aceita `plan`/`billing`/`referralCode` opcionais; quando `plan`+`billing` estão presentes e `POST /api/auth/register` retorna 201, a página avança direto para o passo de checkout (mesma rota `/cadastro`, troca de conteúdo no client, sem navegação) chamando `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` e o `priceId` correspondente ao plano/ciclo escolhido",
+    "Enquanto o `clientSecret` carrega, exibir estado de loading; em caso de erro (ex.: `priceId` não configurado), exibir mensagem e oferecer uma saída sem deixar o usuário travado — a conta já foi criada e não deve ficar inacessível",
+    "Sem `plan`/`billing` na query string (cadastro 'normal'), após o registro a página mostra um passo de seleção de plano com 3 cards: Gratuito, Básico e Premium (com toggle mensal/anual para os dois pagos)",
+    "Selecionar o plano Gratuito redireciona para `/dashboard` sem chamar o endpoint de checkout — não cria nenhuma assinatura",
+    "Selecionar Básico ou Premium nesse seletor chama `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` e o `priceId` resolvido a partir do plano/ciclo clicado, e renderiza o `EmbeddedCheckoutForm` — mesmo comportamento do caminho pré-selecionado",
+    "Ao completar o pagamento no Embedded Checkout (callback `onComplete`), redirecionar para `/dashboard?checkout=success` — mesmo destino já usado pelo fluxo hosted existente, em ambos os caminhos (pré-selecionado e seletor pós-cadastro)"
   ],
   "steps": [
     {
       "step": 1,
       "description": "Extrair o mapeamento de priceId para um helper compartilhado",
       "details": "Hoje `src/app/planos/PlansClient.tsx` resolve `priceId` a partir de `plan`+`billing` localmente. Extrair essa resolução para um helper compartilhado (ex.: `src/lib/plans.ts`, recebendo os price IDs já carregados via env) para não duplicar a lógica entre `PlansClient` e `RegisterForm`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar estado de 'passo' ao RegisterForm",
       "details": "Em `src/components/auth/RegisterForm.tsx`, adicionar um estado `step: 'account' | 'checkout'`. Quando `plan`/`billing` válidos estão presentes nas props e o registro retorna 201, em vez de `router.push('/dashboard')`, chamar `POST /api/subscriptions/checkout` com `{ priceId, billingCycle: billing, referralCode, uiMode: 'embedded' }`, guardar o `clientSecret` retornado e mudar para `step: 'checkout'`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar o EmbeddedCheckoutForm no passo de checkout",
       "details": "Quando `step === 'checkout'`, renderizar `<EmbeddedCheckoutForm clientSecret={clientSecret} onComplete={() => router.push('/dashboard?checkout=success')} />` no lugar do formulário de conta, dentro do mesmo `<lui-card>`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
@@ -36,16 +38,47 @@
     },
     {
       "step": 5,
-      "description": "Testar manualmente o fluxo completo",
+      "description": "Testar manualmente o fluxo completo (caminho pré-selecionado)",
       "details": "A partir de `/planos`, deslogado, clicar em \"Criar conta e assinar\" no Premium anual, completar o cadastro, confirmar que o Embedded Checkout aparece inline na mesma página (sem redirecionar para `checkout.stripe.com`), completar o pagamento em modo teste com cartão, e confirmar que cai em `/dashboard?checkout=success` com a assinatura ativa.",
-      "pass": false
+      "pass": true
+    },
+    {
+      "step": 6,
+      "description": "Criar o componente PlanPicker (Gratuito + Básico + Premium)",
+      "details": "Criar `src/components/checkout/PlanPicker.tsx`: 3 cards compactos (Gratuito, Básico, Premium) com toggle mensal/anual compartilhado entre os dois pagos. Extrair a tabela de preços (`PLAN_PRICES`) de `PlansClient.tsx` para `src/lib/plans.ts`, e fazer `PlansClient` importar de lá, para não duplicar os valores em dois arquivos. Props: `onSelectFree`, `onSelectPaid(plan, billing)`, `loadingPlan`.",
+      "pass": true
+    },
+    {
+      "step": 7,
+      "description": "Adicionar o passo 'plans' ao RegisterForm",
+      "details": "Em `src/components/auth/RegisterForm.tsx`, ao concluir o registro sem `plan`/`billing` pré-selecionados, mudar para `step: 'plans'` em vez de `router.push('/dashboard')`. Renderizar `<PlanPicker>` nesse passo. `onSelectFree` chama `router.push('/dashboard')` diretamente (sem chamada de API — o plano gratuito não tem nenhum modelo novo no backend, é equivalente ao estado atual de \"sem assinatura\"). `onSelectPaid` resolve o `priceId` via `resolvePriceId` e reaproveita a mesma função `startCheckout` (agora parametrizada por `priceId`/`billing` em vez de depender só das props da pré-seleção).",
+      "pass": true
+    },
+    {
+      "step": 8,
+      "description": "Propagar priceIds completo de CadastroPage",
+      "details": "`src/app/(auth)/cadastro/page.tsx` passa a sempre montar e passar o objeto `priceIds` completo (4 chaves) para `RegisterForm`, em vez de resolver um único `priceId` — necessário porque o seletor pós-cadastro precisa dos 4 price IDs (Básico/Premium × mensal/anual), não só do par pré-selecionado.",
+      "pass": true
+    },
+    {
+      "step": 9,
+      "description": "Testar manualmente os dois novos caminhos do seletor",
+      "details": "Cadastro direto em `/cadastro` (sem query string): completar o registro, confirmar que aparece o seletor com 3 cards. Cenário A: clicar em \"Continuar grátis\" e confirmar redirecionamento para `/dashboard` sem nenhuma chamada ao endpoint de checkout. Cenário B: clicar em \"Assinar Básico\" (ou Premium) e confirmar que o Embedded Checkout aparece inline, com o preço/plano corretos.",
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-196", "TASK-197", "TASK-198"],
+  "dependencies": [
+    "TASK-196",
+    "TASK-197",
+    "TASK-198"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "O registro (`POST /api/auth/register`) já autentica o usuário via cookie `auth-token` na resposta — por isso é possível chamar `POST /api/subscriptions/checkout` (que exige `getAuthUser`) imediatamente depois, sem passo de login intermediário.",
     "O check de assinatura duplicada em `/api/subscriptions/checkout` (`dbUser.subscriptions.length > 0`) não afeta este fluxo, já que a conta acabou de ser criada e não tem assinatura.",
-    "Não reimplementar a lógica de cupom de indicação/trial no client — ela já é resolvida inteiramente no servidor pelo endpoint existente, independente de `uiMode`."
+    "Não reimplementar a lógica de cupom de indicação/trial no client — ela já é resolvida inteiramente no servidor pelo endpoint existente, independente de `uiMode`.",
+    "O plano 'Gratuito' não é um conceito novo de backend — não criar model, campo ou enum novo no Prisma para ele. É só a opção de UI para 'continuar sem assinar agora', funcionalmente idêntica ao estado de usuário autenticado sem `UserSubscription` que já existe hoje (acesso só a aulas `isPreview: true`, controlado por `src/lib/access.ts`, sem nenhuma mudança).",
+    "Validado de ponta a ponta com `stripe listen` + cartão de teste `4242 4242 4242 4242`, via Playwright dirigindo o iframe real do Stripe (campos `#cardNumber`/`#cardExpiry`/`#cardCvc`/`#billingName` dentro do frame `embedded-checkout`, botão `[data-testid=\"hosted-payment-submit-button\"]`). Confirmado no banco: `UserSubscription` criada com `status: 'active'`, plano e billingCycle corretos, nos dois caminhos (pré-selecionado e seletor pós-cadastro). Boleto foi removido das formas de pagamento da conta Stripe pelo cliente — só cartão fica disponível por enquanto (ver TASK-150).",
+    "Decisão sobre Boleto na assinatura (2026-06-21): o cliente optou por desabilitar Boleto direto no Stripe Dashboard (conta), em vez de restringir via `payment_method_types` no código — motivo: o webhook `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`) assume que toda Checkout Session de assinatura completada já está paga (`subscriptionStatus = trialing ? trialing : active`), o que é falso para Boleto (status real fica `incomplete` até a compensação). Habilitar Boleto na assinatura sem TASK-147/148/150 implementadas criaria acesso pago sem pagamento confirmado."
   ]
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { PLAN_PRICES, resolvePriceId } from '@/lib/plans'
 
 interface PriceIds {
   basicMonthly: string
@@ -23,11 +24,7 @@ interface Props {
   referralCode?: string
 }
 
-// Update these to match your Stripe product prices
-const PRICES = {
-  basic: { monthly: 80, annual: 800 },
-  premium: { monthly: 100, annual: 1000 },
-}
+const PRICES = PLAN_PRICES
 
 // Deve ficar em sincronia com o percent_off do Coupon configurado em STRIPE_COUPON_ID_REFERRAL
 const REFERRAL_DISCOUNT_PERCENT = 10
@@ -83,10 +80,7 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
       return
     }
 
-    const priceId =
-      plan === 'basic'
-        ? billing === 'monthly' ? priceIds.basicMonthly : priceIds.basicAnnual
-        : billing === 'monthly' ? priceIds.premiumMonthly : priceIds.premiumAnnual
+    const priceId = resolvePriceId(priceIds, plan, billing)
 
     setLoading(plan)
     setError(null)
@@ -111,6 +105,12 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
     } finally {
       setLoading(null)
     }
+  }
+
+  function cadastroHref(plan: 'basic' | 'premium') {
+    const params = new URLSearchParams({ plan, billing })
+    if (referralCode) params.set('ref', referralCode)
+    return `/cadastro?${params.toString()}`
   }
 
   const planLabel = (type: string, cycle: string) => {
@@ -241,6 +241,21 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
             }`}>
               {activeSubscription.planType === 'basic' ? 'Plano atual' : 'Fazer downgrade'}
             </span>
+          ) : !isAuthenticated ? (
+            <div className="flex flex-col gap-2">
+              <Link
+                href={cadastroHref('basic')}
+                className="w-full text-center py-3 rounded-xl text-sm font-semibold border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors"
+              >
+                Criar conta e assinar
+              </Link>
+              <button
+                onClick={() => handleCheckout('basic')}
+                className="text-sm text-gray-500 hover:text-gray-700 underline text-center"
+              >
+                Já tenho conta
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => handleCheckout('basic')}
@@ -303,6 +318,21 @@ export function PlansClient({ priceIds, isAuthenticated, activeSubscription, ref
             }`}>
               {activeSubscription.planType === 'premium' ? 'Plano atual' : 'Fazer upgrade'}
             </span>
+          ) : !isAuthenticated ? (
+            <div className="flex flex-col gap-2">
+              <Link
+                href={cadastroHref('premium')}
+                className="w-full text-center py-3 rounded-xl text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              >
+                Criar conta e assinar
+              </Link>
+              <button
+                onClick={() => handleCheckout('premium')}
+                className="text-sm text-gray-500 hover:text-gray-700 underline text-center"
+              >
+                Já tenho conta
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => handleCheckout('premium')}
