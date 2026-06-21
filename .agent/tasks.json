@@ -1023,21 +1023,21 @@
   },
   {
     "id": "TASK-147",
-    "title": "Habilitar Pix e Boleto na Checkout Session de compra avulsa",
+    "title": "Habilitar Boleto na Checkout Session de compra avulsa",
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-147.json",
     "passes": false
   },
   {
     "id": "TASK-148",
-    "title": "Tratar webhooks de pagamento assíncrono para Pix/Boleto",
+    "title": "Tratar webhooks de pagamento assíncrono para Boleto",
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-148.json",
     "passes": false
   },
   {
     "id": "TASK-149",
-    "title": "Página de retorno com estado \"pagamento pendente\" para Pix/Boleto",
+    "title": "Página de retorno com estado \"pagamento pendente\" para Boleto",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-149.json",
     "passes": false
@@ -1053,112 +1053,112 @@
     "id": "TASK-151",
     "title": "Modelo Organization",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-151.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-151.json",
     "passes": false
   },
   {
     "id": "TASK-152",
     "title": "Modelo OrganizationMember",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-152.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-152.json",
     "passes": false
   },
   {
     "id": "TASK-153",
     "title": "Modelo OrganizationInvite",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-153.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-153.json",
     "passes": false
   },
   {
     "id": "TASK-154",
     "title": "Modelo OrganizationSubscription",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-154.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-154.json",
     "passes": false
   },
   {
     "id": "TASK-155",
     "title": "Estender controle de acesso para organizações em access.ts",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-155.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-155.json",
     "passes": false
   },
   {
     "id": "TASK-156",
     "title": "POST /api/organizations cria organização",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-156.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-156.json",
     "passes": false
   },
   {
     "id": "TASK-157",
     "title": "GET /api/organizations/me retorna dados da organização do usuário",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-157.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-157.json",
     "passes": false
   },
   {
     "id": "TASK-158",
     "title": "POST /api/organizations/me/invites convida membro por e-mail",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-158.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-158.json",
     "passes": false
   },
   {
     "id": "TASK-159",
     "title": "E-mail transacional de convite para organização",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-159.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-159.json",
     "passes": false
   },
   {
     "id": "TASK-160",
     "title": "Fluxo de aceite de convite de organização",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-160.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-160.json",
     "passes": false
   },
   {
     "id": "TASK-161",
     "title": "DELETE /api/organizations/me/members/[userId] remove membro",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-161.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-161.json",
     "passes": false
   },
   {
     "id": "TASK-162",
     "title": "Checkout de assinatura B2B por seat",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-162.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-162.json",
     "passes": false
   },
   {
     "id": "TASK-163",
     "title": "Estender webhooks Stripe para OrganizationSubscription",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-163.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-163.json",
     "passes": false
   },
   {
     "id": "TASK-164",
     "title": "Painel /organizacao para o owner gerenciar membros e assinatura",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-164.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-164.json",
     "passes": false
   },
   {
     "id": "TASK-165",
     "title": "CTA \"Para empresas\" e página de planos B2B",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-165.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-165.json",
     "passes": false
   },
   {
     "id": "TASK-166",
     "title": "Autorização por papel dentro da organização (owner vs member)",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-166.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-166.json",
     "passes": false
   },
   {

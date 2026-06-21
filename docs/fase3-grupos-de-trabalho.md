@@ -1,8 +1,10 @@
 # Fase 3 — Grupos de Trabalho e Prompts de Execução
 
-Este documento divide as 50 tasks da Fase 3 (`TASK-146` a `TASK-195`, detalhadas em `.agent/prd/PRD.md` seção 14 e em `.agent/tasks/`) em **12 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
+Este documento divide as 34 tasks **ativas** da Fase 3 (`TASK-146` a `TASK-150` e `TASK-167` a `TASK-195`, detalhadas em `.agent/prd/PRD.md` seção 14 e em `.agent/tasks/`) em **8 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
 
-Critério de agrupamento: cada grupo corresponde a uma funcionalidade (ou a uma fatia coesa de uma funcionalidade maior) listada em `docs/fase3-oportunidades.md`. O grupo de B2B foi dividido em 4 sub-grupos (Modelos, Membros/Acesso, Cobrança, Painel) porque, diferente de qualquer grupo da Fase 2, ele sozinho somaria 16 tasks tocando schema, API, e-mail, billing e UI — grande demais para um PR revisável.
+Critério de agrupamento: cada grupo corresponde a uma funcionalidade (ou a uma fatia coesa de uma funcionalidade maior) listada em `docs/fase3-oportunidades.md`.
+
+> **B2B despriorizado (2026-06-21):** os 4 sub-grupos de B2B (Modelos, Membros/Acesso, Cobrança, Painel — TASK-151 a TASK-166, antigos Grupos 2 a 5) foram retirados da execução ativa. As tasks correspondentes foram movidas para `.agent/tasks/deprecated/`, e os prompts de execução ficam preservados na seção **"Grupos despriorizados — B2B"** ao final deste documento. Não é cancelamento — é decisão de priorização, pendente de validar a demanda real de clientes corporativos com o cliente do projeto (ver `.agent/prd/PRD.md` seção 14.6). Os números de grupo (2 a 5) ficam reservados para esse spec e não são reaproveitados pelos grupos ativos abaixo.
 
 ## Como usar este documento
 
@@ -10,24 +12,19 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 
 **Regra geral para todos os grupos**: o agente abre o PR para revisão humana — **não mergeia sozinho**. Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 
-**Regra específica da Fase 3**: a demanda real de B2B (Grupos 2 a 5) ainda **não foi validada com o cliente** (ver `.agent/prd/PRD.md` seção 14.6). Antes de iniciar qualquer um dos 4 sub-grupos de B2B, confirme com o stakeholder do projeto que a direção continua válida — não é um bloqueio técnico, é um bloqueio de produto.
-
 ## Ordem de execução entre grupos
 
-1. **Grupo 0 (pré-requisitos) é bloqueante** — todos os outros grupos dependem dele.
-2. Depois do Grupo 0, a maioria dos grupos pode ser feita em paralelo (por agentes/desenvolvedores diferentes), com as seguintes exceções:
-   - Os 4 sub-grupos de B2B são **sequenciais entre si**: Grupo 3 depende do Grupo 2 mesclado; Grupo 4 depende dos Grupos 2 e 3 mesclados; Grupo 5 depende dos Grupos 3 e 4 mesclados.
-   - O **Grupo 6 (Trilhas e bundles)** depende do **Grupo 1 (Pix e Boleto)** já estar mesclado em `main`, porque a TASK-172 reaproveita o `payment_method_types` habilitado na TASK-147.
+1. **Grupo 0 (pré-requisitos) é bloqueante** — todos os outros grupos ativos dependem dele.
+2. Depois do Grupo 0, todos os grupos ativos podem ser feitos em paralelo (por agentes/desenvolvedores diferentes), com uma exceção:
+   - O **Grupo 6 (Trilhas e bundles)** depende do **Grupo 1 (Boleto)** já estar mesclado em `main`, porque a TASK-172 reaproveita o `payment_method_types` habilitado na TASK-147.
 3. Dentro de cada grupo, as tasks devem ser feitas na ordem listada — a ordem já respeita as `dependencies` declaradas em cada `TASK-X.json`.
+4. Os Grupos 2 a 5 (B2B) estão despriorizados e fora desta ordem de execução — ver "Grupos despriorizados — B2B" ao final deste documento antes de retomá-los.
 
 | # | Grupo | Tasks | Depende de | Branch sugerida |
 |---|---|---|---|---|
 | 0 | Pré-requisitos da Fase 3 | TASK-146 | — | (sem PR de código) |
-| 1 | Pix e Boleto via Stripe | TASK-147 a 150 | Grupo 0 | `feat/fase3-pix-boleto` |
-| 2 | B2B — Modelos de dados | TASK-151 a 154 | Grupo 0 | `feat/fase3-b2b-modelos` |
-| 3 | B2B — Membros, convites e acesso | TASK-155 a 161, 166 | Grupo 2 | `feat/fase3-b2b-membros` |
-| 4 | B2B — Cobrança por seat | TASK-162 a 163 | Grupo 2 e 3 | `feat/fase3-b2b-cobranca` |
-| 5 | B2B — Painel da organização | TASK-164 a 165 | Grupo 3 e 4 | `feat/fase3-b2b-painel` |
+| 1 | Boleto via Stripe (Pix adiado) | TASK-147 a 150 | Grupo 0 | `feat/fase3-boleto` |
+| 2-5 | ~~B2B — Modelos, Membros, Cobrança, Painel~~ | TASK-151 a 166 | — | **despriorizado** — ver seção ao final |
 | 6 | Trilhas e bundles de cursos | TASK-167 a 173 | Grupo 0 **e Grupo 1** | `feat/fase3-trilhas-bundles` |
 | 7 | Conteúdo programado (drip content) | TASK-174 a 178 | Grupo 0 | `feat/fase3-conteudo-programado` |
 | 8 | Testes E2E com Playwright | TASK-179 a 184 | Grupo 0 | `feat/fase3-testes-e2e` |
@@ -53,8 +50,10 @@ Esta task verifica os pré-requisitos da Fase 3 antes que qualquer outro grupo d
 1. Adicionar ao `.env.local` (SOMENTE placeholders, nunca valores reais): `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`,
    `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN`,
    `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`.
-2. Confirmar manualmente no Stripe Dashboard que Pix e Boleto estão habilitados como payment methods para a
-   conta (BRL/BR). Se não estiverem, apenas reporte — não é algo que se resolve por código.
+2. Confirmar manualmente no Stripe Dashboard que Boleto está habilitado como payment method para a conta
+   (BRL/BR). Se não estiver, apenas reporte — não é algo que se resolve por código. Pix foi adiado desta
+   rodada (exige convite da Stripe para contas BR, não é configuração direta de Dashboard — ver
+   `docs/pix-habilitacao.md`); não verificar/bloquear por causa dele aqui.
 3. Criar (ou confirmar que já existe) um produto B2B com dois preços recorrentes por seat (mensal e anual) no
    Stripe Dashboard, e preencher os Price IDs no `.env.local`.
 4. Confirmar se a integração Upstash Redis foi adicionada ao projeto via Vercel Marketplace. Se ainda não foi,
@@ -71,41 +70,48 @@ paralelo (ex: Grupo 1, Grupo 6) não fique bloqueado por algo que só afeta os G
 
 ---
 
-## Grupo 1 — Pix e Boleto via Stripe
+## Grupo 1 — Boleto via Stripe (Pix adiado)
 
 **Tasks**: TASK-147, TASK-148, TASK-149, TASK-150
 **Depende de**: Grupo 0
 
+> **Pix foi adiado desta rodada.** Habilitar Pix para contas Stripe sediadas no Brasil exige convite da própria
+> Stripe — não é um toggle de Dashboard — e o time ainda não solicitou/recebeu esse convite. Ver
+> `docs/pix-habilitacao.md` para o passo a passo de solicitação e os pontos exatos do código a reverter quando
+> o convite for concedido (aqui em TASK-147/148/149 e também em TASK-172, no Grupo 6). Este grupo cobre **só
+> Boleto**.
+
 ### Prompt para a IA
 
 ```
-Você vai implementar o grupo "Pix e Boleto via Stripe" da Fase 3 da Plataforma de Cursos (Next.js 16 App
-Router + Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar — eles documentam os
-padrões obrigatórios do projeto (rotas, Zod v4, Prisma, webhooks Stripe).
+Você vai implementar o grupo "Boleto via Stripe" da Fase 3 da Plataforma de Cursos (Next.js 16 App Router +
+Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar — eles documentam os padrões
+obrigatórios do projeto (rotas, Zod v4, Prisma, webhooks Stripe).
 
-Contexto: hoje o checkout só aceita cartão de crédito. Pix e Boleto são relevantes porque parte significativa
-do público brasileiro não tem ou prefere não usar cartão para pagamento. A complicação técnica é que ambos são
-métodos de pagamento ASSÍNCRONOS — diferente do cartão, a confirmação não chega no evento
-`checkout.session.completed`, chega depois em `checkout.session.async_payment_succeeded` (ou `_failed`). O
-webhook atual (`src/lib/stripe-handlers.ts`) não trata isso e, sem o tratamento certo, a matrícula do aluno
-nunca aconteceria para quem paga com Pix/Boleto.
+Contexto: hoje o checkout só aceita cartão de crédito. Boleto é relevante porque parte significativa do
+público brasileiro não tem ou prefere não usar cartão para pagamento. (Pix foi adiado desta rodada — exige
+convite da Stripe para contas BR, ver `docs/pix-habilitacao.md` — não implemente Pix neste grupo.) A
+complicação técnica é que Boleto é um método de pagamento ASSÍNCRONO — diferente do cartão, a confirmação não
+chega no evento `checkout.session.completed`, chega depois em `checkout.session.async_payment_succeeded` (ou
+`_failed`). O webhook atual (`src/lib/stripe-handlers.ts`) não trata isso e, sem o tratamento certo, a
+matrícula do aluno nunca aconteceria para quem paga com Boleto.
 
 Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/TASK-<id>.json antes de codar):
-1. TASK-147 — Habilitar Pix e Boleto na Checkout Session de compra avulsa (mode: 'payment')
+1. TASK-147 — Habilitar Boleto na Checkout Session de compra avulsa (mode: 'payment')
 2. TASK-148 — Tratar webhooks de pagamento assíncrono (async_payment_succeeded/failed)
-3. TASK-149 — Página de retorno com estado "pagamento pendente" para Pix/Boleto
+3. TASK-149 — Página de retorno com estado "pagamento pendente" para Boleto
 4. TASK-150 — Investigar e decidir sobre Boleto na assinatura recorrente (mode: 'subscription')
 
-Dependências externas: TASK-146 (Grupo 0) deve ter confirmado Pix/Boleto habilitados na conta Stripe.
+Dependências externas: TASK-146 (Grupo 0) deve ter confirmado Boleto habilitado na conta Stripe.
 
 Atenção a padrões do projeto:
-- Pix e Boleto só têm suporte garantido em `mode: 'payment'` (compra avulsa, `src/app/api/courses/[slug]/
-  purchase/route.ts`) — NÃO assuma que funcionam em `mode: 'subscription'` sem confirmar na documentação
+- Boleto só tem suporte garantido em `mode: 'payment'` (compra avulsa, `src/app/api/courses/[slug]/
+  purchase/route.ts`) — NÃO assuma que funciona em `mode: 'subscription'` sem confirmar na documentação
   oficial do Stripe primeiro (é exatamente o objetivo da TASK-150, que é uma investigação, não uma
   implementação garantida).
 - Em `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), o branch `session.mode === 'payment'`
   hoje assume pagamento confirmado. Ajuste para só matricular quando `session.payment_status === 'paid'`;
-  para `unpaid` (caso comum de Pix/Boleto recém-criado), aguarde o evento assíncrono da TASK-148.
+  para `unpaid` (caso comum de Boleto recém-criado), aguarde o evento assíncrono da TASK-148.
 - Webhooks Stripe podem ser reentregues — use `upsert`, nunca `create` puro.
 - Em produção, novos tipos de evento precisam ser habilitados manualmente em Developers → Webhooks no Stripe
   Dashboard (localmente, via `stripe listen`, já chegam todos os eventos automaticamente) — mesmo padrão já
@@ -113,9 +119,10 @@ Atenção a padrões do projeto:
 - A TASK-150 pode legitimamente concluir como "não habilitar boleto recorrente nesta rodada" — não force a
   feature se a documentação não confirmar suporte adequado ou se o comportamento de `past_due` durante a
   janela de compensação (1-3 dias úteis) se mostrar problemático no teste.
+- Não inclua `pix` em `payment_method_types` — está fora de escopo deste grupo (ver `docs/pix-habilitacao.md`).
 
 Como trabalhar:
-1. Crie a branch `feat/fase3-pix-boleto` a partir de `main` atualizada.
+1. Crie a branch `feat/fase3-boleto` a partir de `main` atualizada.
 2. Implemente TASK-147, depois TASK-148, depois TASK-149, nessa ordem — a TASK-149 só faz sentido com o
    webhook assíncrono já funcionando.
 3. Implemente a TASK-150 por último — é investigação e pode ser feita de forma independente das outras três.
@@ -123,275 +130,20 @@ Como trabalhar:
    a próxima.
 5. Valide o código: `npx tsc --noEmit` e `npx vitest run` devem passar sem erros novos.
 6. Suba o dev server e rode `stripe listen --forward-to localhost:3000/api/webhooks/stripe` em paralelo. Teste
-   manualmente: complete uma compra avulsa de curso escolhendo Pix em modo teste, confirme que a página de
-   retorno mostra "pagamento pendente", simule a confirmação do Pix (o Stripe permite isso em modo teste), e
-   confirme que a matrícula é criada e a página passa a refletir acesso liberado. Repita o teste com Boleto.
+   manualmente: complete uma compra avulsa de curso escolhendo Boleto em modo teste, confirme que a página de
+   retorno mostra "pagamento pendente", marque o boleto como pago (o Stripe permite isso em modo teste), e
+   confirme que a matrícula é criada e a página passa a refletir acesso liberado.
 7. Marque `"pass": true` em cada step dos quatro JSONs de task e `"passes": true` nas entradas correspondentes
    de `.agent/tasks.json`, só depois de validar de fato.
 8. Commit(s) com mensagens claras, seguindo o estilo dos commits existentes no repositório (confira `git log`).
-9. Abra um PR para `main` com `gh pr create`. Título: "feat: Pix e Boleto na compra avulsa de curso (TASK-147 a
+9. Abra um PR para `main` com `gh pr create`. Título: "feat: Boleto na compra avulsa de curso (TASK-147 a
    150)". Na descrição, liste as 4 tasks concluídas (incluindo a decisão tomada na TASK-150, com justificativa),
    o que foi testado manualmente, e link para a seção 14.1 do PRD (`.agent/prd/PRD.md`). Não faça merge — deixe
    para revisão humana.
 
 Definition of Done: acceptanceCriteria de TASK-147 a 150 atendidas e marcadas; decisão da TASK-150 documentada
-no PRD com justificativa; fluxo de compra avulsa com Pix e com Boleto testado manualmente até a matrícula ser
-criada; tsc e vitest passando; PR aberto.
-```
-
----
-
-## Grupo 2 — B2B: Modelos de dados
-
-**Tasks**: TASK-151, TASK-152, TASK-153, TASK-154
-**Depende de**: Grupo 0
-
-### Prompt para a IA
-
-```
-Você vai implementar o grupo "B2B — Modelos de dados" da Fase 3 da Plataforma de Cursos (Next.js 16 + Prisma
-7 + Neon). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
-
-ATENÇÃO — confirme antes de começar: a demanda real de clientes corporativos (B2B) ainda NÃO foi validada com
-o cliente do projeto. Isso está documentado em `.agent/prd/PRD.md` seção 14.6. Esta é uma decisão de produto,
-não técnica — se o stakeholder ainda não confirmou que vale investir nisso, pare e avise antes de codar.
-Assumindo que a direção foi confirmada, prossiga normalmente.
-
-Contexto: hoje `UserSubscription` é 1:1 com `User` — uma assinatura por pessoa. Este grupo cria a base de
-dados para licenciamento corporativo: uma `Organization` com seats contratados, membros vinculados, convites
-por e-mail e uma assinatura própria da organização (cobrança por seat, não por pessoa).
-
-Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
-1. TASK-151 — Modelo Organization
-2. TASK-152 — Modelo OrganizationMember (decisão de escopo: 1 usuário pertence a no máximo 1 organização)
-3. TASK-153 — Modelo OrganizationInvite (convite por e-mail, com token seguro e expiração de 7 dias)
-4. TASK-154 — Modelo OrganizationSubscription (análogo a UserSubscription, mas com `seats` em vez de 1:1)
-
-Dependências externas: nenhuma além do Grupo 0 — pode começar imediatamente após a validação de produto acima.
-
-Atenção a padrões do projeto:
-- Os 4 models são interdependentes — adicione todos ao `prisma/schema.prisma` antes de rodar a migration, em
-  uma única migration (`npx prisma migrate dev --name add_organization_models`), para evitar estados
-  intermediários inválidos.
-- `OrganizationMember.userId` é `@unique` — essa é a decisão deliberada de v1 (sem multi-tenancy de usuário).
-  Não modele como many-to-many.
-- `OrganizationSubscription` reaproveita os enums `SubscriptionStatus` e `BillingCycle` já existentes — não
-  duplique enums.
-- Gere o token de convite com `crypto.randomBytes(32).toString('hex')` (Node `crypto`), nunca um valor
-  previsível como UUID sequencial ou timestamp.
-- Reaproveite `generateSlug`/`getUniqueSlug` de `src/lib/utils/slug.ts` para o slug da organização — mesmo
-  helper já usado em `Course.slug`.
-
-Como trabalhar:
-1. Crie a branch `feat/fase3-b2b-modelos` a partir de `main` atualizada.
-2. Implemente as 4 tasks na ordem listada, adicionando todos os models ao schema antes de migrar.
-3. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
-4. Rode `npx prisma migrate dev --name add_organization_models` e `npx prisma generate`.
-5. Valide: `npx tsc --noEmit` sem erros novos.
-6. Não há fluxo de UI para testar neste grupo — valide via Prisma Studio (`npx prisma studio`) ou um script
-   pontual que cria uma `Organization`, um `OrganizationMember` e um `OrganizationInvite` de teste, confirmando
-   que as constraints (`@unique`, `@@unique`) funcionam como esperado.
-7. Marque `"pass": true` nos steps dos quatro JSONs de task e `"passes": true` em `.agent/tasks.json`.
-8. Commit(s) e abra PR com `gh pr create`. Título: "feat: modelos de dados para licenciamento B2B (TASK-151 a
-   154)". Descrição explicando os 4 models, as decisões de escopo (1 organização por usuário, seats fixados no
-   plano), e link para a seção 14.1 e 14.6 do PRD.
-
-Definition of Done: acceptanceCriteria de TASK-151 a 154 atendidas e marcadas; migration aplicada sem afetar
-tabelas existentes; constraints validadas manualmente; PR aberto.
-```
-
----
-
-## Grupo 3 — B2B: Membros, convites e acesso
-
-**Tasks**: TASK-155, TASK-156, TASK-157, TASK-158, TASK-159, TASK-160, TASK-161, TASK-166
-**Depende de**: Grupo 2 (mesclado)
-
-### Prompt para a IA
-
-```
-Você vai implementar o grupo "B2B — Membros, convites e acesso" da Fase 3 da Plataforma de Cursos (Next.js 16
-App Router + Prisma 7). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
-
-PRÉ-REQUISITO OBRIGATÓRIO: confirme que o grupo "B2B — Modelos de dados" (TASK-151 a 154) já está mesclado em
-`main` antes de começar — todas as tasks deste grupo dependem dos models `Organization`, `OrganizationMember`,
-`OrganizationInvite` e `OrganizationSubscription`. Se não estiver mesclado, pare e avise.
-
-Contexto: este grupo entrega o ciclo completo de gestão de membros de uma organização: criar a organização,
-convidar por e-mail (com ou sem conta prévia), aceitar o convite, remover membro, e a extensão do controle de
-acesso para que membros de organização com assinatura ativa tenham acesso de nível premium ao catálogo — tudo
-isso ANTES de existir cobrança (a cobrança é o Grupo 4, separado).
-
-Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
-1. TASK-155 — Estender checkLessonAccess/checkCourseAccess em src/lib/access.ts para organizações
-2. TASK-156 — POST /api/organizations cria organização (usuário se torna owner)
-3. TASK-157 — GET /api/organizations/me retorna dados da organização do usuário
-4. TASK-159 — E-mail transacional de convite (template + função de envio)
-5. TASK-158 — POST /api/organizations/me/invites convida membro por e-mail
-6. TASK-160 — Fluxo de aceite de convite (/convite/[token])
-7. TASK-161 — DELETE /api/organizations/me/members/[userId] remove membro
-8. TASK-166 — Autorização por papel (owner vs member) nos endpoints acima
-
-Nota de ordem: TASK-159 (e-mail) vem antes de TASK-158 (que dispara o e-mail) porque o template/função
-precisam existir primeiro. TASK-166 vem por último porque endurece a autorização dos endpoints já
-implementados nos passos anteriores — implemente os endpoints já pensando em checar o papel, mas centralize e
-teste a regra explicitamente nesta task final.
-
-Dependências externas: Grupo 2 (B2B — Modelos de dados) mesclado em `main` — ver acima.
-
-Atenção a padrões do projeto:
-- `checkLessonAccess`/`checkCourseAccess` (`src/lib/access.ts`) são a fonte única de verdade de controle de
-  acesso — a extensão para organizações deve ser uma checagem adicional, sem duplicar ou quebrar a lógica já
-  existente de assinatura individual. As duas funções precisam da mesma checagem (evite implementar só em uma).
-- Siga o padrão de `requireRole` (`src/lib/auth.ts`, retorno `instanceof NextResponse`) ao criar o helper
-  `requireOrgOwner` da TASK-166 — não invente um padrão de erro diferente.
-- `GET /api/organizations/me` deve retornar 404 (não 403) para usuário sem organização — não revele a
-  existência de organizações de terceiros.
-- O fluxo de convite (TASK-160) precisa tratar 3 estados na página `/convite/[token]`: usuário deslogado
-  (redirecionar para `/cadastro` preservando o destino), e-mail divergente do convite, e convite
-  expirado/já aceito. Não implemente só o caminho feliz.
-- Siga o padrão de templates já existentes em `src/lib/email-templates.ts` para o e-mail de convite da
-  TASK-159, e envolva o envio em try/catch — falha de e-mail não pode impedir a criação do convite.
-
-Como trabalhar:
-1. Confirme o pré-requisito (Grupo 2 mesclado) antes de criar a branch.
-2. Crie a branch `feat/fase3-b2b-membros` a partir de `main` atualizada (já incluindo o Grupo 2).
-3. Implemente as 8 tasks na ordem listada acima.
-4. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
-5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
-6. Teste manualmente o fluxo completo com dois usuários de teste: usuário A cria organização (torna-se owner),
-   convida o e-mail do usuário B (que ainda não tem conta), usuário B recebe o link, cria conta a partir do
-   convite e é adicionado como member; confirme que B aparece na lista de membros. Teste a remoção de B pelo
-   owner. Teste que B (como member) recebe 403 ao tentar convidar ou remover alguém. Teste que um usuário sem
-   organização recebe 404 em `GET /api/organizations/me`.
-7. Marque `"pass": true` nos steps dos oito JSONs de task e `"passes": true` em `.agent/tasks.json`.
-8. Commit(s) e abra PR com `gh pr create`. Título: "feat: gestão de membros e convites de organização B2B
-   (TASK-155 a 161, 166)". Descrição com o fluxo de dois usuários testado, os casos de autorização validados, e
-   link para a seção 14.1 e 14.4 do PRD.
-
-Definition of Done: acceptanceCriteria de TASK-155 a 161 e 166 atendidas e marcadas; fluxo de convite e
-remoção testado de ponta a ponta com dois usuários; autorização por papel validada; PR aberto.
-```
-
----
-
-## Grupo 4 — B2B: Cobrança por seat
-
-**Tasks**: TASK-162, TASK-163
-**Depende de**: Grupo 2 e Grupo 3 (mesclados)
-
-### Prompt para a IA
-
-```
-Você vai implementar o grupo "B2B — Cobrança por seat" da Fase 3 da Plataforma de Cursos (Next.js 16 + Prisma
-7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
-
-PRÉ-REQUISITO OBRIGATÓRIO: confirme que os grupos "B2B — Modelos de dados" (TASK-151 a 154) e "B2B — Membros,
-convites e acesso" (TASK-155 a 161, 166) já estão mesclados em `main`. A TASK-162 depende de `GET /api/
-organizations/me` (TASK-157) e a TASK-163 depende da `OrganizationSubscription` e do checkout já existirem.
-
-Contexto: este grupo conecta a organização ao Stripe Billing, cobrando por quantidade de seats (`quantity` no
-line item da Checkout Session), em vez do fluxo 1:1 de assinatura individual já existente.
-
-Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
-1. TASK-162 — Checkout de assinatura B2B por seat (POST /api/organizations/me/checkout)
-2. TASK-163 — Estender webhooks Stripe (src/lib/stripe-handlers.ts) para tratar OrganizationSubscription
-
-Dependências externas: Grupo 2 e Grupo 3 mesclados — ver acima.
-
-Atenção a padrões do projeto:
-- `src/lib/stripe-handlers.ts` já segue a API version `2026-05-27.dahlia` — `current_period_start`/`end`
-  ficam em `subscription.items.data[0]`, e o ID da subscription em invoices vem de
-  `invoice.parent.subscription_details`, NUNCA de `invoice.subscription` (ver AGENTS.md). Essa armadilha vale
-  igualmente para `OrganizationSubscription`.
-- Diferencie assinatura individual de assinatura de organização pelo metadata: `session.metadata.userId` (já
-  existente) vs `session.metadata.organizationId` (novo, sem `userId`) — NÃO assuma que toda session de
-  `mode: 'subscription'` é individual.
-- O `quantity` do line item é o que define os `seats` contratados — não recalcule isso manualmente, leia de
-  `subscription.items.data[0].quantity`.
-- `Organization.seatLimit` deve ser sincronizado com o `quantity` da subscription sempre que ela for
-  criada/atualizada — isso cobre o caso de o seatLimit ser ajustado direto no Stripe Dashboard.
-- Crie um helper que localiza a subscription por `stripeSubscriptionId` tentando `UserSubscription` e depois
-  `OrganizationSubscription`, e reaproveite esse helper nos handlers de invoice e de subscription
-  updated/deleted já existentes, em vez de duplicar a lógica de busca.
-
-Como trabalhar:
-1. Confirme os dois pré-requisitos (Grupos 2 e 3 mesclados) antes de criar a branch.
-2. Crie a branch `feat/fase3-b2b-cobranca` a partir de `main` atualizada.
-3. Implemente TASK-162, depois TASK-163.
-4. Confira as acceptanceCriteria de cada task.
-5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
-6. Teste manualmente com Stripe CLI (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`): como
-   owner de uma organização de teste, inicie o checkout com 5 seats, complete o pagamento em modo teste, e
-   confirme que `OrganizationSubscription` é criada com `seats: 5` e `Organization.seatLimit: 5`. Dispare
-   `stripe trigger invoice.payment_failed` e `customer.subscription.deleted` para a mesma subscription e
-   confirme que o status é atualizado corretamente SEM afetar nenhuma `UserSubscription` existente.
-7. Marque `"pass": true` nos steps dos dois JSONs de task e `"passes": true` em `.agent/tasks.json`.
-8. Commit(s) e abra PR com `gh pr create`. Título: "feat: cobrança B2B por seat via Stripe (TASK-162 a 163)".
-   Descrição com o teste end-to-end (checkout → webhook → seatLimit sincronizado) e link para a seção 14.1 do
-   PRD.
-
-Definition of Done: acceptanceCriteria de TASK-162 e 163 atendidas e marcadas; checkout e os 4 eventos de
-webhook (completed, payment_succeeded, payment_failed, deleted) testados para organização sem regressão na
-assinatura individual; PR aberto.
-```
-
----
-
-## Grupo 5 — B2B: Painel da organização
-
-**Tasks**: TASK-164, TASK-165
-**Depende de**: Grupo 3 e Grupo 4 (mesclados)
-
-### Prompt para a IA
-
-```
-Você vai implementar o grupo "B2B — Painel da organização" da Fase 3 da Plataforma de Cursos (Next.js 16 App
-Router + Prisma 7). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
-
-PRÉ-REQUISITO OBRIGATÓRIO: confirme que os grupos "B2B — Membros, convites e acesso" (TASK-155 a 161, 166) e
-"B2B — Cobrança por seat" (TASK-162 a 163) já estão mesclados em `main`. Este grupo é só a camada de UI sobre
-os endpoints já existentes — não deve criar nenhum endpoint novo de backend além do portal descrito abaixo.
-
-Contexto: este é o último grupo de B2B — a página onde o owner gerencia a organização (membros, seats,
-assinatura) e a página pública que apresenta o plano B2B para visitantes.
-
-Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
-1. TASK-164 — Painel /organizacao (membros, seats, convite, remoção, portal de assinatura)
-2. TASK-165 — CTA "Para empresas" e página /planos/empresas
-
-Dependências externas: Grupo 3 e Grupo 4 mesclados — ver acima.
-
-Atenção a padrões do projeto:
-- Adicione `/organizacao` ao matcher de `src/proxy.ts` (igual já existe para `/dashboard/:path*`) — sem isso a
-  página fica acessível sem autenticação.
-- A TASK-164 inclui um endpoint novo e pequeno, `POST /api/organizations/me/portal`, análogo a `POST /api/
-  subscriptions/portal` mas usando `organization.stripeCustomerId` — siga exatamente esse padrão existente, só
-  restrinja a `owner` (reaproveite o helper `requireOrgOwner` da TASK-166).
-- Reaproveite componentes existentes: `<lui-tag>` para badge de papel (owner/member), o padrão visual de
-  `UpgradePrompt`/cards do design system para os CTAs.
-- A UI deve refletir os 3 papéis possíveis: sem organização (CTA criar/aceitar convite), member (lista
-  somente leitura), owner (lista com controles de convite/remoção/gestão de assinatura) — não esconda isso só
-  no backend, a UI também precisa diferenciar visualmente.
-
-Como trabalhar:
-1. Confirme os dois pré-requisitos (Grupos 3 e 4 mesclados) antes de criar a branch.
-2. Crie a branch `feat/fase3-b2b-painel` a partir de `main` atualizada.
-3. Implemente TASK-164, depois TASK-165.
-4. Confira as acceptanceCriteria de cada task.
-5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
-6. Suba o dev server e teste manualmente nos três papéis: sem organização, member, e owner (use os usuários de
-   teste já criados no Grupo 3). Confirme que o owner consegue abrir o Stripe Customer Portal da organização a
-   partir do painel. Confirme o fluxo completo a partir de `/planos/empresas`: criar organização e iniciar
-   checkout com N seats escolhidos.
-7. Marque `"pass": true` nos steps dos dois JSONs de task e `"passes": true` em `.agent/tasks.json`.
-8. Commit(s) e abra PR com `gh pr create`. Título: "feat: painel de gestão e página pública de planos B2B
-   (TASK-164 a 165)". Descrição com os três papéis testados no navegador e link para a seção 14.1 e 14.4 do
-   PRD. Esta é a última peça de B2B — mencione no PR que o grupo todo (Grupos 2 a 5) está completo.
-
-Definition of Done: acceptanceCriteria de TASK-164 e 165 atendidas e marcadas; os três papéis (sem
-organização, member, owner) testados no navegador; fluxo completo de /planos/empresas até o checkout validado;
-PR aberto.
+no PRD com justificativa; fluxo de compra avulsa com Boleto testado manualmente até a matrícula ser criada;
+tsc e vitest passando; PR aberto.
 ```
 
 ---
@@ -399,7 +151,7 @@ PR aberto.
 ## Grupo 6 — Trilhas e bundles de cursos
 
 **Tasks**: TASK-167, TASK-168, TASK-169, TASK-170, TASK-171, TASK-172, TASK-173
-**Depende de**: Grupo 0 **e Grupo 1 (Pix e Boleto) já mesclado em `main`**
+**Depende de**: Grupo 0 **e Grupo 1 (Boleto) já mesclado em `main`**
 
 ### Prompt para a IA
 
@@ -407,10 +159,11 @@ PR aberto.
 Você vai implementar o grupo "Trilhas e bundles de cursos" da Fase 3 da Plataforma de Cursos (Next.js 16 +
 Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
 
-PRÉ-REQUISITO OBRIGATÓRIO: confirme que o grupo "Pix e Boleto via Stripe" (TASK-147 a 150) já está mesclado em
-`main` antes de começar — a TASK-172 deste grupo reaproveita o `payment_method_types: ['card', 'pix',
-'boleto']` habilitado na TASK-147. Se não estiver mesclado, implemente a TASK-172 só com cartão e deixe um
-TODO claro, ou espere o merge — não duplique a decisão de payment methods.
+PRÉ-REQUISITO OBRIGATÓRIO: confirme que o grupo "Boleto via Stripe" (TASK-147 a 150) já está mesclado em
+`main` antes de começar — a TASK-172 deste grupo reaproveita o `payment_method_types: ['card', 'boleto']`
+habilitado na TASK-147. Se não estiver mesclado, implemente a TASK-172 só com cartão e deixe um TODO claro, ou
+espere o merge — não duplique a decisão de payment methods. Pix está fora de escopo aqui também — foi adiado
+da Fase 3 (ver `docs/pix-habilitacao.md`).
 
 Contexto: a estrutura de catálogo hoje é plana — um curso por vez, sem relação entre eles. Este grupo permite
 agrupar cursos relacionados em uma trilha (sequência com progressão) e, opcionalmente, vender essa trilha como
@@ -426,7 +179,7 @@ Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json
 6. TASK-172 — Checkout de bundle de trilha (POST /api/tracks/[slug]/purchase)
 7. TASK-173 — Matrícula em lote nos cursos da trilha ao comprar o bundle (webhook)
 
-Dependências externas: Grupo 1 (Pix e Boleto) mesclado — ver acima.
+Dependências externas: Grupo 1 (Boleto) mesclado — ver acima.
 
 Atenção a padrões do projeto:
 - Reordenação e remoção de cursos da trilha devem seguir EXATAMENTE o mesmo padrão já usado em módulos:
@@ -436,7 +189,7 @@ Atenção a padrões do projeto:
   mesmos padrões de inputs nativos com Tailwind e de refetch pós-mutação via `onUpdate` callback.
 - Publicar uma trilha exige pelo menos 2 cursos associados — valide isso no `PATCH` do endpoint, não só na UI.
 - O checkout de bundle (TASK-172) é `mode: 'payment'`, igual à compra avulsa individual — inclua
-  `payment_method_types: ['card', 'pix', 'boleto']` desde já.
+  `payment_method_types: ['card', 'boleto']` desde já (Pix adiado, ver `docs/pix-habilitacao.md`).
 - O webhook de matrícula em lote (TASK-173) deve rotear por `session.metadata.trackId` ANTES de
   `session.metadata.courseId` em `handleCheckoutSessionCompleted`, e usar `upsert` por curso (idempotente,
   reentrega de webhook não pode duplicar nem falhar).
@@ -449,8 +202,8 @@ Como trabalhar:
 5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
 6. Teste manualmente: crie uma trilha com 3 cursos publicados existentes via `/admin/trilhas`, reordene-os,
    publique a trilha, marque como bundle com um preço de teste, acesse `/trilhas/[slug]` como aluno, compre o
-   bundle em modo teste (cartão, depois repita com Pix), e confirme que o webhook matricula o aluno nos 3
-   cursos de uma vez.
+   bundle em modo teste com cartão, depois repita com Boleto, e confirme que o webhook matricula o aluno nos
+   3 cursos de uma vez.
 7. Marque `"pass": true` nos steps dos sete JSONs de task e `"passes": true` em `.agent/tasks.json`.
 8. Commit(s) e abra PR com `gh pr create`. Título: "feat: trilhas e bundles de cursos (TASK-167 a 173)".
    Descrição com o fluxo de ponta a ponta testado (criação → publicação → compra → matrícula em lote) e link
@@ -741,3 +494,263 @@ Como trabalhar:
 Definition of Done: acceptanceCriteria de TASK-191 a 195 atendidas e marcadas; os 4 eventos-chave confirmados
 na tabela `ProductEvent`; seção de funil exibindo dados corretos no AdminDashboard; PR aberto.
 ```
+
+---
+
+## Grupos despriorizados — B2B (Grupos 2 a 5)
+
+> **Despriorizado em 2026-06-21.** A demanda real de clientes corporativos ainda não foi validada com o cliente do projeto (ver `.agent/prd/PRD.md` seção 14.6) — em vez de manter estes 4 sub-grupos na rotação ativa só com essa ressalva, eles foram retirados da ordem de execução da seção acima. As tasks TASK-151 a TASK-166 foram movidas para `.agent/tasks/deprecated/`. Os prompts abaixo continuam completos e utilizáveis sem alteração — bastam ser retomados (e os specFilePath em `.agent/tasks.json` apontados de volta para `.agent/tasks/`) se a direção for confirmada com o stakeholder. **Antes de retomar qualquer um destes 4 sub-grupos, confirme a demanda com o stakeholder do projeto — não é um bloqueio técnico, é um bloqueio de produto.**
+
+## Grupo 2 — B2B: Modelos de dados
+
+**Tasks**: TASK-151, TASK-152, TASK-153, TASK-154
+**Depende de**: Grupo 0
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "B2B — Modelos de dados" da Fase 3 da Plataforma de Cursos (Next.js 16 + Prisma
+7 + Neon). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
+
+ATENÇÃO — confirme antes de começar: a demanda real de clientes corporativos (B2B) ainda NÃO foi validada com
+o cliente do projeto. Isso está documentado em `.agent/prd/PRD.md` seção 14.6. Esta é uma decisão de produto,
+não técnica — se o stakeholder ainda não confirmou que vale investir nisso, pare e avise antes de codar.
+Assumindo que a direção foi confirmada, prossiga normalmente.
+
+Contexto: hoje `UserSubscription` é 1:1 com `User` — uma assinatura por pessoa. Este grupo cria a base de
+dados para licenciamento corporativo: uma `Organization` com seats contratados, membros vinculados, convites
+por e-mail e uma assinatura própria da organização (cobrança por seat, não por pessoa).
+
+Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
+1. TASK-151 — Modelo Organization
+2. TASK-152 — Modelo OrganizationMember (decisão de escopo: 1 usuário pertence a no máximo 1 organização)
+3. TASK-153 — Modelo OrganizationInvite (convite por e-mail, com token seguro e expiração de 7 dias)
+4. TASK-154 — Modelo OrganizationSubscription (análogo a UserSubscription, mas com `seats` em vez de 1:1)
+
+Dependências externas: nenhuma além do Grupo 0 — pode começar imediatamente após a validação de produto acima.
+
+Atenção a padrões do projeto:
+- Os 4 models são interdependentes — adicione todos ao `prisma/schema.prisma` antes de rodar a migration, em
+  uma única migration (`npx prisma migrate dev --name add_organization_models`), para evitar estados
+  intermediários inválidos.
+- `OrganizationMember.userId` é `@unique` — essa é a decisão deliberada de v1 (sem multi-tenancy de usuário).
+  Não modele como many-to-many.
+- `OrganizationSubscription` reaproveita os enums `SubscriptionStatus` e `BillingCycle` já existentes — não
+  duplique enums.
+- Gere o token de convite com `crypto.randomBytes(32).toString('hex')` (Node `crypto`), nunca um valor
+  previsível como UUID sequencial ou timestamp.
+- Reaproveite `generateSlug`/`getUniqueSlug` de `src/lib/utils/slug.ts` para o slug da organização — mesmo
+  helper já usado em `Course.slug`.
+
+Como trabalhar:
+1. Crie a branch `feat/fase3-b2b-modelos` a partir de `main` atualizada.
+2. Implemente as 4 tasks na ordem listada, adicionando todos os models ao schema antes de migrar.
+3. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
+4. Rode `npx prisma migrate dev --name add_organization_models` e `npx prisma generate`.
+5. Valide: `npx tsc --noEmit` sem erros novos.
+6. Não há fluxo de UI para testar neste grupo — valide via Prisma Studio (`npx prisma studio`) ou um script
+   pontual que cria uma `Organization`, um `OrganizationMember` e um `OrganizationInvite` de teste, confirmando
+   que as constraints (`@unique`, `@@unique`) funcionam como esperado.
+7. Marque `"pass": true` nos steps dos quatro JSONs de task e `"passes": true` em `.agent/tasks.json`.
+8. Commit(s) e abra PR com `gh pr create`. Título: "feat: modelos de dados para licenciamento B2B (TASK-151 a
+   154)". Descrição explicando os 4 models, as decisões de escopo (1 organização por usuário, seats fixados no
+   plano), e link para a seção 14.1 e 14.6 do PRD.
+
+Definition of Done: acceptanceCriteria de TASK-151 a 154 atendidas e marcadas; migration aplicada sem afetar
+tabelas existentes; constraints validadas manualmente; PR aberto.
+```
+
+---
+
+## Grupo 3 — B2B: Membros, convites e acesso
+
+**Tasks**: TASK-155, TASK-156, TASK-157, TASK-158, TASK-159, TASK-160, TASK-161, TASK-166
+**Depende de**: Grupo 2 (mesclado)
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "B2B — Membros, convites e acesso" da Fase 3 da Plataforma de Cursos (Next.js 16
+App Router + Prisma 7). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
+
+PRÉ-REQUISITO OBRIGATÓRIO: confirme que o grupo "B2B — Modelos de dados" (TASK-151 a 154) já está mesclado em
+`main` antes de começar — todas as tasks deste grupo dependem dos models `Organization`, `OrganizationMember`,
+`OrganizationInvite` e `OrganizationSubscription`. Se não estiver mesclado, pare e avise.
+
+Contexto: este grupo entrega o ciclo completo de gestão de membros de uma organização: criar a organização,
+convidar por e-mail (com ou sem conta prévia), aceitar o convite, remover membro, e a extensão do controle de
+acesso para que membros de organização com assinatura ativa tenham acesso de nível premium ao catálogo — tudo
+isso ANTES de existir cobrança (a cobrança é o Grupo 4, separado).
+
+Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
+1. TASK-155 — Estender checkLessonAccess/checkCourseAccess em src/lib/access.ts para organizações
+2. TASK-156 — POST /api/organizations cria organização (usuário se torna owner)
+3. TASK-157 — GET /api/organizations/me retorna dados da organização do usuário
+4. TASK-159 — E-mail transacional de convite (template + função de envio)
+5. TASK-158 — POST /api/organizations/me/invites convida membro por e-mail
+6. TASK-160 — Fluxo de aceite de convite (/convite/[token])
+7. TASK-161 — DELETE /api/organizations/me/members/[userId] remove membro
+8. TASK-166 — Autorização por papel (owner vs member) nos endpoints acima
+
+Nota de ordem: TASK-159 (e-mail) vem antes de TASK-158 (que dispara o e-mail) porque o template/função
+precisam existir primeiro. TASK-166 vem por último porque endurece a autorização dos endpoints já
+implementados nos passos anteriores — implemente os endpoints já pensando em checar o papel, mas centralize e
+teste a regra explicitamente nesta task final.
+
+Dependências externas: Grupo 2 (B2B — Modelos de dados) mesclado em `main` — ver acima.
+
+Atenção a padrões do projeto:
+- `checkLessonAccess`/`checkCourseAccess` (`src/lib/access.ts`) são a fonte única de verdade de controle de
+  acesso — a extensão para organizações deve ser uma checagem adicional, sem duplicar ou quebrar a lógica já
+  existente de assinatura individual. As duas funções precisam da mesma checagem (evite implementar só em uma).
+- Siga o padrão de `requireRole` (`src/lib/auth.ts`, retorno `instanceof NextResponse`) ao criar o helper
+  `requireOrgOwner` da TASK-166 — não invente um padrão de erro diferente.
+- `GET /api/organizations/me` deve retornar 404 (não 403) para usuário sem organização — não revele a
+  existência de organizações de terceiros.
+- O fluxo de convite (TASK-160) precisa tratar 3 estados na página `/convite/[token]`: usuário deslogado
+  (redirecionar para `/cadastro` preservando o destino), e-mail divergente do convite, e convite
+  expirado/já aceito. Não implemente só o caminho feliz.
+- Siga o padrão de templates já existentes em `src/lib/email-templates.ts` para o e-mail de convite da
+  TASK-159, e envolva o envio em try/catch — falha de e-mail não pode impedir a criação do convite.
+
+Como trabalhar:
+1. Confirme o pré-requisito (Grupo 2 mesclado) antes de criar a branch.
+2. Crie a branch `feat/fase3-b2b-membros` a partir de `main` atualizada (já incluindo o Grupo 2).
+3. Implemente as 8 tasks na ordem listada acima.
+4. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
+5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
+6. Teste manualmente o fluxo completo com dois usuários de teste: usuário A cria organização (torna-se owner),
+   convida o e-mail do usuário B (que ainda não tem conta), usuário B recebe o link, cria conta a partir do
+   convite e é adicionado como member; confirme que B aparece na lista de membros. Teste a remoção de B pelo
+   owner. Teste que B (como member) recebe 403 ao tentar convidar ou remover alguém. Teste que um usuário sem
+   organização recebe 404 em `GET /api/organizations/me`.
+7. Marque `"pass": true` nos steps dos oito JSONs de task e `"passes": true` em `.agent/tasks.json`.
+8. Commit(s) e abra PR com `gh pr create`. Título: "feat: gestão de membros e convites de organização B2B
+   (TASK-155 a 161, 166)". Descrição com o fluxo de dois usuários testado, os casos de autorização validados, e
+   link para a seção 14.1 e 14.4 do PRD.
+
+Definition of Done: acceptanceCriteria de TASK-155 a 161 e 166 atendidas e marcadas; fluxo de convite e
+remoção testado de ponta a ponta com dois usuários; autorização por papel validada; PR aberto.
+```
+
+---
+
+## Grupo 4 — B2B: Cobrança por seat
+
+**Tasks**: TASK-162, TASK-163
+**Depende de**: Grupo 2 e Grupo 3 (mesclados)
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "B2B — Cobrança por seat" da Fase 3 da Plataforma de Cursos (Next.js 16 + Prisma
+7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
+
+PRÉ-REQUISITO OBRIGATÓRIO: confirme que os grupos "B2B — Modelos de dados" (TASK-151 a 154) e "B2B — Membros,
+convites e acesso" (TASK-155 a 161, 166) já estão mesclados em `main`. A TASK-162 depende de `GET /api/
+organizations/me` (TASK-157) e a TASK-163 depende da `OrganizationSubscription` e do checkout já existirem.
+
+Contexto: este grupo conecta a organização ao Stripe Billing, cobrando por quantidade de seats (`quantity` no
+line item da Checkout Session), em vez do fluxo 1:1 de assinatura individual já existente.
+
+Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
+1. TASK-162 — Checkout de assinatura B2B por seat (POST /api/organizations/me/checkout)
+2. TASK-163 — Estender webhooks Stripe (src/lib/stripe-handlers.ts) para tratar OrganizationSubscription
+
+Dependências externas: Grupo 2 e Grupo 3 mesclados — ver acima.
+
+Atenção a padrões do projeto:
+- `src/lib/stripe-handlers.ts` já segue a API version `2026-05-27.dahlia` — `current_period_start`/`end`
+  ficam em `subscription.items.data[0]`, e o ID da subscription em invoices vem de
+  `invoice.parent.subscription_details`, NUNCA de `invoice.subscription` (ver AGENTS.md). Essa armadilha vale
+  igualmente para `OrganizationSubscription`.
+- Diferencie assinatura individual de assinatura de organização pelo metadata: `session.metadata.userId` (já
+  existente) vs `session.metadata.organizationId` (novo, sem `userId`) — NÃO assuma que toda session de
+  `mode: 'subscription'` é individual.
+- O `quantity` do line item é o que define os `seats` contratados — não recalcule isso manualmente, leia de
+  `subscription.items.data[0].quantity`.
+- `Organization.seatLimit` deve ser sincronizado com o `quantity` da subscription sempre que ela for
+  criada/atualizada — isso cobre o caso de o seatLimit ser ajustado direto no Stripe Dashboard.
+- Crie um helper que localiza a subscription por `stripeSubscriptionId` tentando `UserSubscription` e depois
+  `OrganizationSubscription`, e reaproveite esse helper nos handlers de invoice e de subscription
+  updated/deleted já existentes, em vez de duplicar a lógica de busca.
+
+Como trabalhar:
+1. Confirme os dois pré-requisitos (Grupos 2 e 3 mesclados) antes de criar a branch.
+2. Crie a branch `feat/fase3-b2b-cobranca` a partir de `main` atualizada.
+3. Implemente TASK-162, depois TASK-163.
+4. Confira as acceptanceCriteria de cada task.
+5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
+6. Teste manualmente com Stripe CLI (`stripe listen --forward-to localhost:3000/api/webhooks/stripe`): como
+   owner de uma organização de teste, inicie o checkout com 5 seats, complete o pagamento em modo teste, e
+   confirme que `OrganizationSubscription` é criada com `seats: 5` e `Organization.seatLimit: 5`. Dispare
+   `stripe trigger invoice.payment_failed` e `customer.subscription.deleted` para a mesma subscription e
+   confirme que o status é atualizado corretamente SEM afetar nenhuma `UserSubscription` existente.
+7. Marque `"pass": true` nos steps dos dois JSONs de task e `"passes": true` em `.agent/tasks.json`.
+8. Commit(s) e abra PR com `gh pr create`. Título: "feat: cobrança B2B por seat via Stripe (TASK-162 a 163)".
+   Descrição com o teste end-to-end (checkout → webhook → seatLimit sincronizado) e link para a seção 14.1 do
+   PRD.
+
+Definition of Done: acceptanceCriteria de TASK-162 e 163 atendidas e marcadas; checkout e os 4 eventos de
+webhook (completed, payment_succeeded, payment_failed, deleted) testados para organização sem regressão na
+assinatura individual; PR aberto.
+```
+
+---
+
+## Grupo 5 — B2B: Painel da organização
+
+**Tasks**: TASK-164, TASK-165
+**Depende de**: Grupo 3 e Grupo 4 (mesclados)
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "B2B — Painel da organização" da Fase 3 da Plataforma de Cursos (Next.js 16 App
+Router + Prisma 7). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
+
+PRÉ-REQUISITO OBRIGATÓRIO: confirme que os grupos "B2B — Membros, convites e acesso" (TASK-155 a 161, 166) e
+"B2B — Cobrança por seat" (TASK-162 a 163) já estão mesclados em `main`. Este grupo é só a camada de UI sobre
+os endpoints já existentes — não deve criar nenhum endpoint novo de backend além do portal descrito abaixo.
+
+Contexto: este é o último grupo de B2B — a página onde o owner gerencia a organização (membros, seats,
+assinatura) e a página pública que apresenta o plano B2B para visitantes.
+
+Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
+1. TASK-164 — Painel /organizacao (membros, seats, convite, remoção, portal de assinatura)
+2. TASK-165 — CTA "Para empresas" e página /planos/empresas
+
+Dependências externas: Grupo 3 e Grupo 4 mesclados — ver acima.
+
+Atenção a padrões do projeto:
+- Adicione `/organizacao` ao matcher de `src/proxy.ts` (igual já existe para `/dashboard/:path*`) — sem isso a
+  página fica acessível sem autenticação.
+- A TASK-164 inclui um endpoint novo e pequeno, `POST /api/organizations/me/portal`, análogo a `POST /api/
+  subscriptions/portal` mas usando `organization.stripeCustomerId` — siga exatamente esse padrão existente, só
+  restrinja a `owner` (reaproveite o helper `requireOrgOwner` da TASK-166).
+- Reaproveite componentes existentes: `<lui-tag>` para badge de papel (owner/member), o padrão visual de
+  `UpgradePrompt`/cards do design system para os CTAs.
+- A UI deve refletir os 3 papéis possíveis: sem organização (CTA criar/aceitar convite), member (lista
+  somente leitura), owner (lista com controles de convite/remoção/gestão de assinatura) — não esconda isso só
+  no backend, a UI também precisa diferenciar visualmente.
+
+Como trabalhar:
+1. Confirme os dois pré-requisitos (Grupos 3 e 4 mesclados) antes de criar a branch.
+2. Crie a branch `feat/fase3-b2b-painel` a partir de `main` atualizada.
+3. Implemente TASK-164, depois TASK-165.
+4. Confira as acceptanceCriteria de cada task.
+5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
+6. Suba o dev server e teste manualmente nos três papéis: sem organização, member, e owner (use os usuários de
+   teste já criados no Grupo 3). Confirme que o owner consegue abrir o Stripe Customer Portal da organização a
+   partir do painel. Confirme o fluxo completo a partir de `/planos/empresas`: criar organização e iniciar
+   checkout com N seats escolhidos.
+7. Marque `"pass": true` nos steps dos dois JSONs de task e `"passes": true` em `.agent/tasks.json`.
+8. Commit(s) e abra PR com `gh pr create`. Título: "feat: painel de gestão e página pública de planos B2B
+   (TASK-164 a 165)". Descrição com os três papéis testados no navegador e link para a seção 14.1 e 14.4 do
+   PRD. Esta é a última peça de B2B — mencione no PR que o grupo todo (Grupos 2 a 5) está completo.
+
+Definition of Done: acceptanceCriteria de TASK-164 e 165 atendidas e marcadas; os três papéis (sem
+organização, member, owner) testados no navegador; fluxo completo de /planos/empresas até o checkout validado;
+PR aberto.
+```
+
