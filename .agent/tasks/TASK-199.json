@@ -40,7 +40,7 @@
       "step": 5,
       "description": "Testar manualmente o fluxo completo (caminho pré-selecionado)",
       "details": "A partir de `/planos`, deslogado, clicar em \"Criar conta e assinar\" no Premium anual, completar o cadastro, confirmar que o Embedded Checkout aparece inline na mesma página (sem redirecionar para `checkout.stripe.com`), completar o pagamento em modo teste com cartão, e confirmar que cai em `/dashboard?checkout=success` com a assinatura ativa.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 6,
@@ -77,6 +77,8 @@
     "O registro (`POST /api/auth/register`) já autentica o usuário via cookie `auth-token` na resposta — por isso é possível chamar `POST /api/subscriptions/checkout` (que exige `getAuthUser`) imediatamente depois, sem passo de login intermediário.",
     "O check de assinatura duplicada em `/api/subscriptions/checkout` (`dbUser.subscriptions.length > 0`) não afeta este fluxo, já que a conta acabou de ser criada e não tem assinatura.",
     "Não reimplementar a lógica de cupom de indicação/trial no client — ela já é resolvida inteiramente no servidor pelo endpoint existente, independente de `uiMode`.",
-    "O plano 'Gratuito' não é um conceito novo de backend — não criar model, campo ou enum novo no Prisma para ele. É só a opção de UI para 'continuar sem assinar agora', funcionalmente idêntica ao estado de usuário autenticado sem `UserSubscription` que já existe hoje (acesso só a aulas `isPreview: true`, controlado por `src/lib/access.ts`, sem nenhuma mudança)."
+    "O plano 'Gratuito' não é um conceito novo de backend — não criar model, campo ou enum novo no Prisma para ele. É só a opção de UI para 'continuar sem assinar agora', funcionalmente idêntica ao estado de usuário autenticado sem `UserSubscription` que já existe hoje (acesso só a aulas `isPreview: true`, controlado por `src/lib/access.ts`, sem nenhuma mudança).",
+    "Validado de ponta a ponta com `stripe listen` + cartão de teste `4242 4242 4242 4242`, via Playwright dirigindo o iframe real do Stripe (campos `#cardNumber`/`#cardExpiry`/`#cardCvc`/`#billingName` dentro do frame `embedded-checkout`, botão `[data-testid=\"hosted-payment-submit-button\"]`). Confirmado no banco: `UserSubscription` criada com `status: 'active'`, plano e billingCycle corretos, nos dois caminhos (pré-selecionado e seletor pós-cadastro). Boleto foi removido das formas de pagamento da conta Stripe pelo cliente — só cartão fica disponível por enquanto (ver TASK-150).",
+    "Decisão sobre Boleto na assinatura (2026-06-21): o cliente optou por desabilitar Boleto direto no Stripe Dashboard (conta), em vez de restringir via `payment_method_types` no código — motivo: o webhook `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`) assume que toda Checkout Session de assinatura completada já está paga (`subscriptionStatus = trialing ? trialing : active`), o que é falso para Boleto (status real fica `incomplete` até a compensação). Habilitar Boleto na assinatura sem TASK-147/148/150 implementadas criaria acesso pago sem pagamento confirmado."
   ]
 }

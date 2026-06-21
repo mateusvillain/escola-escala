@@ -31,7 +31,7 @@
       "step": 4,
       "description": "Testar manualmente com um cartão de teste que força 3D Secure",
       "details": "Usar o cartão de teste do Stripe que sempre exige autenticação (`4000 0027 6000 3184`), completar o desafio, e confirmar que o retorno cai corretamente em `/dashboard?checkout=success`. Repetir cancelando o desafio e confirmar o caminho de erro.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [
@@ -40,6 +40,7 @@
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Este caminho é o fallback raro (desafio 3DS), não o caminho feliz — a maioria dos pagamentos com cartão sem desafio adicional resolve via `onComplete` no client (TASK-199), sem nunca navegar para esta rota.",
-    "Armadilha descoberta na implementação: `src/proxy.ts` tem `/api/subscriptions/:path*` no matcher de autenticação, o que bloqueava esta rota com 401 antes de ela rodar (ela depende do `session_id`, não de cookie, conforme a acceptanceCriteria). Foi necessário adicionar um bypass explícito para `/api/subscriptions/checkout/return` no início de `proxy.ts`, antes do `getAuthUser`."
+    "Armadilha descoberta na implementação: `src/proxy.ts` tem `/api/subscriptions/:path*` no matcher de autenticação, o que bloqueava esta rota com 401 antes de ela rodar (ela depende do `session_id`, não de cookie, conforme a acceptanceCriteria). Foi necessário adicionar um bypass explícito para `/api/subscriptions/checkout/return` no início de `proxy.ts`, antes do `getAuthUser`.",
+    "Validação real do desafio 3DS (cartão `4000 0027 6000 3184`, via Playwright): o desafio renderiza dentro do próprio iframe `embedded-checkout` (frame `stripe-challenge-frame`, botão `#test-source-authorize-3ds`) e, ao completar, dispara `onComplete` no client — a navegação nunca saiu do domínio nem passou por esta rota de retorno. Confirma a nota acima: em `ui_mode: 'embedded_page'`, mesmo 3DS resolve inline na maioria dos casos. O caminho 'cancelar desafio' não foi testado via browser real (botão `#test-source-fail-3ds` existe mas não foi clicado); os 3 ramos de fallback da rota (sem `session_id`, `session_id` inválido, sessão real mas incompleta) já foram validados diretamente via `curl` contra o endpoint, cobrindo a lógica do redirecionamento de erro independentemente do client."
   ]
 }

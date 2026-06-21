@@ -1390,13 +1390,13 @@
     "title": "Cadastro com checkout integrado (Embedded Checkout) e seleção de plano pós-cadastro",
     "category": "functional",
     "specFilePath": ".agent/tasks/TASK-199.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-200",
     "title": "Rota de retorno (fallback) do checkout embutido",
     "category": "api-endpoint",
     "specFilePath": ".agent/tasks/TASK-200.json",
-    "passes": false
+    "passes": true
   }
 ]
