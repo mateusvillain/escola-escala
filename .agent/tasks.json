@@ -1387,7 +1387,7 @@
   },
   {
     "id": "TASK-199",
-    "title": "Cadastro com checkout integrado (Embedded Checkout)",
+    "title": "Cadastro com checkout integrado (Embedded Checkout) e seleção de plano pós-cadastro",
     "category": "functional",
     "specFilePath": ".agent/tasks/TASK-199.json",
     "passes": false

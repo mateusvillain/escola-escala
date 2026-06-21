@@ -1,5 +1,5 @@
 import { RegisterForm } from '@/components/auth/RegisterForm'
-import { resolvePriceId, type PlanBillingCycle, type PlanType } from '@/lib/plans'
+import type { PlanBillingCycle, PlanType } from '@/lib/plans'
 
 export default async function CadastroPage({
   searchParams,
@@ -12,23 +12,17 @@ export default async function CadastroPage({
   const validBilling: PlanBillingCycle | undefined =
     billing === 'monthly' || billing === 'annual' ? billing : undefined
 
-  let priceId: string | undefined
-  if (validPlan && validBilling) {
-    priceId = resolvePriceId(
-      {
-        basicMonthly: process.env.STRIPE_PRICE_ID_BASIC_MONTHLY!,
-        basicAnnual: process.env.STRIPE_PRICE_ID_BASIC_ANNUAL!,
-        premiumMonthly: process.env.STRIPE_PRICE_ID_PREMIUM_MONTHLY!,
-        premiumAnnual: process.env.STRIPE_PRICE_ID_PREMIUM_ANNUAL!,
-      },
-      validPlan,
-      validBilling,
-    )
+  const priceIds = {
+    basicMonthly: process.env.STRIPE_PRICE_ID_BASIC_MONTHLY!,
+    basicAnnual: process.env.STRIPE_PRICE_ID_BASIC_ANNUAL!,
+    premiumMonthly: process.env.STRIPE_PRICE_ID_PREMIUM_MONTHLY!,
+    premiumAnnual: process.env.STRIPE_PRICE_ID_PREMIUM_ANNUAL!,
   }
 
   return (
     <RegisterForm
-      priceId={priceId}
+      priceIds={priceIds}
+      plan={validPlan}
       billingCycle={validBilling}
       referralCode={ref}
       checkoutError={checkoutError === '1'}

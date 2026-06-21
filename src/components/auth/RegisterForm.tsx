@@ -6,10 +6,12 @@ import Link from 'next/link'
 import { Button, Alert } from '@/components/ui'
 import { registerSchema } from '@/lib/schemas/auth'
 import { EmbeddedCheckoutForm } from '@/components/checkout/EmbeddedCheckoutForm'
-import type { PlanBillingCycle } from '@/lib/plans'
+import { PlanPicker } from '@/components/checkout/PlanPicker'
+import { resolvePriceId, type PlanBillingCycle, type PlanPriceIds, type PlanType } from '@/lib/plans'
 
 interface Props {
-  priceId?: string
+  priceIds: PlanPriceIds
+  plan?: PlanType
   billingCycle?: PlanBillingCycle
   referralCode?: string
   checkoutError?: boolean
@@ -45,7 +47,7 @@ function validate(values: Record<string, string>): Record<string, string> {
   return errors
 }
 
-export function RegisterForm({ priceId, billingCycle, referralCode, checkoutError }: Props) {
+export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
@@ -53,12 +55,14 @@ export function RegisterForm({ priceId, billingCycle, referralCode, checkoutErro
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isFormValid, setIsFormValid] = useState(false)
 
-  const wantsSubscription = !!priceId && !!billingCycle
-  const [step, setStep] = useState<'account' | 'checkout' | 'checkout-error'>(
+  const preselectedPriceId = plan && billingCycle ? resolvePriceId(priceIds, plan, billingCycle) : undefined
+  const wantsSubscription = !!preselectedPriceId
+  const [step, setStep] = useState<'account' | 'plans' | 'checkout' | 'checkout-error'>(
     checkoutError ? 'checkout-error' : 'account',
   )
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [checkoutErrorMsg, setCheckoutErrorMsg] = useState<string | null>(null)
+  const [planLoading, setPlanLoading] = useState<'free' | PlanType | null>(null)
 
   function getValues() {
     const form = formRef.current
@@ -79,12 +83,17 @@ export function RegisterForm({ priceId, billingCycle, referralCode, checkoutErro
     setIsFormValid(allFilled && Object.keys(errors).length === 0)
   }
 
-  async function startCheckout() {
+  async function startCheckout(checkoutPriceId: string, checkoutBilling: PlanBillingCycle) {
     try {
       const res = await fetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, billingCycle, referralCode, uiMode: 'embedded' }),
+        body: JSON.stringify({
+          priceId: checkoutPriceId,
+          billingCycle: checkoutBilling,
+          referralCode,
+          uiMode: 'embedded',
+        }),
       })
 
       const data = await res.json()
@@ -99,6 +108,16 @@ export function RegisterForm({ priceId, billingCycle, referralCode, checkoutErro
     } catch {
       setCheckoutErrorMsg('Erro de conexão ao iniciar a assinatura.')
     }
+  }
+
+  function handleSelectFree() {
+    router.push('/dashboard')
+  }
+
+  async function handleSelectPaid(selectedPlan: PlanType, selectedBilling: PlanBillingCycle) {
+    setPlanLoading(selectedPlan)
+    await startCheckout(resolvePriceId(priceIds, selectedPlan, selectedBilling), selectedBilling)
+    setPlanLoading(null)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -129,11 +148,12 @@ export function RegisterForm({ priceId, billingCycle, referralCode, checkoutErro
       })
 
       if (res.status === 201) {
-        if (wantsSubscription) {
-          await startCheckout()
+        if (wantsSubscription && preselectedPriceId && billingCycle) {
+          await startCheckout(preselectedPriceId, billingCycle)
           setLoading(false)
         } else {
-          router.push('/dashboard')
+          setStep('plans')
+          setLoading(false)
         }
         return
       }
@@ -169,6 +189,24 @@ export function RegisterForm({ priceId, billingCycle, referralCode, checkoutErro
               Ir para o login
             </Link>
           </lui-flex>
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
+  if (step === 'plans') {
+    return (
+      <lui-card aria-label="Escolha seu plano">
+        <lui-heading level="2">Sua conta foi criada. Escolha um plano</lui-heading>
+        <lui-stack space="md">
+          {checkoutErrorMsg && (
+            <Alert
+              variant="caution"
+              title="Não foi possível iniciar a assinatura"
+              content={`${checkoutErrorMsg} Você pode tentar de novo ou continuar gratuitamente por enquanto.`}
+            />
+          )}
+          <PlanPicker onSelectFree={handleSelectFree} onSelectPaid={handleSelectPaid} loadingPlan={planLoading} />
         </lui-stack>
       </lui-card>
     )

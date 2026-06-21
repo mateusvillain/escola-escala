@@ -6,7 +6,7 @@
   "acceptanceCriteria": [
     "Para usuário não autenticado, `PlansClient` oferece duas ações claras ao escolher um plano: \"Já tenho conta\" (mantém o redirecionamento atual para `/login?next=...`) e \"Criar conta\" (novo botão/link, leva para `/cadastro?plan=basic|premium&billing=monthly|annual`, preservando `ref` quando presente)",
     "`/cadastro` lê `plan`, `billing` e `ref` da query string (via `useSearchParams`, dentro de `<Suspense>` no componente pai, conforme padrão do projeto) e repassa esses valores para `RegisterForm`",
-    "Sem `plan` na query string, `/cadastro` se comporta exatamente como hoje (form de criação de conta sem nenhuma alteração visual)",
+    "Sem `plan` na query string, o formulário de criação de conta em si (campos, validação) não tem nenhuma alteração visual — o que acontece DEPOIS do submit nesse caso é escopo da TASK-199 (seletor de planos pós-cadastro), não desta task",
     "Valores de `plan`/`billing` fora do conjunto esperado (`basic`/`premium`, `monthly`/`annual`) são ignorados silenciosamente, caindo no comportamento padrão sem plano"
   ],
   "steps": [

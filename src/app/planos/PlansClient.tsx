@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { resolvePriceId } from '@/lib/plans'
+import { PLAN_PRICES, resolvePriceId } from '@/lib/plans'
 
 interface PriceIds {
   basicMonthly: string
@@ -24,11 +24,7 @@ interface Props {
   referralCode?: string
 }
 
-// Update these to match your Stripe product prices
-const PRICES = {
-  basic: { monthly: 80, annual: 800 },
-  premium: { monthly: 100, annual: 1000 },
-}
+const PRICES = PLAN_PRICES
 
 // Deve ficar em sincronia com o percent_off do Coupon configurado em STRIPE_COUPON_ID_REFERRAL
 const REFERRAL_DISCOUNT_PERCENT = 10
