@@ -38,12 +38,6 @@ function validate(values: Record<string, string>): Record<string, string> {
     }
   }
 
-  if (!values.confirmPassword) {
-    errors.confirmPassword = 'Campo obrigatório'
-  } else if (values.password !== values.confirmPassword) {
-    errors.confirmPassword = 'As senhas não coincidem'
-  }
-
   return errors
 }
 
@@ -71,7 +65,6 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
       name: readShadowValue(form, 'name'),
       email: readShadowValue(form, 'email'),
       password: readShadowValue(form, 'password'),
-      confirmPassword: readShadowValue(form, 'confirmPassword'),
     }
   }
 
@@ -79,7 +72,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
     const values = getValues()
     if (!values) return
     const errors = validate(values)
-    const allFilled = !!(values.name && values.email && values.password && values.confirmPassword)
+    const allFilled = !!(values.name && values.email && values.password)
     setIsFormValid(allFilled && Object.keys(errors).length === 0)
   }
 
@@ -197,6 +190,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
   if (step === 'plans') {
     return (
       <lui-card aria-label="Escolha seu plano">
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 2 de 2</lui-body>
         <lui-heading level="2">Sua conta foi criada. Escolha um plano</lui-heading>
         <lui-stack space="md">
           {checkoutErrorMsg && (
@@ -215,6 +209,9 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
   if (step === 'checkout' && clientSecret) {
     return (
       <lui-card aria-label="Concluir assinatura">
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 2 de 2' : 'Etapa 3 de 3'}
+        </lui-body>
         <lui-heading level="2">Quase lá — conclua sua assinatura</lui-heading>
         <lui-stack space="md">
           <EmbeddedCheckoutForm
@@ -228,6 +225,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
 
   return (
     <lui-card aria-label="Criar conta">
+      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 1 de 2</lui-body>
       <lui-heading level="2">Criar conta</lui-heading>
 
       <lui-stack space="md">
@@ -280,18 +278,8 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
               error-text={fieldErrors.password}
               onInput={handleFormInput}
             />
-            <lui-input
-              label="Confirmar Senha"
-              type="password"
-              name="confirmPassword"
-              placeholder="Repita a senha"
-              required
-              error={!!fieldErrors.confirmPassword}
-              error-text={fieldErrors.confirmPassword}
-              onInput={handleFormInput}
-            />
             <Button
-              label={wantsSubscription ? 'Criar conta e continuar para o pagamento' : 'Criar conta'}
+              label="Continuar"
               type="submit"
               loading={loading}
               loadingText="Criando conta..."
