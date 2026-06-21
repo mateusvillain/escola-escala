@@ -14,28 +14,30 @@
       "step": 1,
       "description": "Instalar dependências",
       "details": "`npm install @stripe/stripe-js @stripe/react-stripe-js`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar o singleton do Stripe.js no client",
       "details": "Em `src/lib/stripe-client.ts`: `import { loadStripe } from '@stripe/stripe-js'; export const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)`. Não chamar `loadStripe` mais de uma vez na árvore de componentes (evita recriar a conexão a cada render).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar o componente EmbeddedCheckoutForm",
       "details": "`'use client'` component em `src/components/checkout/EmbeddedCheckoutForm.tsx`, usando `EmbeddedCheckoutProvider` (`stripe={stripePromise}`, `options={{ clientSecret, onComplete }}`) e `<EmbeddedCheckout />` do `@stripe/react-stripe-js`. Renderizar um spinner/skeleton enquanto o provider inicializa.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Validar isoladamente",
       "details": "Criar uma página/rota temporária (ou usar o Storybook se existir) passando um `clientSecret` real obtido manualmente da TASK-196 e confirmar que o formulário de pagamento do Stripe renderiza dentro da página, sem redirecionar.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-196"],
+  "dependencies": [
+    "TASK-196"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "`EmbeddedCheckoutProvider` precisa ser remontado (`key` diferente) se o `clientSecret` mudar para uma sessão totalmente nova — não tente atualizar o `clientSecret` de uma sessão já montada."

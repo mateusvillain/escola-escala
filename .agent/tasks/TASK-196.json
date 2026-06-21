@@ -14,25 +14,25 @@
       "step": 1,
       "description": "Atualizar o schema Zod do body",
       "details": "Em `src/app/api/subscriptions/checkout/route.ts`, adicionar `uiMode: z.enum(['hosted', 'embedded']).optional().default('hosted')` ao schema existente.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Construir sessionParams condicionalmente por modo",
       "details": "Quando `uiMode === 'embedded'`: usar `ui_mode: 'embedded'` e `return_url: \\`${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}\\`` em vez de `success_url`/`cancel_url`. Quando `uiMode === 'hosted'`: manter `success_url`/`cancel_url` exatamente como hoje. O restante de `sessionParams` (customer, mode, line_items, metadata, discounts/allow_promotion_codes, subscription_data de trial) não muda entre os dois modos.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Retornar o campo certo por modo",
       "details": "Responder com `{ clientSecret: session.client_secret }` quando embedded, ou `{ checkoutUrl: session.url }` quando hosted (comportamento atual).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Testar os dois modos manualmente",
       "details": "Com `curl`/Postman autenticado, chamar o endpoint com `uiMode: 'hosted'` (confirmar que nada mudou) e depois com `uiMode: 'embedded'` (confirmar que a sessão aparece no Stripe Dashboard em modo teste com `ui_mode: embedded` e que a resposta tem `clientSecret`).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],
@@ -40,6 +40,7 @@
   "technicalNotes": [
     "`allow_promotion_codes` e `discounts` continuam mutuamente exclusivos como hoje — essa regra do Stripe não muda por causa do `ui_mode`.",
     "`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` já está configurada em `.env.local` — nenhuma variável de ambiente nova é necessária para esta task.",
-    "O `return_url` aqui é consumido pela TASK-200 (rota de fallback para confirmações que navegam para fora do iframe, ex.: desafio 3D Secure)."
+    "O `return_url` aqui é consumido pela TASK-200 (rota de fallback para confirmações que navegam para fora do iframe, ex.: desafio 3D Secure).",
+    "Armadilha descoberta na implementação: a API version do projeto (`2026-05-27.dahlia`) usa `ui_mode: 'embedded_page'` no valor real passado ao Stripe — não `'embedded'`, que é o nome comumente usado na documentação pública do Stripe e que o `tsc` rejeita para esse SDK. O `uiMode: 'embedded'` do nosso próprio schema Zod é só o contrato interno da API da plataforma; o mapeamento para `'embedded_page'` acontece dentro da rota."
   ]
 }

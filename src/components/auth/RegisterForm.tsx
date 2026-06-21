@@ -5,6 +5,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button, Alert } from '@/components/ui'
 import { registerSchema } from '@/lib/schemas/auth'
+import { EmbeddedCheckoutForm } from '@/components/checkout/EmbeddedCheckoutForm'
+import type { PlanBillingCycle } from '@/lib/plans'
+
+interface Props {
+  priceId?: string
+  billingCycle?: PlanBillingCycle
+  referralCode?: string
+  checkoutError?: boolean
+}
 
 function readShadowValue(form: HTMLFormElement, name: string): string {
   const el = form.querySelector(`lui-input[name="${name}"]`)
@@ -36,13 +45,20 @@ function validate(values: Record<string, string>): Record<string, string> {
   return errors
 }
 
-export function RegisterForm() {
+export function RegisterForm({ priceId, billingCycle, referralCode, checkoutError }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isFormValid, setIsFormValid] = useState(false)
+
+  const wantsSubscription = !!priceId && !!billingCycle
+  const [step, setStep] = useState<'account' | 'checkout' | 'checkout-error'>(
+    checkoutError ? 'checkout-error' : 'account',
+  )
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [checkoutErrorMsg, setCheckoutErrorMsg] = useState<string | null>(null)
 
   function getValues() {
     const form = formRef.current
@@ -61,6 +77,28 @@ export function RegisterForm() {
     const errors = validate(values)
     const allFilled = !!(values.name && values.email && values.password && values.confirmPassword)
     setIsFormValid(allFilled && Object.keys(errors).length === 0)
+  }
+
+  async function startCheckout() {
+    try {
+      const res = await fetch('/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, billingCycle, referralCode, uiMode: 'embedded' }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setCheckoutErrorMsg(data.error ?? 'Não foi possível iniciar a assinatura.')
+        return
+      }
+
+      setClientSecret(data.clientSecret)
+      setStep('checkout')
+    } catch {
+      setCheckoutErrorMsg('Erro de conexão ao iniciar a assinatura.')
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +129,12 @@ export function RegisterForm() {
       })
 
       if (res.status === 201) {
-        router.push('/dashboard')
+        if (wantsSubscription) {
+          await startCheckout()
+          setLoading(false)
+        } else {
+          router.push('/dashboard')
+        }
         return
       }
 
@@ -108,6 +151,43 @@ export function RegisterForm() {
     setLoading(false)
   }
 
+  if (step === 'checkout-error') {
+    return (
+      <lui-card aria-label="Pagamento não concluído">
+        <lui-heading level="2">Pagamento não concluído</lui-heading>
+        <lui-stack space="md">
+          <Alert
+            variant="caution"
+            title="Sua conta já foi criada"
+            content="O pagamento da assinatura não foi confirmado. Você pode tentar novamente quando quiser — sua conta já existe e está pronta para uso."
+          />
+          <lui-flex justify="center" gap="md">
+            <Link href="/planos" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Ver planos novamente
+            </Link>
+            <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+              Ir para o login
+            </Link>
+          </lui-flex>
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
+  if (step === 'checkout' && clientSecret) {
+    return (
+      <lui-card aria-label="Concluir assinatura">
+        <lui-heading level="2">Quase lá — conclua sua assinatura</lui-heading>
+        <lui-stack space="md">
+          <EmbeddedCheckoutForm
+            clientSecret={clientSecret}
+            onComplete={() => router.push('/dashboard?checkout=success')}
+          />
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
   return (
     <lui-card aria-label="Criar conta">
       <lui-heading level="2">Criar conta</lui-heading>
@@ -115,6 +195,20 @@ export function RegisterForm() {
       <lui-stack space="md">
         {submitError && (
           <Alert variant="danger" title="Erro ao criar conta" content={submitError} />
+        )}
+
+        {checkoutErrorMsg && (
+          <Alert
+            variant="caution"
+            title="Conta criada, mas a assinatura não foi iniciada"
+            content={`${checkoutErrorMsg} Você já pode acessar sua conta e assinar mais tarde em /planos.`}
+          />
+        )}
+
+        {checkoutErrorMsg && (
+          <Link href="/dashboard" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+            Ir para o Dashboard
+          </Link>
         )}
 
         <form ref={formRef} onSubmit={handleSubmit}>
@@ -159,7 +253,7 @@ export function RegisterForm() {
               onInput={handleFormInput}
             />
             <Button
-              label="Criar conta"
+              label={wantsSubscription ? 'Criar conta e continuar para o pagamento' : 'Criar conta'}
               type="submit"
               loading={loading}
               loadingText="Criando conta..."

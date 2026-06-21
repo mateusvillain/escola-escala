@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Extrair o mapeamento de priceId para um helper compartilhado",
       "details": "Hoje `src/app/planos/PlansClient.tsx` resolve `priceId` a partir de `plan`+`billing` localmente. Extrair essa resolução para um helper compartilhado (ex.: `src/lib/plans.ts`, recebendo os price IDs já carregados via env) para não duplicar a lógica entre `PlansClient` e `RegisterForm`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar estado de 'passo' ao RegisterForm",
       "details": "Em `src/components/auth/RegisterForm.tsx`, adicionar um estado `step: 'account' | 'checkout'`. Quando `plan`/`billing` válidos estão presentes nas props e o registro retorna 201, em vez de `router.push('/dashboard')`, chamar `POST /api/subscriptions/checkout` com `{ priceId, billingCycle: billing, referralCode, uiMode: 'embedded' }`, guardar o `clientSecret` retornado e mudar para `step: 'checkout'`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar o EmbeddedCheckoutForm no passo de checkout",
       "details": "Quando `step === 'checkout'`, renderizar `<EmbeddedCheckoutForm clientSecret={clientSecret} onComplete={() => router.push('/dashboard?checkout=success')} />` no lugar do formulário de conta, dentro do mesmo `<lui-card>`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
@@ -41,7 +41,11 @@
       "pass": false
     }
   ],
-  "dependencies": ["TASK-196", "TASK-197", "TASK-198"],
+  "dependencies": [
+    "TASK-196",
+    "TASK-197",
+    "TASK-198"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "O registro (`POST /api/auth/register`) já autentica o usuário via cookie `auth-token` na resposta — por isso é possível chamar `POST /api/subscriptions/checkout` (que exige `getAuthUser`) imediatamente depois, sem passo de login intermediário.",

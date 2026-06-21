@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 
 export default function proxy(request: NextRequest) {
+  // Rota de retorno do Embedded Checkout: o navegador pode chegar aqui sem o
+  // cookie de sessão disponível (ex.: retorno de um desafio 3DS em outro
+  // domínio) — a validação de identidade vem do session_id, não do cookie.
+  if (request.nextUrl.pathname === "/api/subscriptions/checkout/return") {
+    return NextResponse.next();
+  }
+
   const user = getAuthUser(request);
 
   if (!user) {

@@ -14,25 +14,25 @@
       "step": 1,
       "description": "Adicionar a opção 'Criar conta' em PlansClient",
       "details": "Em `src/app/planos/PlansClient.tsx`, dentro de `handleCheckout`, quando `!isAuthenticated`: manter o link/redirecionamento de login existente e adicionar um segundo CTA \"Criar conta e assinar\" apontando para `/cadastro?plan=${plan}&billing=${billing}${referralCode ? `&ref=${referralCode}` : ''}`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Tornar CadastroPage consciente da query string",
-      "details": "Em `src/app/(auth)/cadastro/page.tsx`, envolver a leitura de `useSearchParams()` em `<Suspense>` (AGENTS.md exige isso) e repassar `plan`/`billing`/`ref` como props para `RegisterForm`, validando os valores contra os enums esperados antes de repassar.",
-      "pass": false
+      "details": "Em `src/app/(auth)/cadastro/page.tsx`, ler `searchParams` como prop assíncrona do Server Component (mesmo padrão já usado em `src/app/planos/page.tsx`, sem precisar de `useSearchParams()`/`<Suspense>` — esse hook só seria necessário se a leitura fosse feita num Client Component) e repassar `plan`/`billing`/`ref` como props para `RegisterForm`, validando os valores contra os enums esperados antes de repassar.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Testar manualmente os dois caminhos",
       "details": "Deslogado, acessar `/planos`, clicar em \"Criar conta e assinar\" no plano Premium anual, confirmar que `/cadastro?plan=premium&billing=annual` carrega normalmente. Acessar `/cadastro` direto (sem query string) e confirmar que nada mudou visualmente.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],
   "estimatedComplexity": "low",
   "technicalNotes": [
-    "`useSearchParams()` exige `<Suspense>` no componente pai (AGENTS.md) — `CadastroPage` hoje é um componente síncrono simples e precisa desse ajuste estrutural.",
+    "A exigência de `<Suspense>` para `useSearchParams()` (AGENTS.md) só se aplica ao hook client-side — lendo `searchParams` como prop num Server Component (como já faz `PlanosPage`) não precisa de Suspense.",
     "Esta task só prepara a propagação do plano — a TASK-199 é quem efetivamente usa esses valores para abrir o checkout embutido."
   ]
 }

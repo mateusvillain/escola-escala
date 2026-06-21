@@ -1369,21 +1369,21 @@
     "title": "Suporte a ui_mode 'embedded' no checkout de assinatura",
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-196.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-197",
     "title": "Componente EmbeddedCheckoutForm reutilizável",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-197.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-198",
     "title": "Propagar plano escolhido de /planos para /cadastro",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-198.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-199",
