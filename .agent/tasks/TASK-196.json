@@ -1,0 +1,45 @@
+{
+  "id": "TASK-196",
+  "title": "Suporte a ui_mode 'embedded' no checkout de assinatura",
+  "category": "integration",
+  "description": "Hoje `POST /api/subscriptions/checkout` sempre cria uma Checkout Session hospedada (retorna `checkoutUrl`, e o cliente faz `window.location.href`). Para embutir o checkout na própria página (fluxo de cadastro integrado, TASK-199), o endpoint precisa também suportar `ui_mode: 'embedded'`, retornando `clientSecret` em vez de `checkoutUrl`, sem alterar o comportamento atual para quem não pedir embedded.",
+  "acceptanceCriteria": [
+    "Body do POST aceita `uiMode: 'hosted' | 'embedded'` opcional (Zod), default `'hosted'`",
+    "Quando `uiMode: 'embedded'`, a Checkout Session é criada com `ui_mode: 'embedded'` e `return_url` (em vez de `success_url`/`cancel_url`, exclusivos do modo hosted) — resposta passa a incluir `clientSecret: session.client_secret`",
+    "Quando `uiMode` é omitido ou `'hosted'`, comportamento idêntico ao atual — resposta com `checkoutUrl: session.url`",
+    "Lógica existente (cupom de indicação, trial gratuito, allow_promotion_codes, bloqueio de assinatura duplicada) preservada igualmente nos dois modos"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Atualizar o schema Zod do body",
+      "details": "Em `src/app/api/subscriptions/checkout/route.ts`, adicionar `uiMode: z.enum(['hosted', 'embedded']).optional().default('hosted')` ao schema existente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Construir sessionParams condicionalmente por modo",
+      "details": "Quando `uiMode === 'embedded'`: usar `ui_mode: 'embedded'` e `return_url: \\`${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}\\`` em vez de `success_url`/`cancel_url`. Quando `uiMode === 'hosted'`: manter `success_url`/`cancel_url` exatamente como hoje. O restante de `sessionParams` (customer, mode, line_items, metadata, discounts/allow_promotion_codes, subscription_data de trial) não muda entre os dois modos.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Retornar o campo certo por modo",
+      "details": "Responder com `{ clientSecret: session.client_secret }` quando embedded, ou `{ checkoutUrl: session.url }` quando hosted (comportamento atual).",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testar os dois modos manualmente",
+      "details": "Com `curl`/Postman autenticado, chamar o endpoint com `uiMode: 'hosted'` (confirmar que nada mudou) e depois com `uiMode: 'embedded'` (confirmar que a sessão aparece no Stripe Dashboard em modo teste com `ui_mode: embedded` e que a resposta tem `clientSecret`).",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`allow_promotion_codes` e `discounts` continuam mutuamente exclusivos como hoje — essa regra do Stripe não muda por causa do `ui_mode`.",
+    "`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` já está configurada em `.env.local` — nenhuma variável de ambiente nova é necessária para esta task.",
+    "O `return_url` aqui é consumido pela TASK-200 (rota de fallback para confirmações que navegam para fora do iframe, ex.: desafio 3D Secure)."
+  ]
+}

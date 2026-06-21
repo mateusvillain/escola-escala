@@ -1,0 +1,51 @@
+{
+  "id": "TASK-199",
+  "title": "Cadastro com checkout integrado (Embedded Checkout)",
+  "category": "functional",
+  "description": "Peça central da feature: quando o usuário chega em `/cadastro` com um plano selecionado (TASK-198), o formulário de criação de conta continua igual, mas ao concluir o registro com sucesso a página não redireciona mais direto para `/dashboard` — em vez disso, chama `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` (TASK-196) e renderiza o `EmbeddedCheckoutForm` (TASK-197) na mesma página, deixando o usuário concluir o pagamento sem sair do fluxo de cadastro.",
+  "acceptanceCriteria": [
+    "`RegisterForm` aceita `plan`/`billing`/`referralCode` opcionais; quando `plan`+`billing` estão presentes e `POST /api/auth/register` retorna 201, a página avança para um segundo passo (mesma rota `/cadastro`, troca de conteúdo no client, sem navegação) chamando `POST /api/subscriptions/checkout` com `uiMode: 'embedded'` e o `priceId` correspondente ao plano/ciclo escolhido",
+    "Enquanto o `clientSecret` carrega, exibir estado de loading; em caso de erro (ex.: `priceId` não configurado), exibir mensagem e oferecer um link para `/dashboard` sem assinar — a conta já foi criada e não deve ficar inacessível",
+    "Sem `plan`/`billing` na query string, o comportamento é o atual: registra e redireciona direto para `/dashboard`, sem nenhum passo adicional",
+    "Ao completar o pagamento no Embedded Checkout (callback `onComplete`), redirecionar para `/dashboard?checkout=success` — mesmo destino já usado pelo fluxo hosted existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Extrair o mapeamento de priceId para um helper compartilhado",
+      "details": "Hoje `src/app/planos/PlansClient.tsx` resolve `priceId` a partir de `plan`+`billing` localmente. Extrair essa resolução para um helper compartilhado (ex.: `src/lib/plans.ts`, recebendo os price IDs já carregados via env) para não duplicar a lógica entre `PlansClient` e `RegisterForm`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar estado de 'passo' ao RegisterForm",
+      "details": "Em `src/components/auth/RegisterForm.tsx`, adicionar um estado `step: 'account' | 'checkout'`. Quando `plan`/`billing` válidos estão presentes nas props e o registro retorna 201, em vez de `router.push('/dashboard')`, chamar `POST /api/subscriptions/checkout` com `{ priceId, billingCycle: billing, referralCode, uiMode: 'embedded' }`, guardar o `clientSecret` retornado e mudar para `step: 'checkout'`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Renderizar o EmbeddedCheckoutForm no passo de checkout",
+      "details": "Quando `step === 'checkout'`, renderizar `<EmbeddedCheckoutForm clientSecret={clientSecret} onComplete={() => router.push('/dashboard?checkout=success')} />` no lugar do formulário de conta, dentro do mesmo `<lui-card>`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Tratar falha ao iniciar o checkout",
+      "details": "Se `POST /api/subscriptions/checkout` falhar (ex.: 400/409), manter o usuário em `step: 'account'` mas exibir um aviso com link direto para `/dashboard` — a conta já existe e o aluno não pode ficar sem rota de saída.",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Testar manualmente o fluxo completo",
+      "details": "A partir de `/planos`, deslogado, clicar em \"Criar conta e assinar\" no Premium anual, completar o cadastro, confirmar que o Embedded Checkout aparece inline na mesma página (sem redirecionar para `checkout.stripe.com`), completar o pagamento em modo teste com cartão, e confirmar que cai em `/dashboard?checkout=success` com a assinatura ativa.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-196", "TASK-197", "TASK-198"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "O registro (`POST /api/auth/register`) já autentica o usuário via cookie `auth-token` na resposta — por isso é possível chamar `POST /api/subscriptions/checkout` (que exige `getAuthUser`) imediatamente depois, sem passo de login intermediário.",
+    "O check de assinatura duplicada em `/api/subscriptions/checkout` (`dbUser.subscriptions.length > 0`) não afeta este fluxo, já que a conta acabou de ser criada e não tem assinatura.",
+    "Não reimplementar a lógica de cupom de indicação/trial no client — ela já é resolvida inteiramente no servidor pelo endpoint existente, independente de `uiMode`."
+  ]
+}

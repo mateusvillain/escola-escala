@@ -31,6 +31,7 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 | 9 | Rate limiting distribuído | TASK-185 a 187 | Grupo 0 | `feat/fase3-rate-limit-redis` |
 | 10 | Monitoramento de erro (Sentry) | TASK-188 a 190 | Grupo 0 | `feat/fase3-monitoramento-erro` |
 | 11 | Event tracking de produto | TASK-191 a 195 | Grupo 0 | `feat/fase3-event-tracking` |
+| 12 | Checkout integrado ao cadastro (Embedded Checkout) | TASK-196 a 200 | — | `feat/fase3-checkout-cadastro` |
 
 ---
 
@@ -493,6 +494,79 @@ Como trabalhar:
 
 Definition of Done: acceptanceCriteria de TASK-191 a 195 atendidas e marcadas; os 4 eventos-chave confirmados
 na tabela `ProductEvent`; seção de funil exibindo dados corretos no AdminDashboard; PR aberto.
+```
+
+---
+
+## Grupo 12 — Checkout integrado ao cadastro (Embedded Checkout)
+
+**Tasks**: TASK-196, TASK-197, TASK-198, TASK-199, TASK-200
+**Depende de**: nenhum grupo — pode começar imediatamente, em paralelo com qualquer outro
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "Checkout integrado ao cadastro (Embedded Checkout)" da Fase 3 da Plataforma de
+Cursos (Next.js 16 App Router + Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de
+começar — eles documentam os padrões obrigatórios do projeto (rotas, Zod v4, Prisma, padrões de checkout
+Stripe já existentes).
+
+Contexto: hoje o cadastro (`/cadastro`, `RegisterForm.tsx`) só cria a conta e redireciona para `/dashboard` —
+a escolha de plano só acontece numa visita separada a `/planos`, e quem ainda não tem conta e clica em
+"Assinar" lá é mandado para `/login`, sem caminho direto para criar conta preservando a intenção de
+assinatura. Este grupo junta os dois passos numa página só, usando o Embedded Checkout do Stripe
+(`ui_mode: 'embedded'`) em vez do Checkout hospedado atual — o formulário de pagamento é renderizado num
+iframe dentro da própria página, sem redirecionar para `checkout.stripe.com`. Decidido em conversa com o
+cliente em 2026-06-21, fora do documento de oportunidades original (`docs/fase3-oportunidades.md`) — ver
+seção 14.7 do PRD.
+
+Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/TASK-<id>.json antes de codar):
+1. TASK-196 — `uiMode: 'embedded'` em `POST /api/subscriptions/checkout` (retorna `clientSecret`)
+2. TASK-197 — Componente `EmbeddedCheckoutForm` reutilizável (`@stripe/stripe-js`/`@stripe/react-stripe-js`)
+3. TASK-198 — `/planos` propaga plano/ciclo para `/cadastro` via query string quando não autenticado
+4. TASK-199 — `RegisterForm` com segundo passo: cria conta → abre Embedded Checkout inline
+5. TASK-200 — Rota de retorno (`return_url`) para confirmações que navegam para fora do iframe (3DS)
+
+Dependências externas: nenhuma — `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` já está configurada em `.env.local`, e
+o grupo não depende de Boleto/Pix/trilhas/B2B.
+
+Atenção a padrões do projeto:
+- `POST /api/auth/register` já autentica via cookie `auth-token` na resposta — não é preciso passo de login
+  intermediário entre criar a conta e chamar `POST /api/subscriptions/checkout`.
+- Não duplique a lógica de cupom de indicação, trial gratuito ou `allow_promotion_codes`/`discounts` — ela já
+  é resolvida inteiramente no servidor em `src/app/api/subscriptions/checkout/route.ts`, independente de
+  `uiMode`. Mude só a construção condicional de `sessionParams` (embedded vs. hosted) e o campo de resposta.
+- `useSearchParams()` exige `<Suspense>` no componente pai (AGENTS.md) — ajuste `CadastroPage` de acordo ao
+  ler `plan`/`billing`/`ref` da query string.
+- Não há custo adicional do Stripe por usar Embedded em vez de Hosted Checkout — mesma Checkout Session, mesma
+  tabela de taxas (`docs/stripe-pricing.md`); não é necessário criar nada novo no Dashboard do Stripe por
+  causa do `ui_mode`.
+- Escopo apenas da assinatura recorrente (planos Básico/Premium) — não estenda Embedded Checkout à compra
+  avulsa de curso nem ao bundle de trilha nesta rodada.
+
+Como trabalhar:
+1. Crie a branch `feat/fase3-checkout-cadastro` a partir de `main` atualizada.
+2. Implemente as 5 tasks na ordem listada — TASK-199 depende das três anteriores estarem prontas.
+3. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
+4. Valide o código: `npx tsc --noEmit` e `npx vitest run` devem passar sem erros novos.
+5. Suba o dev server e rode `stripe listen --forward-to localhost:3000/api/webhooks/stripe` em paralelo. Teste
+   manualmente: a partir de `/planos` deslogado, clique em "Criar conta e assinar" num plano, complete o
+   cadastro, confirme que o Embedded Checkout aparece inline na mesma página (sem redirecionar para
+   `checkout.stripe.com`), complete o pagamento com cartão de teste, e confirme que cai em
+   `/dashboard?checkout=success` com a assinatura ativa. Repita com o cartão de teste que força desafio 3D
+   Secure (`4000 0027 6000 3184`) para validar o fallback da TASK-200. Confirme também que `/cadastro` sem
+   plano na query string continua funcionando exatamente como antes.
+6. Marque `"pass": true` em cada step dos cinco JSONs de task e `"passes": true` nas entradas correspondentes
+   de `.agent/tasks.json`, só depois de validar de fato.
+7. Commit(s) com mensagens claras, seguindo o estilo dos commits existentes no repositório (confira `git log`).
+8. Abra um PR para `main` com `gh pr create`. Título: "feat: checkout integrado ao cadastro com Embedded
+   Checkout (TASK-196 a 200)". Na descrição, liste as 5 tasks concluídas, o fluxo testado manualmente
+   (cadastro → checkout embutido → dashboard, incluindo o fallback de 3DS), e link para a seção 14.7 do PRD
+   (`.agent/prd/PRD.md`). Não faça merge — deixe para revisão humana.
+
+Definition of Done: acceptanceCriteria de TASK-196 a 200 atendidas e marcadas; fluxo completo testado
+manualmente (cadastro → Embedded Checkout → dashboard com assinatura ativa, incluindo fallback de 3DS);
+`/cadastro` sem plano continua funcionando sem alteração; tsc e vitest passando; PR aberto.
 ```
 
 ---

@@ -1,0 +1,42 @@
+{
+  "id": "TASK-200",
+  "title": "Rota de retorno (fallback) do checkout embutido",
+  "category": "api-endpoint",
+  "description": "Embedded Checkout exige um `return_url` mesmo quando o pagamento é concluído via `onComplete` no client, porque alguns métodos/desafios de pagamento (ex.: 3D Secure de determinados bancos) navegam para fora do iframe e retornam via `return_url` em vez de disparar o callback. Esta task garante que esse caminho de retorno funcione mesmo se o `onComplete` não disparar.",
+  "acceptanceCriteria": [
+    "`GET /api/subscriptions/checkout/return` lê `session_id` da query string, busca a sessão via `stripe.checkout.sessions.retrieve(sessionId)` e redireciona para `/dashboard?checkout=success` quando `status === 'complete'`",
+    "Quando a sessão não está completa (ex.: usuário cancelou o desafio 3DS), redireciona de volta para `/cadastro` com um parâmetro de erro tratável pela UI (sem expor detalhes internos do Stripe)",
+    "Rota não exige autenticação prévia via cookie (o navegador pode voltar de um redirecionamento de banco em um contexto sem o cookie de sessão imediatamente disponível) — a validação de identidade vem do próprio `session_id`, que é opaco e de uso único"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a rota de retorno",
+      "details": "Criar `src/app/api/subscriptions/checkout/return/route.ts` com um `GET` que lê `session_id` de `request.nextUrl.searchParams`, chama `stripe.checkout.sessions.retrieve(sessionId)` e usa `NextResponse.redirect` para `/dashboard?checkout=success` (status `complete`) ou `/cadastro?checkoutError=1` (qualquer outro status).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Apontar o return_url da TASK-196 para esta rota",
+      "details": "Confirmar que o `return_url` montado em `POST /api/subscriptions/checkout` (modo embedded) aponta para `${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}` — o placeholder `{CHECKOUT_SESSION_ID}` é substituído automaticamente pelo Stripe.js no client.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Tratar o erro de retorno na UI de cadastro",
+      "details": "Em `RegisterForm`/`CadastroPage`, ao detectar `checkoutError=1` na query string, exibir uma mensagem informando que o pagamento não foi concluído, com a conta já criada e um link para tentar assinar novamente em `/planos`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testar manualmente com um cartão de teste que força 3D Secure",
+      "details": "Usar o cartão de teste do Stripe que sempre exige autenticação (`4000 0027 6000 3184`), completar o desafio, e confirmar que o retorno cai corretamente em `/dashboard?checkout=success`. Repetir cancelando o desafio e confirmar o caminho de erro.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-199"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Este caminho é o fallback raro (desafio 3DS), não o caminho feliz — a maioria dos pagamentos com cartão sem desafio adicional resolve via `onComplete` no client (TASK-199), sem nunca navegar para esta rota."
+  ]
+}

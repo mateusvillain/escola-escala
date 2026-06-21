@@ -593,7 +593,7 @@ Essas decisões devem ser validadas com o cliente antes ou durante a implementa�
 
 ## 14. Fase 3 — Expansão e Maturidade
 
-Origem: `docs/fase3-oportunidades.md`. Documento de visão original — não previa quebra em tasks até validação com o cliente; esta seção converte os 7 itens do documento em tasks de implementação. **B2B (14.1) foi despriorizado e suas tasks (TASK-151 a TASK-166) movidas para `.agent/tasks/deprecated/`** — ver decisão na seção 14.6; o spec permanece descrito abaixo (14.1/14.4) como referência para quando a direção for revisitada, mas não faz parte dos sprints ativos (seção 11). Cada requisito referencia o ID de task correspondente em `.agent/tasks/`.
+Origem: `docs/fase3-oportunidades.md`. Documento de visão original — não previa quebra em tasks até validação com o cliente; esta seção converte os 7 itens do documento em tasks de implementação, mais uma frente adicional (14.7) decidida em conversa com o cliente em 2026-06-21, fora do documento de oportunidades original. **B2B (14.1) foi despriorizado e suas tasks (TASK-151 a TASK-166) movidas para `.agent/tasks/deprecated/`** — ver decisão na seção 14.6; o spec permanece descrito abaixo (14.1/14.4) como referência para quando a direção for revisitada, mas não faz parte dos sprints ativos (seção 11). Cada requisito referencia o ID de task correspondente em `.agent/tasks/`.
 
 ### 14.1 Monetização e Expansão de Mercado (TASK-147 a TASK-150, TASK-167 a TASK-173 ativas; TASK-151 a TASK-166 despriorizadas)
 
@@ -647,3 +647,15 @@ Origem: `docs/fase3-oportunidades.md`. Documento de visão original — não pre
 - Event tracking: tabela própria simples (`ProductEvent`), sem ferramenta de analytics externa nesta rodada
 
 Essas decisões devem ser validadas com o cliente antes ou durante a implementação das tasks correspondentes; ajustar a task específica se a decisão mudar.
+
+### 14.7 Checkout integrado ao cadastro (Embedded Checkout) — TASK-196 a TASK-200
+
+Decidido em 2026-06-21, fora do documento de oportunidades original (`docs/fase3-oportunidades.md`). Hoje o cadastro (`/cadastro`) só cria a conta e redireciona para `/dashboard` — a escolha de plano acontece numa visita separada a `/planos`, e quem ainda não tem conta e clica em "Assinar" lá é mandado para `/login`, sem caminho direto para criar conta preservando a intenção de assinatura. Esta frente junta os dois passos numa página só, usando o **Embedded Checkout** do Stripe (`ui_mode: 'embedded'`) em vez do Checkout hospedado — o formulário de pagamento é renderizado num iframe dentro da própria página, sem redirecionar o usuário para `checkout.stripe.com`.
+
+- **TASK-196** — `POST /api/subscriptions/checkout` passa a aceitar `uiMode: 'hosted' | 'embedded'`, retornando `clientSecret` no modo embedded (mantém `checkoutUrl` no modo hosted, comportamento atual inalterado).
+- **TASK-197** — Componente `EmbeddedCheckoutForm` reutilizável (`@stripe/stripe-js` + `@stripe/react-stripe-js`).
+- **TASK-198** — `/planos` propaga plano/ciclo escolhidos para `/cadastro` via query string quando o usuário não está autenticado, em vez de só oferecer login.
+- **TASK-199** — `RegisterForm` ganha um segundo passo: com plano selecionado, após criar a conta abre o Embedded Checkout inline na mesma página em vez de ir direto para `/dashboard`.
+- **TASK-200** — Rota de retorno (`return_url`) para os casos em que a confirmação de pagamento navega para fora do iframe (ex.: desafio 3D Secure) e não dispara o callback `onComplete` no client.
+
+**Decisão de escopo:** não há custo adicional do Stripe por usar Embedded em vez de Hosted Checkout — é o mesmo produto Checkout Session, mesma tabela de taxas por forma de pagamento (`docs/stripe-pricing.md`), só muda onde a UI é renderizada. Esta frente cobre apenas o checkout de **assinatura** (`mode: 'subscription'`, planos Básico/Premium) integrado ao cadastro — não estende Embedded Checkout à compra avulsa de curso nem ao bundle de trilha (TASK-167 a 173) nesta rodada.

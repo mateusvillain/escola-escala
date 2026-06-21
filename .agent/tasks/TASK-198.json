@@ -1,0 +1,38 @@
+{
+  "id": "TASK-198",
+  "title": "Propagar plano escolhido de /planos para /cadastro",
+  "category": "ui-ux",
+  "description": "Hoje, em `PlansClient.tsx`, um usuário não autenticado que clica em \"Assinar\" é redirecionado direto para `/login?next=/planos`, sem oferecer caminho de criar conta — quem não tem conta precisa ir manualmente em \"Já tem conta? Faça login\" → voltar → `/cadastro`, perdendo a intenção de plano escolhido nesse meio do caminho. Esta task ajusta `/planos` para oferecer as duas opções e propagar plano/ciclo via query string, para que a TASK-199 possa retomar o checkout imediatamente após criar a conta.",
+  "acceptanceCriteria": [
+    "Para usuário não autenticado, `PlansClient` oferece duas ações claras ao escolher um plano: \"Já tenho conta\" (mantém o redirecionamento atual para `/login?next=...`) e \"Criar conta\" (novo botão/link, leva para `/cadastro?plan=basic|premium&billing=monthly|annual`, preservando `ref` quando presente)",
+    "`/cadastro` lê `plan`, `billing` e `ref` da query string (via `useSearchParams`, dentro de `<Suspense>` no componente pai, conforme padrão do projeto) e repassa esses valores para `RegisterForm`",
+    "Sem `plan` na query string, `/cadastro` se comporta exatamente como hoje (form de criação de conta sem nenhuma alteração visual)",
+    "Valores de `plan`/`billing` fora do conjunto esperado (`basic`/`premium`, `monthly`/`annual`) são ignorados silenciosamente, caindo no comportamento padrão sem plano"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar a opção 'Criar conta' em PlansClient",
+      "details": "Em `src/app/planos/PlansClient.tsx`, dentro de `handleCheckout`, quando `!isAuthenticated`: manter o link/redirecionamento de login existente e adicionar um segundo CTA \"Criar conta e assinar\" apontando para `/cadastro?plan=${plan}&billing=${billing}${referralCode ? `&ref=${referralCode}` : ''}`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Tornar CadastroPage consciente da query string",
+      "details": "Em `src/app/(auth)/cadastro/page.tsx`, envolver a leitura de `useSearchParams()` em `<Suspense>` (AGENTS.md exige isso) e repassar `plan`/`billing`/`ref` como props para `RegisterForm`, validando os valores contra os enums esperados antes de repassar.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar manualmente os dois caminhos",
+      "details": "Deslogado, acessar `/planos`, clicar em \"Criar conta e assinar\" no plano Premium anual, confirmar que `/cadastro?plan=premium&billing=annual` carrega normalmente. Acessar `/cadastro` direto (sem query string) e confirmar que nada mudou visualmente.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`useSearchParams()` exige `<Suspense>` no componente pai (AGENTS.md) — `CadastroPage` hoje é um componente síncrono simples e precisa desse ajuste estrutural.",
+    "Esta task só prepara a propagação do plano — a TASK-199 é quem efetivamente usa esses valores para abrir o checkout embutido."
+  ]
+}

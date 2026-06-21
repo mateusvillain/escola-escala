@@ -1363,5 +1363,40 @@
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-195.json",
     "passes": false
+  },
+  {
+    "id": "TASK-196",
+    "title": "Suporte a ui_mode 'embedded' no checkout de assinatura",
+    "category": "integration",
+    "specFilePath": ".agent/tasks/TASK-196.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-197",
+    "title": "Componente EmbeddedCheckoutForm reutilizável",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-197.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-198",
+    "title": "Propagar plano escolhido de /planos para /cadastro",
+    "category": "ui-ux",
+    "specFilePath": ".agent/tasks/TASK-198.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-199",
+    "title": "Cadastro com checkout integrado (Embedded Checkout)",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-199.json",
+    "passes": false
+  },
+  {
+    "id": "TASK-200",
+    "title": "Rota de retorno (fallback) do checkout embutido",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/TASK-200.json",
+    "passes": false
   }
 ]
