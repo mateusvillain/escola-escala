@@ -1,10 +1,10 @@
 {
   "id": "TASK-149",
-  "title": "Página de retorno com estado \"pagamento pendente\" para Pix/Boleto",
+  "title": "Página de retorno com estado \"pagamento pendente\" para Boleto",
   "category": "ui-ux",
-  "description": "A página de retorno da compra avulsa (`/cursos/[slug]?purchase=success`) hoje assume sucesso imediato. Para Pix/Boleto, o pagamento pode levar minutos (Pix) ou dias (Boleto) para confirmar — a UI precisa comunicar isso e atualizar o acesso assim que a confirmação chegar (TASK-148).",
+  "description": "A página de retorno da compra avulsa (`/cursos/[slug]?purchase=success`) hoje assume sucesso imediato. Para Boleto, o pagamento pode levar até 3 dias úteis para confirmar — a UI precisa comunicar isso e atualizar o acesso assim que a confirmação chegar (TASK-148).",
   "acceptanceCriteria": [
-    "Compra avulsa com Pix/Boleto retorna para um estado que comunica \"pagamento em processamento\", distinto do estado de sucesso imediato usado pelo cartão",
+    "Compra avulsa com Boleto retorna para um estado que comunica \"pagamento em processamento\", distinto do estado de sucesso imediato usado pelo cartão",
     "Mensagem específica para Boleto menciona prazo de compensação (até 3 dias úteis)",
     "Após a confirmação do pagamento (webhook da TASK-148), o aluno ganha acesso ao curso sem ação manual — basta recarregar a página ou acessar o dashboard"
   ],
@@ -18,13 +18,13 @@
     {
       "step": 2,
       "description": "Atualizar a página de curso para o estado pendente",
-      "details": "Em `src/app/cursos/[slug]/page.tsx`, ao detectar `purchase=pending` (ou matrícula ainda inexistente após retorno do checkout), exibir mensagem de \"pagamento em processamento\" em vez do CTA de compra, com texto adaptado para Pix (minutos) e Boleto (até 3 dias úteis).",
+      "details": "Em `src/app/cursos/[slug]/page.tsx`, ao detectar `purchase=pending` (ou matrícula ainda inexistente após retorno do checkout), exibir mensagem de \"pagamento em processamento\" em vez do CTA de compra, com texto informando o prazo de compensação do Boleto (até 3 dias úteis).",
       "pass": false
     },
     {
       "step": 3,
-      "description": "Validar manualmente com Pix em modo teste",
-      "details": "Completar uma compra com Pix em modo teste, confirmar o pagamento (Stripe permite simular confirmação de Pix em test mode) e verificar que a página passa do estado pendente para acesso liberado ao recarregar.",
+      "description": "Validar manualmente com Boleto em modo teste",
+      "details": "Completar uma compra com Boleto em modo teste, marcar o boleto como pago (Stripe permite simular isso em test mode) e verificar que a página passa do estado pendente para acesso liberado ao recarregar.",
       "pass": false
     }
   ],

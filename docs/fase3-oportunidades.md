@@ -20,7 +20,7 @@ O que ficou explicitamente fora de escopo desde o PRD original e nunca foi revis
 ## 1. Monetização e expansão de mercado
 
 - **Gestão B2B / licenciamento corporativo.** Hoje `UserSubscription` é 1:1 com `User` — uma assinatura por pessoa. Para B2B, o modelo natural é uma entidade `Organization` com seats: um cliente Stripe por organização, N usuários vinculados, painel de admin da própria organização (convidar/remover membros, ver consumo). A lógica de acesso por plano em `src/lib/access.ts` é reaproveitável quase integralmente — só muda a origem do "direito de acesso" (organização em vez de assinatura individual). É a maior alavanca de receita do roadmap atual: ticket médio de venda B2B é ordens de magnitude maior que assinatura individual.
-- **Pix e Boleto via Stripe.** Hoje o checkout só aceita cartão de crédito. Stripe já suporta Pix e Boleto nativamente para clientes BR — relevante porque parte significativa do público brasileiro não tem ou prefere não usar cartão de crédito para cobrança recorrente. Reaproveita o checkout existente (`POST /api/subscriptions/checkout`), é mudança de configuração de payment methods, não de arquitetura.
+- **Boleto via Stripe (Pix adiado).** Hoje o checkout só aceita cartão de crédito. Stripe já suporta Boleto nativamente para clientes BR — relevante porque parte significativa do público brasileiro não tem ou prefere não usar cartão de crédito. Reaproveita o checkout existente (`POST /api/subscriptions/checkout`), é mudança de configuração de payment methods, não de arquitetura. Pix foi adiado desta rodada: habilitar exige convite da própria Stripe para contas BR — não é um toggle simples no Dashboard — ver `docs/pix-habilitacao.md` para o passo a passo de solicitação.
 - **Trilhas e bundles de cursos.** A estrutura hoje é plana — um curso por vez, sem relação entre eles. Agrupar cursos relacionados em trilha (sequência com progressão) ou bundle (pacote com desconto, reaproveitando o fluxo de compra avulsa já existente em `TASK-95-99`) aumenta o ticket médio e dá ao aluno um motivo claro para continuar na plataforma após o primeiro curso.
 
 ## 2. Conteúdo
@@ -38,6 +38,6 @@ O que ficou explicitamente fora de escopo desde o PRD original e nunca foi revis
 
 ## Como priorizar
 
-1. Pix/Boleto — esforço baixo, impacto direto em conversão no mercado brasileiro.
+1. Boleto — esforço baixo, impacto direto em conversão no mercado brasileiro. (Pix adiado — ver `docs/pix-habilitacao.md`.)
 2. B2B — maior potencial de receita, mas exige modelagem nova (`Organization`) e validação de demanda antes de investir.
 3. Demais itens (trilhas, conteúdo programado, confiabilidade) conforme sinal de uso real após o lançamento.

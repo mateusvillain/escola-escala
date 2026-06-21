@@ -5,7 +5,7 @@
   "description": "Endpoint de compra avulsa do bundle de uma trilha, espelhando `POST /api/courses/[slug]/purchase` (TASK-95 a 99), mas matriculando o aluno em todos os cursos da trilha de uma vez (TASK-173) em vez de em um único curso.",
   "acceptanceCriteria": [
     "`POST /api/tracks/[slug]/purchase` exige usuário autenticado e trilha publicada com `isBundle: true` e `stripePriceIdBundle` definido",
-    "Cria Stripe Checkout Session `mode: 'payment'` com `payment_method_types: ['card', 'pix', 'boleto']` (reaproveitando a decisão da TASK-147) e `metadata: { userId, trackId }`",
+    "Cria Stripe Checkout Session `mode: 'payment'` com `payment_method_types: ['card', 'boleto']` (reaproveitando a decisão da TASK-147; Pix adiado, ver docs/pix-habilitacao.md) e `metadata: { userId, trackId }`",
     "Retorna 403 com mensagem clara se a trilha não estiver configurada para venda de bundle"
   ],
   "steps": [
@@ -17,8 +17,8 @@
     },
     {
       "step": 2,
-      "description": "Incluir Pix e Boleto",
-      "details": "Incluir `payment_method_types: ['card', 'pix', 'boleto']` na Checkout Session, já que este fluxo também é `mode: 'payment'` (mesma situação da TASK-147).",
+      "description": "Incluir Boleto",
+      "details": "Incluir `payment_method_types: ['card', 'boleto']` na Checkout Session, já que este fluxo também é `mode: 'payment'` (mesma situação da TASK-147). Pix fica fora desta rodada.",
       "pass": false
     },
     {

@@ -38,8 +38,8 @@ Cobrado por cima da taxa de cartão nacional quando o cartão foi emitido fora d
 
 O método mais barato disponível, mas com duas restrições importantes para o projeto:
 
-- **Acesso por convite:** contas Stripe sediadas no Brasil precisam ser convidadas pela própria Stripe para habilitar Pix — não é um toggle simples no Dashboard. O critério usual é ter histórico de transações processadas nos últimos ~60 dias em bom standing. **Isso bloqueia o início da TASK-147 até o convite ser concedido** — vale abrir o pedido de acesso à Stripe com antecedência, antes de depender da feature no roadmap.
-- **Sem suporte a cobrança recorrente para contas BR:** existe um produto separado, "Pix Automático", que permite recorrência (cliente autoriza uma instrução no app do banco, cobranças futuras acontecem sem ação manual) — mas a documentação oficial da Stripe confirma que **Pix Automático não está disponível para contas brasileiras**. Isso **confirma a decisão já estrutural da TASK-150**: Pix fica restrito à compra avulsa (`mode: 'payment'`, TASK-147/148) e ao bundle de trilha (TASK-172), nunca à assinatura recorrente — não é uma limitação de implementação, é uma limitação da própria Stripe para contas BR.
+- **Acesso por convite:** contas Stripe sediadas no Brasil precisam ser convidadas pela própria Stripe para habilitar Pix — não é um toggle simples no Dashboard. O critério usual é ter histórico de transações processadas nos últimos ~60 dias em bom standing. **Por isso, Pix foi adiado da Fase 3** — TASK-147 a 150 e TASK-172 cobrem só Boleto por ora. Ver `docs/pix-habilitacao.md` para o passo a passo de solicitação do convite e para os pontos exatos do código a reverter quando ele for concedido.
+- **Sem suporte a cobrança recorrente para contas BR:** existe um produto separado, "Pix Automático", que permite recorrência (cliente autoriza uma instrução no app do banco, cobranças futuras acontecem sem ação manual) — mas a documentação oficial da Stripe confirma que **Pix Automático não está disponível para contas brasileiras**. Por isso, mesmo quando Pix for habilitado, ele deve ficar restrito a pagamento único (compra avulsa e bundle de trilha), nunca à assinatura recorrente — não é uma limitação de implementação, é uma limitação da própria Stripe para contas BR.
 
 **Exemplo:** compra avulsa de curso (R$ 197,00) → taxa de **R$ 2,34** → líquido de **R$ 194,66** (vs. R$ 188,75 líquido no cartão — Pix entrega ~R$ 6 mais por venda no mesmo preço)
 
@@ -93,12 +93,12 @@ Aplicável quando a moeda de liquidação da conta Stripe difere da moeda da cob
 
 | Item | Onde afeta | Observação |
 |---|---|---|
-| Pix exige convite da Stripe para contas BR | TASK-147, TASK-148 | Solicitar o convite com antecedência — não é configuração imediata via Dashboard |
-| Pix não tem suporte a recorrência para contas BR (Pix Automático indisponível) | TASK-150 | Confirma que a decisão correta é não tentar habilitar Pix na assinatura — é limitação da Stripe, não escolha de produto |
+| Pix exige convite da Stripe para contas BR — adiado da Fase 3 | `docs/pix-habilitacao.md` | Solicitar o convite com antecedência; reabilitar em TASK-147/148/172 quando concedido |
+| Pix não tem suporte a recorrência para contas BR (Pix Automático indisponível) | `docs/pix-habilitacao.md` | Mesmo após o convite, Pix deve ficar restrito a pagamento único — nunca habilitar na assinatura recorrente |
 | Boleto suporta `mode: 'subscription'`, com confirmação em ~1 dia útil | TASK-150 | A investigação pode concluir "habilitar", mas o tratamento de `past_due` precisa tolerar a janela de 1+ dia útil sem bloquear acesso prematuramente |
 | Taxa fixa do Boleto (R$ 3,45) é desproporcional em valores baixos | TASK-150 | Vale considerar habilitar Boleto recorrente só no plano anual e/ou B2B, não no plano mensal Básico, dependendo da decisão de produto |
 | Taxa de Billing (0,7%) incide sobre o volume de seats B2B | TASK-162, TASK-163 | Calcular o preço por seat já considerando essa taxa adicional, que não existe na compra avulsa |
-| Pix/Boleto não têm chargeback | TASK-147 a 150 | Reduz risco financeiro de fraude pós-consumo de conteúdo, em comparação com cartão |
+| Boleto não tem chargeback (Pix também não, quando habilitado) | TASK-147, TASK-148 | Reduz risco financeiro de fraude pós-consumo de conteúdo, em comparação com cartão |
 
 ---
 
@@ -115,4 +115,4 @@ STRIPE_PRICE_ID_B2B_SEAT_ANNUAL=          # nova, Fase 3 (TASK-146)
 **Onde confirmar as taxas reais da conta:**
 1. **Dashboard → Settings → Pricing & balance**: mostra a taxa efetiva negociada para a conta (pode diferir do preço de lista público se houver negociação por volume)
 2. **Dashboard → Payments → Payouts**: mostra o valor líquido repassado por transação, já com a taxa deduzida
-3. **Dashboard → Settings → Payment methods**: onde Pix e Boleto são habilitados/desabilitados por método (sujeito ao convite, no caso do Pix)
+3. **Dashboard → Settings → Payment methods**: onde Boleto é habilitado/desabilitado; Pix também aparece aqui, mas só fica disponível para ativação após o convite da Stripe (ver `docs/pix-habilitacao.md`)

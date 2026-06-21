@@ -5,7 +5,7 @@
   "description": "Estender `src/lib/stripe-handlers.ts` para, ao confirmar o pagamento de um bundle de trilha (`metadata.trackId`), criar `CourseEnrollment` para cada curso da trilha de uma vez, em vez de para um único curso.",
   "acceptanceCriteria": [
     "`handleOneTimeCoursePurchase` (ou uma nova função `handleTrackBundlePurchase`) reconhece `session.metadata.trackId` e cria `CourseEnrollment` (via `upsert`, idempotente) para cada curso listado em `CourseTrackItem` da trilha",
-    "Pagamento via Pix/Boleto segue o mesmo fluxo assíncrono já tratado nas TASK-147/148 (matrícula só ocorre em `payment_status: 'paid'` ou no evento `async_payment_succeeded`)",
+    "Pagamento via Boleto segue o mesmo fluxo assíncrono já tratado nas TASK-147/148 (matrícula só ocorre em `payment_status: 'paid'` ou no evento `async_payment_succeeded`)",
     "Reentrega do webhook pelo Stripe não duplica nem falha (idempotente, mesmo padrão já usado para compra avulsa individual)"
   ],
   "steps": [

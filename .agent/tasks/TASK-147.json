@@ -1,29 +1,22 @@
 {
   "id": "TASK-147",
-  "title": "Habilitar Pix e Boleto na Checkout Session de compra avulsa",
+  "title": "Habilitar Boleto na Checkout Session de compra avulsa",
   "category": "integration",
-  "description": "Adicionar Pix e Boleto como métodos de pagamento na Checkout Session de compra avulsa de curso (`mode: 'payment'`), permitindo que alunos brasileiros sem cartão de crédito completem a compra.",
+  "description": "Adicionar Boleto como método de pagamento na Checkout Session de compra avulsa de curso (`mode: 'payment'`), permitindo que alunos brasileiros sem cartão de crédito completem a compra. Pix foi adiado desta rodada — habilitar exige convite da Stripe para contas BR, não é configuração direta de Dashboard (ver `docs/pix-habilitacao.md`) — e pode ser adicionado depois reaproveitando a mesma Checkout Session.",
   "acceptanceCriteria": [
-    "Pix e Boleto habilitados como payment methods na conta Stripe para BRL/BR (TASK-146)",
-    "`stripe.checkout.sessions.create` em `src/app/api/courses/[slug]/purchase/route.ts` inclui `payment_method_types: ['card', 'pix', 'boleto']`",
-    "Checkout hospedado pelo Stripe exibe as opções Pix e Boleto para o comprador, junto com cartão",
-    "Compra com Pix em modo teste exibe QR code/código copia-e-cola gerado pelo próprio Stripe Checkout"
+    "Boleto habilitado como payment method na conta Stripe para BRL/BR (TASK-146)",
+    "`stripe.checkout.sessions.create` em `src/app/api/courses/[slug]/purchase/route.ts` inclui `payment_method_types: ['card', 'boleto']`",
+    "Checkout hospedado pelo Stripe exibe a opção Boleto, junto com cartão"
   ],
   "steps": [
     {
       "step": 1,
       "description": "Adicionar payment_method_types à sessão de compra avulsa",
-      "details": "Em `src/app/api/courses/[slug]/purchase/route.ts`, adicionar `payment_method_types: ['card', 'pix', 'boleto']` ao objeto passado para `stripe.checkout.sessions.create`.",
+      "details": "Em `src/app/api/courses/[slug]/purchase/route.ts`, adicionar `payment_method_types: ['card', 'boleto']` ao objeto passado para `stripe.checkout.sessions.create`.",
       "pass": false
     },
     {
       "step": 2,
-      "description": "Testar compra avulsa com Pix em modo teste",
-      "details": "Completar uma compra avulsa de curso escolhendo Pix no Checkout. Confirmar que o Stripe exibe o QR code e que o modo teste permite simular confirmação do pagamento.",
-      "pass": false
-    },
-    {
-      "step": 3,
       "description": "Testar compra avulsa com Boleto em modo teste",
       "details": "Completar uma compra avulsa escolhendo Boleto. Confirmar que o Checkout gera a linha digitável/PDF do boleto de teste.",
       "pass": false
@@ -32,7 +25,8 @@
   "dependencies": ["TASK-146"],
   "estimatedComplexity": "low",
   "technicalNotes": [
-    "Pix e Boleto só têm suporte garantido em `mode: 'payment'` (pagamento único) — não adicionar estes métodos na Checkout Session de assinatura (`mode: 'subscription'`) sem a investigação separada da TASK-150.",
-    "Sem o tratamento de webhooks assíncronos da TASK-148, a matrícula do aluno pode nunca ocorrer para pagamentos via Pix/Boleto, mesmo com o método habilitado aqui."
+    "Boleto só tem suporte garantido em `mode: 'payment'` (pagamento único) — não adicionar este método na Checkout Session de assinatura (`mode: 'subscription'`) sem a investigação separada da TASK-150.",
+    "Sem o tratamento de webhooks assíncronos da TASK-148, a matrícula do aluno pode nunca ocorrer para pagamentos via Boleto.",
+    "Pix foi adiado da Fase 3 — ver `docs/pix-habilitacao.md` para os pré-requisitos de habilitação e os pontos a reverter (aqui e em TASK-148, TASK-149, TASK-172) quando o convite da Stripe for concedido."
   ]
 }
