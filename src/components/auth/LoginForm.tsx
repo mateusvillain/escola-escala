@@ -20,18 +20,6 @@ function LoginFormInner() {
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
-  const [isFormValid, setIsFormValid] = useState(false)
-
-  function handleFormInput() {
-    const form = formRef.current
-    if (!form) return
-    const values = {
-      email: readShadowValue(form, 'email'),
-      password: readShadowValue(form, 'password'),
-    }
-    const result = loginSchema.safeParse(values)
-    setIsFormValid(result.success)
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -46,7 +34,10 @@ function LoginFormInner() {
     }
 
     const parsed = loginSchema.safeParse(values)
-    if (!parsed.success) return
+    if (!parsed.success) {
+      setLoginError('Preencha e-mail e senha corretamente.')
+      return
+    }
 
     setLoading(true)
 
@@ -101,7 +92,6 @@ function LoginFormInner() {
               name="email"
               placeholder="email@exemplo.com"
               required
-              onInput={handleFormInput}
             />
             <lui-input
               label="Senha"
@@ -109,7 +99,6 @@ function LoginFormInner() {
               name="password"
               placeholder="Sua senha"
               required
-              onInput={handleFormInput}
             />
             <lui-flex justify="end">
               <Link href="/recuperar-senha" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
@@ -121,7 +110,7 @@ function LoginFormInner() {
               type="submit"
               loading={loading}
               loadingText="Entrando..."
-              disabled={!isFormValid || loading}
+              disabled={loading}
               block
               onClick={() => formRef.current?.requestSubmit()}
             />
