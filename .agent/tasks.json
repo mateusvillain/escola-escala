@@ -1312,22 +1312,22 @@
     "id": "TASK-188",
     "title": "Instalar e configurar @sentry/nextjs",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-188.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-188.json",
+    "passes": true
   },
   {
     "id": "TASK-189",
     "title": "Capturar erros de rotas críticas no Sentry",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-189.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-189.json",
+    "passes": true
   },
   {
     "id": "TASK-190",
     "title": "Configurar alerta de erro em produção no Sentry",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-190.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-190.json",
+    "passes": true
   },
   {
     "id": "TASK-191",
@@ -1398,5 +1398,12 @@
     "category": "api-endpoint",
     "specFilePath": ".agent/tasks/TASK-200.json",
     "passes": true
+  },
+  {
+    "id": "TASK-201",
+    "title": "Restringir o alerta de erro do Sentry ao ambiente de produção",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-201.json",
+    "passes": false
   }
 ]

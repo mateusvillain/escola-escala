@@ -1,0 +1,37 @@
+{
+  "id": "TASK-190",
+  "title": "Configurar alerta de erro em produção no Sentry",
+  "category": "functional",
+  "description": "Configurar notificação automática quando erros ocorrerem em produção, para que a equipe seja avisada sem precisar checar o dashboard do Sentry manualmente.",
+  "acceptanceCriteria": [
+    "Alert rule criada no projeto Sentry para o ambiente de produção (ex.: \"notificar a cada novo erro não visto antes\" ou limiar de frequência configurado)",
+    "Notificação configurada para um canal acessível à equipe (e-mail, ou outro canal disponível)",
+    "Alerta validado disparando o erro de teste da TASK-188 (ou um novo) e confirmando o recebimento da notificação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a Alert Rule",
+      "details": "Feito em 2026-06-22 via dashboard do Sentry: regra de Issues criada no projeto `plataforma-escala` com a condição \"A new issue is created\". O Environment ficou em \"All Environments\" (interino) em vez de `production`, porque esse ambiente ainda não existe no Sentry — só passa a aparecer no dropdown depois do primeiro evento real, o que depende do deploy de produção (TASK-82, ainda pendente). Restringir para `production` especificamente é o objeto da TASK-201.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Configurar o canal de notificação",
+      "details": "Feito em 2026-06-22: ação da regra configurada para um destinatário explícito (Member/Team) em vez do padrão heurístico (Suggested Assignees/Recently Active Members), garantindo entrega num e-mail conhecido da equipe.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Validar o alerta",
+      "details": "Pendente. A validação final em produção só é possível depois do primeiro deploy real (TASK-82) — ver TASK-201, que cobre tanto restringir o Environment quanto essa validação.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-188"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "PENDENTE em 2026-06-21 — bloqueado por acesso, não por implementação. Configurar uma Alert Rule e o canal de notificação é uma ação no dashboard do Sentry (Settings → Alerts), e o único `SENTRY_AUTH_TOKEN` disponível no `.env.local` tem escopo `org:ci` (confirmado por um 403 ao tentar uma chamada de leitura na API do Sentry) — sem `alerts:write`/`project:write`, não é possível criar a regra via API. Não bloqueia o restante do Grupo 10 (TASK-188 e TASK-189 já passam). Para concluir: (1) no dashboard, ir em Alerts → Create Alert Rule no projeto `plataforma-escala`, condição 'A new issue is created' (ou limiar de frequência desejado) restrita ao ambiente de produção; (2) vincular a um canal (e-mail da equipe ou integração disponível); (3) disparar um erro de teste em produção e confirmar o recebimento da notificação. Alternativa: gerar um token com escopo `alerts:write`/`project:write` e retomar esta task para fazer via API do Sentry.",
+    "RESOLVIDO em 2026-06-22: regra criada manualmente via dashboard por quem administra a conta Sentry, contornando a limitação do token (que continua só com escopo `org:ci` — isso não mudou). Environment ficou em \"All Environments\" porque `production` ainda não existe no Sentry (a aplicação nunca rodou em produção de fato). Restringir o Environment para `production` e validar a notificação em produção ficou registrado na TASK-201 (dependência declarada SOMENTE de TASK-190, sem bloquear nenhuma outra task — é follow-up pós-deploy, retomável quando `production` aparecer no dropdown de Environment do Sentry)."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-188",
+  "title": "Instalar e configurar @sentry/nextjs",
+  "category": "integration",
+  "description": "Hoje não há nenhuma ferramenta de observação de erro além de log de console. Instalar e configurar o Sentry como pré-requisito básico de operação assim que houver usuários reais em produção.",
+  "acceptanceCriteria": [
+    "`@sentry/nextjs` instalado e configurado via wizard oficial, gerando `sentry.client.config.ts`, `sentry.server.config.ts` e `sentry.edge.config.ts` (ou o padrão equivalente da versão instalada)",
+    "`SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` lidos do `.env.local` (placeholders já adicionados na TASK-146)",
+    "Erro de teste disparado propositalmente (ex.: rota de debug temporária) aparece no projeto Sentry",
+    "Source maps configurados para upload no build de produção (via `SENTRY_AUTH_TOKEN`), permitindo stack traces legíveis"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Rodar o wizard de instalação",
+      "details": "Rodar `npx @sentry/wizard@latest -i nextjs --saas --org escola-escala --project plataforma-escala`, seguindo as instruções para o projeto Next.js (App Router) já existente.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Conferir a configuração gerada",
+      "details": "Revisar os arquivos de configuração gerados, garantindo que lêem `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` do ambiente em vez de valores hardcoded. O wizard gerou os 3 arquivos com o DSN hardcoded (`sentry.server.config.ts`, `sentry.edge.config.ts`, `src/instrumentation-client.ts`) — corrigido para `process.env.SENTRY_DSN`/`process.env.NEXT_PUBLIC_SENTRY_DSN` em 2026-06-21.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Disparar um erro de teste",
+      "details": "Usadas as rotas de debug que o próprio wizard gerou (`/sentry-example-page` e `/api/sentry-example-api`) em vez de criar uma nova: `curl http://localhost:3000/api/sentry-example-api` retornou 500 com a exceção `SentryExampleAPIError` lançada propositalmente, confirmando que a instrumentação captura a exceção (via `onRequestError` em `src/instrumentation.ts`) com um DSN real (não placeholder). Ambas as rotas foram removidas do código em 2026-06-21, antes do PR. NÃO foi possível confirmar visualmente a chegada do evento no dashboard do Sentry (https://escola-escala.sentry.io/issues/?project=4511606330687488) — o `SENTRY_AUTH_TOKEN` disponível tem escopo `org:ci` (somente upload de source maps/criação de release, confirmado por um 403 ao tentar ler issues via API), sem permissão de leitura. Confirmação visual final pendente de quem tem acesso ao dashboard.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-146"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Verificação automatizada feita em 2026-06-21: `npx tsc --noEmit`, `npx vitest run` (20/20) e `npx next build` (incluindo o upload de source maps via `runAfterProductionCompile`) passaram sem erros. Falta apenas a confirmação visual do evento de teste no dashboard do Sentry, que requer login na conta (não disponível para o agente)."
+  ]
+}
