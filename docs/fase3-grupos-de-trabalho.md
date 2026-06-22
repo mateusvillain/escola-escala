@@ -21,18 +21,18 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 3. Dentro de cada grupo, as tasks devem ser feitas na ordem listada — a ordem já respeita as `dependencies` declaradas em cada `TASK-X.json`.
 4. Os Grupos 2 a 5 (B2B) estão despriorizados e o Grupo 1 (Boleto) foi removido — ambos fora desta ordem de execução — ver "Grupos despriorizados/removidos" ao final deste documento antes de retomá-los.
 
-| #   | Grupo                                              | Tasks          | Depende de        | Branch sugerida                        |
-| --- | -------------------------------------------------- | -------------- | ----------------- | -------------------------------------- |
-| 0   | Pré-requisitos da Fase 3                           | TASK-146       | —                 | (sem PR de código)                     |
-| 1   | ~~Boleto via Stripe~~                              | TASK-147 a 150 | —                 | **removido** — ver seção ao final      |
-| 2-5 | ~~B2B — Modelos, Membros, Cobrança, Painel~~       | TASK-151 a 166 | —                 | **despriorizado** — ver seção ao final |
-| 6   | Trilhas e bundles de cursos                        | TASK-167 a 173 | Grupo 0           | `feat/fase3-trilhas-bundles`           |
-| 7   | Conteúdo programado (drip content)                 | TASK-174 a 178 | Grupo 0           | `feat/fase3-conteudo-programado`       |
-| 8   | Testes E2E com Playwright                          | TASK-179 a 184 | Grupo 0           | `feat/fase3-testes-e2e`                |
-| 9   | Rate limiting distribuído                          | TASK-185 a 187 | Grupo 0 + TASK-82 | `feat/fase3-rate-limit-redis`          |
-| 10  | Monitoramento de erro (Sentry)                     | TASK-188 a 190 | Grupo 0           | `feat/fase3-monitoramento-erro`        |
-| 11  | Event tracking de produto                          | TASK-191 a 195 | Grupo 0           | `feat/fase3-event-tracking`            |
-| 12  | Checkout integrado ao cadastro (Embedded Checkout) | TASK-196 a 200 | —                 | `feat/fase3-checkout-cadastro`         |
+| #   | Grupo                                              | Tasks          | Depende de        | Branch sugerida                        | Status               |
+| --- | -------------------------------------------------- | -------------- | ----------------- | -------------------------------------- | -------------------- |
+| 0   | Pré-requisitos da Fase 3                           | TASK-146       | —                 | (sem PR de código)                     | ✅ Concluído          |
+| 1   | ~~Boleto via Stripe~~                              | TASK-147 a 150 | —                 | **removido** — ver seção ao final      | 🚫 Removido           |
+| 2-5 | ~~B2B — Modelos, Membros, Cobrança, Painel~~       | TASK-151 a 166 | —                 | **despriorizado** — ver seção ao final | 🚫 Despriorizado      |
+| 6   | Trilhas e bundles de cursos                        | TASK-167 a 173 | Grupo 0           | `feat/fase3-trilhas-bundles`           | ✅ Concluído (PR #20) |
+| 7   | Conteúdo programado (drip content)                 | TASK-174 a 178 | Grupo 0           | `feat/fase3-conteudo-programado`       | ✅ Concluído (PR #21) |
+| 8   | Testes E2E com Playwright                          | TASK-179 a 184 | Grupo 0           | `feat/fase3-testes-e2e`                | ⏳ Pendente           |
+| 9   | Rate limiting distribuído                          | TASK-185 a 187 | Grupo 0 + TASK-82 | `feat/fase3-rate-limit-redis`          | ⏳ Pendente           |
+| 10  | Monitoramento de erro (Sentry)                     | TASK-188 a 190 | Grupo 0           | `feat/fase3-monitoramento-erro`        | ✅ Concluído (PR #19) |
+| 11  | Event tracking de produto                          | TASK-191 a 195 | Grupo 0           | `feat/fase3-event-tracking`            | ⏳ Pendente           |
+| 12  | Checkout integrado ao cadastro (Embedded Checkout) | TASK-196 a 200 | —                 | `feat/fase3-checkout-cadastro`         | ✅ Concluído (PR #18) |
 
 ---
 
