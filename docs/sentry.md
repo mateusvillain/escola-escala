@@ -76,18 +76,16 @@ sinal de que vale a pena investigar com prioridade, mesmo que o volume (Events) 
 
 ## Alertas por e-mail
 
-A ideia é que o Sentry avise o time automaticamente por e-mail quando aparecer um erro novo, sem precisar
-ficar checando o dashboard. **Essa configuração ainda não foi feita** (ver `.agent/tasks/TASK-190.json` para o
-detalhe técnico) — hoje é preciso entrar no dashboard manualmente para saber se algo quebrou. Passo a passo
-para configurar quando alguém com acesso de administrador da conta tiver disponibilidade:
+O Sentry já avisa o time automaticamente quando aparece um erro novo (configurado em 2026-06-22, ver
+`.agent/tasks/TASK-190.json`) — condição **"A new issue is created"**, notificando um e-mail fixo da equipe.
 
-1. No dashboard, ir em **Alerts** (menu lateral) → **Create Alert**.
-2. Escolher o projeto **plataforma-escala**.
-3. Definir a condição — a mais simples e recomendada para começar é **"A new issue is created"** (avisa toda
-   vez que aparece um tipo de erro novo, não repete para erros já conhecidos que continuam acontecendo).
-4. Restringir ao ambiente **production**, para não receber alerta de testes.
-5. Escolher para onde a notificação vai (e-mail da equipe é o mais simples).
-6. Salvar. A partir daí, qualquer erro novo em produção chega por e-mail.
+**Limitação atual:** o alerta está com o Environment em **"All Environments"**, não restrito a `production`.
+Isso é interino, não um esquecimento: o ambiente `production` só passa a existir no Sentry depois do primeiro
+evento real, e a aplicação ainda não foi implantada em produção (deploy na Vercel pendente). Até esse deploy
+acontecer, qualquer erro disparado em ambiente de desenvolvimento local também gera o e-mail de alerta — pode
+gerar algum ruído, mas garante que o canal já está funcionando desde já. Restringir o filtro para `production`
+e validar o alerta de fato em produção está registrado em `.agent/tasks/TASK-201.json`, para ser feito depois
+do primeiro deploy.
 
 ## Quem deve ter acesso
 

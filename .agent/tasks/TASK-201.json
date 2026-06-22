@@ -1,0 +1,43 @@
+{
+  "id": "TASK-201",
+  "title": "Restringir o alerta de erro do Sentry ao ambiente de produção",
+  "category": "functional",
+  "description": "A Alert Rule da TASK-190 (\"Notificar novo erro\") foi criada em 2026-06-22 com o filtro de Environment em \"All Environments\" em vez de \"production\", porque o ambiente `production` ainda não existe no Sentry — o dropdown de Environment só lista ambientes que já enviaram pelo menos um evento real, e a aplicação nunca rodou em produção (TASK-82, deploy na Vercel, ainda pendente). Esta task fecha essa lacuna: restringe o filtro para `production` assim que esse ambiente passar a existir, e faz a validação final de ponta a ponta em produção. Não é bloqueante para nenhuma outra task — é follow-up de configuração, a ser feito a qualquer momento depois do primeiro deploy de produção, sem pressa.",
+  "acceptanceCriteria": [
+    "Confirmado que `production` já aparece como opção no dropdown de Environment da Alert Rule (sinal de que pelo menos um evento real de produção já chegou ao Sentry)",
+    "Filtro de Environment da Alert Rule alterado de \"All Environments\" para `production`",
+    "Validado que um erro disparado em ambiente de desenvolvimento local NÃO gera mais notificação após a mudança (confirma que o filtro está de fato restringindo, não só decorativo)",
+    "Validado que um erro de teste disparado em produção gera a notificação esperada no canal configurado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Confirmar que o ambiente production existe no Sentry",
+      "details": "No dashboard, abrir a Alert Rule criada na TASK-190 (Issues → Alert Rules) e checar o dropdown de Environment em \"Filter Issues\". Só prosseguir quando `production` aparecer na lista — antes disso, esta task continua pendente, sem ação possível.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Restringir o filtro de Environment",
+      "details": "Trocar o valor de \"All Environments\" para `production` e salvar a regra.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Validar que o ruído de desenvolvimento parou",
+      "details": "Disparar um erro de teste localmente (`npx next dev`) e confirmar que NENHUMA notificação chega — só assim se confirma que o filtro de environment está realmente em vigor.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Validar o alerta em produção",
+      "details": "Disparar um erro de teste real em produção (reaproveitando o padrão da TASK-188) e confirmar o recebimento da notificação no canal configurado.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-190"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Criada em 2026-06-22 como follow-up da TASK-190, que ficou com o Environment em \"All Environments\" por não haver alternativa enquanto produção não existir no Sentry. Dependência declarada SOMENTE de TASK-190 (não de TASK-82) por decisão deliberada: esta task não deve bloquear nem ser bloqueante de nenhuma outra — o vínculo real com o deploy de produção (TASK-82) é uma condição de execução de fato (não dá pra fazer o step 1 antes do primeiro deploy), não uma dependência formal. Retomar quando alguém notar `production` disponível no dropdown de Environment do Sentry — não precisa ser logo após o deploy, só antes disso ser inútil esperar."
+  ]
+}

@@ -1398,5 +1398,12 @@
     "category": "api-endpoint",
     "specFilePath": ".agent/tasks/TASK-200.json",
     "passes": true
+  },
+  {
+    "id": "TASK-201",
+    "title": "Restringir o alerta de erro do Sentry ao ambiente de produção",
+    "category": "functional",
+    "specFilePath": ".agent/tasks/TASK-201.json",
+    "passes": false
   }
 ]
