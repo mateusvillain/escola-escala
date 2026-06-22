@@ -15,25 +15,25 @@
       "step": 1,
       "description": "Criar a listagem",
       "details": "Criar `src/app/admin/trilhas/page.tsx` e um componente `TrackTable`, espelhando `CourseTable` (`src/components/admin/CourseTable.tsx`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar o formulário de trilha",
       "details": "Criar `src/components/admin/TrackForm.tsx` (react-hook-form, native inputs, mesmo padrão de `CourseForm`) usado em `/admin/trilhas/novo` e `/admin/trilhas/[id]`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar o gerenciador de cursos da trilha",
       "details": "Criar `src/components/admin/TrackCourseList.tsx`, espelhando `ModuleList`: busca/seleção de curso publicado existente para adicionar, botão de remover, reordenação inline. Refetch via `GET /api/admin/tracks/[id]` após cada mutação, com `onUpdate` callback igual ao padrão de `ModuleList`/`LessonList`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Adicionar link na navegação admin",
       "details": "Adicionar item \"Trilhas\" em `LINKS` de `src/components/admin/AdminSidebar.tsx`, entre \"Cursos\" e \"Usuários\".",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-169"],

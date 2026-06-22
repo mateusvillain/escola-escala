@@ -16,19 +16,19 @@
       "step": 1,
       "description": "Criar endpoints de CRUD de trilha",
       "details": "Criar `src/app/api/admin/tracks/route.ts` (GET/POST) e `src/app/api/admin/tracks/[id]/route.ts` (GET/PATCH/DELETE), protegidos por `requireRole(request, ['admin'])`, seguindo a estrutura de `src/app/api/admin/courses/route.ts`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar regra de publicação",
       "details": "No `PATCH` de `/api/admin/tracks/[id]`, ao alterar `status` para `published`, validar `items.length >= 2`, retornando 400 caso contrário.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar endpoints de gestão de cursos da trilha",
       "details": "Criar `src/app/api/admin/tracks/[id]/courses/route.ts` (POST, `order = count + 1`) e `src/app/api/admin/tracks/[id]/courses/[courseId]/route.ts` (PATCH para reordenar com reordenação dos irmãos, DELETE com gap-closing), espelhando a lógica de `PATCH /api/admin/modules/[id]` e `DELETE /api/admin/modules/[id]`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-167"],

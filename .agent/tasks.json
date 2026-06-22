@@ -1166,49 +1166,49 @@
     "title": "Modelos CourseTrack e CourseTrackItem",
     "category": "data-model",
     "specFilePath": ".agent/tasks/TASK-167.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-168",
     "title": "Campos de bundle (pagamento único) em CourseTrack",
     "category": "data-model",
     "specFilePath": ".agent/tasks/TASK-168.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-169",
     "title": "CRUD admin de trilhas e seus cursos",
     "category": "api-endpoint",
     "specFilePath": ".agent/tasks/TASK-169.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-170",
     "title": "Tela admin /admin/trilhas",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-170.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-171",
     "title": "Página pública /trilhas/[slug]",
     "category": "ui-ux",
     "specFilePath": ".agent/tasks/TASK-171.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-172",
     "title": "Checkout de bundle de trilha",
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-172.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-173",
     "title": "Matrícula em lote nos cursos da trilha ao comprar o bundle",
     "category": "functional",
     "specFilePath": ".agent/tasks/TASK-173.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-174",

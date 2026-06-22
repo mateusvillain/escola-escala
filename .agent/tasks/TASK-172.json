@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/tracks/[slug]/purchase/route.ts`, copiando a estrutura de `src/app/api/courses/[slug]/purchase/route.ts` e adaptando para `CourseTrack`/`stripePriceIdBundle`. Sem `payment_method_types` customizado — usa o default da conta Stripe (só cartão).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Testar em modo teste",
       "details": "Completar uma compra de bundle em modo teste com cartão e confirmar que o webhook (TASK-173) matricula o aluno em todos os cursos da trilha.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-171"],

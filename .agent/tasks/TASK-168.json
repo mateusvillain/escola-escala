@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Adicionar os campos ao schema",
       "details": "Adicionar `isBundle Boolean @default(false)`, `bundlePriceOneTime Decimal?` e `stripePriceIdBundle String?` ao model `CourseTrack` em `prisma/schema.prisma`, na mesma migration da TASK-167.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar o produto/preço no Stripe",
       "details": "Para cada trilha vendida como bundle, criar manualmente um produto/preço de pagamento único no Stripe Dashboard e preencher `stripePriceIdBundle` no admin (mesmo fluxo manual já usado para `stripePriceIdOneTime` em cursos individuais).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-167"],

@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar o handler de bundle",
       "details": "Em `src/lib/stripe-handlers.ts`, criar `handleTrackBundlePurchase(session)`: buscar `CourseTrackItem` da trilha (`trackId` do metadata) e, para cada `courseId`, fazer `prisma.courseEnrollment.upsert` (mesmo padrão de `handleOneTimeCoursePurchase`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rotear pelo tipo de metadata",
       "details": "No branch `session.mode === 'payment'` de `handleCheckoutSessionCompleted`, checar `session.metadata?.trackId` antes de `session.metadata?.courseId`, chamando o handler correspondente.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-172"],

@@ -92,6 +92,34 @@ model Course {
   enrollments  CourseEnrollment[]
   certificates Certificate[]
   reviews      CourseReview[]
+  trackItems   CourseTrackItem[]
+}
+
+model CourseTrack {
+  id                 String       @id @default(uuid())
+  title              String
+  slug               String       @unique
+  description        String
+  thumbnailUrl       String?
+  status             CourseStatus @default(draft)
+  isBundle           Boolean      @default(false)
+  bundlePriceOneTime Decimal?
+  stripePriceIdBundle String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  items CourseTrackItem[]
+}
+
+model CourseTrackItem {
+  id       String      @id @default(uuid())
+  trackId  String
+  track    CourseTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course      @relation(fields: [courseId], references: [id])
+  order    Int
+
+  @@unique([trackId, courseId])
 }
 
 model Module {

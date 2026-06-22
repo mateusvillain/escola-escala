@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Criar o endpoint público de detalhe",
       "details": "Criar `GET /api/tracks/[slug]` (`src/app/api/tracks/[slug]/route.ts`), retornando a trilha publicada com seus cursos em ordem e, se autenticado, o enrollment/progresso de cada curso para o usuário.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar a página pública",
       "details": "Criar `src/app/trilhas/[slug]/page.tsx`, reaproveitando os componentes de card de curso já usados em `/cursos` e o padrão de barra de progresso do dashboard do aluno.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Adicionar CTA de compra do bundle",
       "details": "Quando `isBundle: true`, exibir preço (`bundlePriceOneTime`) e botão que chama `POST /api/tracks/[slug]/purchase` (TASK-172).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-168", "TASK-169"],
