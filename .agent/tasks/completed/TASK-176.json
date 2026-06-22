@@ -14,27 +14,29 @@
       "step": 1,
       "description": "Adicionar o novo AccessReason",
       "details": "Em `src/lib/access.ts`, adicionar `'module_not_released'` ao union type `AccessReason`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar os campos de liberação e o enrollment",
       "details": "Ajustar a query de `lesson` em `checkLessonAccess` para incluir `module.releaseType`, `module.releaseDate`, `module.releaseAfterDays`. Buscar o `CourseEnrollment` do usuário para o curso (já buscado para a checagem de compra avulsa) e reaproveitar para `isModuleReleased`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Aplicar a checagem após a checagem de plano",
       "details": "Depois de confirmar que o plano/assinatura permite acesso ao curso, mas antes do `return { allowed: true }` final, chamar `isModuleReleased` (TASK-175); se `false`, retornar `{ allowed: false, reason: 'module_not_released' }`. Pular esta checagem para `role === 'admin'` e para `isPreview: true`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Atualizar testes existentes",
       "details": "Adicionar casos em `src/lib/__tests__/` cobrindo módulo com `fixed_date` futura (bloqueado) e passada (liberado), e `days_after_enrollment` antes/depois do prazo.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-175"],
+  "dependencies": [
+    "TASK-175"
+  ],
   "estimatedComplexity": "medium"
 }
