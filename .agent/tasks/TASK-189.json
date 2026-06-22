@@ -12,22 +12,25 @@
     {
       "step": 1,
       "description": "Instrumentar o webhook do Stripe",
-      "details": "Em `src/app/api/webhooks/stripe/route.ts`, envolver a chamada aos handlers em try/catch, chamando `Sentry.captureException(err, { extra: { eventType: event.type } })` antes de retornar o erro.",
-      "pass": false
+      "details": "Em `src/app/api/webhooks/stripe/route.ts`, envolver a chamada aos handlers em try/catch, chamando `Sentry.captureException(err, { extra: { eventType: event.type } })` antes de retornar o erro. O try/catch já existia (loga e retorna 200 de propósito, ver comentário no código) — só foi adicionada a chamada ao Sentry dentro do catch existente.",
+      "pass": true
     },
     {
       "step": 2,
       "description": "Instrumentar checkout e compra avulsa",
-      "details": "Aplicar o mesmo padrão de captura em `src/app/api/subscriptions/checkout/route.ts` e `src/app/api/courses/[slug]/purchase/route.ts`, com contexto de `userId`.",
-      "pass": false
+      "details": "Aplicado o mesmo padrão de captura em `src/app/api/subscriptions/checkout/route.ts` (try/catch novo em torno da criação da sessão, contexto `userId`, retorna 500) e `src/app/api/courses/[slug]/purchase/route.ts` (idem, contexto `userId` + `courseId`).",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Instrumentar a geração de certificado",
-      "details": "Em `src/lib/certificate.ts`, capturar falhas na geração do PDF com contexto de `userId`/`courseId`, sem impedir que o erro original ainda seja propagado/logado como hoje.",
-      "pass": false
+      "details": "Em `src/lib/certificate.ts`, `generateAndStoreCertificate` envolvida em try/catch — captura com contexto `userId`/`courseId` via `Sentry.captureException` e re-lança o erro original (`throw err`), preservando o comportamento de propagação existente.",
+      "pass": true
     }
   ],
   "dependencies": ["TASK-188"],
-  "estimatedComplexity": "medium"
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Verificado em 2026-06-21: `npx tsc --noEmit` e `npx vitest run` (20/20, incluindo `certificate.test.ts`) sem erros novos. Teste manual de ponta a ponta dos fluxos de pagamento (checkout real, webhook do Stripe, falha de geração de certificado) não foi executado nesta rodada — as mudanças são aditivas (try/catch em torno do comportamento existente, sem alterar a lógica de sucesso) e cobertas por tsc/build/vitest; recomenda-se validação manual com `stripe listen` antes de produção, igual a qualquer outra mudança nesses endpoints."
+  ]
 }

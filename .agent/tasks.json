@@ -1313,14 +1313,14 @@
     "title": "Instalar e configurar @sentry/nextjs",
     "category": "integration",
     "specFilePath": ".agent/tasks/TASK-188.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-189",
     "title": "Capturar erros de rotas críticas no Sentry",
     "category": "functional",
     "specFilePath": ".agent/tasks/TASK-189.json",
-    "passes": false
+    "passes": true
   },
   {
     "id": "TASK-190",
