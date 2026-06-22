@@ -1,4 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import * as Sentry from '@sentry/nextjs'
 import { prisma } from '@/lib/prisma'
 
 export interface CertificateData {
@@ -88,37 +89,42 @@ export async function generateAndStoreCertificate(
   userId: string,
   courseId: string
 ): Promise<StoredCertificate> {
-  const existing = await prisma.certificate.findUnique({
-    where: { userId_courseId: { userId, courseId } },
-  })
-  if (existing) {
-    return { certificateId: existing.id, fileUrl: existing.fileUrl, issuedAt: existing.issuedAt }
-  }
-
-  const [user, course, enrollment] = await Promise.all([
-    prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true } }),
-    prisma.course.findUniqueOrThrow({
-      where: { id: courseId },
-      select: { title: true, instructor: { select: { user: { select: { name: true } } } } },
-    }),
-    prisma.courseEnrollment.findUnique({
+  try {
+    const existing = await prisma.certificate.findUnique({
       where: { userId_courseId: { userId, courseId } },
-      select: { completedAt: true },
-    }),
-  ])
+    })
+    if (existing) {
+      return { certificateId: existing.id, fileUrl: existing.fileUrl, issuedAt: existing.issuedAt }
+    }
 
-  const pdfBuffer = await generateCertificatePDF({
-    studentName: user.name,
-    courseName: course.title,
-    instructorName: course.instructor.user.name,
-    completedAt: enrollment?.completedAt ?? new Date(),
-  })
+    const [user, course, enrollment] = await Promise.all([
+      prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { name: true } }),
+      prisma.course.findUniqueOrThrow({
+        where: { id: courseId },
+        select: { title: true, instructor: { select: { user: { select: { name: true } } } } },
+      }),
+      prisma.courseEnrollment.findUnique({
+        where: { userId_courseId: { userId, courseId } },
+        select: { completedAt: true },
+      }),
+    ])
 
-  const fileUrl = `data:application/pdf;base64,${pdfBuffer.toString('base64')}`
+    const pdfBuffer = await generateCertificatePDF({
+      studentName: user.name,
+      courseName: course.title,
+      instructorName: course.instructor.user.name,
+      completedAt: enrollment?.completedAt ?? new Date(),
+    })
 
-  const certificate = await prisma.certificate.create({
-    data: { userId, courseId, fileUrl },
-  })
+    const fileUrl = `data:application/pdf;base64,${pdfBuffer.toString('base64')}`
 
-  return { certificateId: certificate.id, fileUrl: certificate.fileUrl, issuedAt: certificate.issuedAt }
+    const certificate = await prisma.certificate.create({
+      data: { userId, courseId, fileUrl },
+    })
+
+    return { certificateId: certificate.id, fileUrl: certificate.fileUrl, issuedAt: certificate.issuedAt }
+  } catch (err) {
+    Sentry.captureException(err, { extra: { userId, courseId } })
+    throw err
+  }
 }

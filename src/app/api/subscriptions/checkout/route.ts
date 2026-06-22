@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import type Stripe from 'stripe'
 import { z } from 'zod'
 import { getAuthUser } from '@/lib/auth'
@@ -33,82 +34,87 @@ export async function POST(request: NextRequest) {
 
   const { priceId, billingCycle, referralCode, uiMode } = parsed.data
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.userId },
-    include: {
-      subscriptions: {
-        where: { status: 'active' },
-        take: 1,
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.userId },
+      include: {
+        subscriptions: {
+          where: { status: 'active' },
+          take: 1,
+        },
       },
-    },
-  })
-
-  if (!dbUser) {
-    return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
-  }
-
-  if (dbUser.subscriptions.length > 0) {
-    return NextResponse.json({ error: 'Você já possui uma assinatura ativa' }, { status: 409 })
-  }
-
-  // Desconto de indicação é válido somente para o plano anual.
-  const validReferralCode = referralCode && billingCycle === 'annual'
-    ? (await validateReferralCode(referralCode, dbUser.id)) ?? undefined
-    : undefined
-
-  let stripeCustomerId = dbUser.stripeCustomerId
-
-  if (!stripeCustomerId) {
-    const customer = await stripe.customers.create({
-      email: dbUser.email,
-      name: dbUser.name,
     })
-    stripeCustomerId = customer.id
 
-    await prisma.user.update({
-      where: { id: dbUser.id },
-      data: { stripeCustomerId },
-    })
+    if (!dbUser) {
+      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+    }
+
+    if (dbUser.subscriptions.length > 0) {
+      return NextResponse.json({ error: 'Você já possui uma assinatura ativa' }, { status: 409 })
+    }
+
+    // Desconto de indicação é válido somente para o plano anual.
+    const validReferralCode = referralCode && billingCycle === 'annual'
+      ? (await validateReferralCode(referralCode, dbUser.id)) ?? undefined
+      : undefined
+
+    let stripeCustomerId = dbUser.stripeCustomerId
+
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: dbUser.email,
+        name: dbUser.name,
+      })
+      stripeCustomerId = customer.id
+
+      await prisma.user.update({
+        where: { id: dbUser.id },
+        data: { stripeCustomerId },
+      })
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      customer: stripeCustomerId,
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      metadata: {
+        userId: dbUser.id,
+        ...(validReferralCode && { referralCode: validReferralCode }),
+      },
+    }
+
+    if (uiMode === 'embedded') {
+      // A API version do projeto (`2026-05-27.dahlia`) usa `embedded_page`, não `embedded` — ver Stripe.Checkout.SessionCreateParams.UiMode.
+      sessionParams.ui_mode = 'embedded_page'
+      sessionParams.return_url = `${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}`
+    } else {
+      sessionParams.success_url = `${appUrl}/dashboard?checkout=success`
+      sessionParams.cancel_url = `${appUrl}/planos`
+    }
+
+    // Stripe não permite `allow_promotion_codes` e `discounts` na mesma Checkout Session.
+    if (validReferralCode) {
+      sessionParams.discounts = [{ coupon: process.env.STRIPE_COUPON_ID_REFERRAL! }]
+    } else {
+      sessionParams.allow_promotion_codes = true
+    }
+
+    // Trial gratuito concedido manualmente pelo admin (não é benefício padrão de checkout).
+    if (dbUser.freeTrialEligible) {
+      sessionParams.subscription_data = { trial_period_days: 7 }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
+
+    if (uiMode === 'embedded') {
+      return NextResponse.json({ clientSecret: session.client_secret })
+    }
+
+    return NextResponse.json({ checkoutUrl: session.url })
+  } catch (err) {
+    Sentry.captureException(err, { extra: { userId: user.userId } })
+    return NextResponse.json({ error: 'Erro ao criar sessão de checkout' }, { status: 500 })
   }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
-
-  const sessionParams: Stripe.Checkout.SessionCreateParams = {
-    customer: stripeCustomerId,
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    metadata: {
-      userId: dbUser.id,
-      ...(validReferralCode && { referralCode: validReferralCode }),
-    },
-  }
-
-  if (uiMode === 'embedded') {
-    // A API version do projeto (`2026-05-27.dahlia`) usa `embedded_page`, não `embedded` — ver Stripe.Checkout.SessionCreateParams.UiMode.
-    sessionParams.ui_mode = 'embedded_page'
-    sessionParams.return_url = `${appUrl}/api/subscriptions/checkout/return?session_id={CHECKOUT_SESSION_ID}`
-  } else {
-    sessionParams.success_url = `${appUrl}/dashboard?checkout=success`
-    sessionParams.cancel_url = `${appUrl}/planos`
-  }
-
-  // Stripe não permite `allow_promotion_codes` e `discounts` na mesma Checkout Session.
-  if (validReferralCode) {
-    sessionParams.discounts = [{ coupon: process.env.STRIPE_COUPON_ID_REFERRAL! }]
-  } else {
-    sessionParams.allow_promotion_codes = true
-  }
-
-  // Trial gratuito concedido manualmente pelo admin (não é benefício padrão de checkout).
-  if (dbUser.freeTrialEligible) {
-    sessionParams.subscription_data = { trial_period_days: 7 }
-  }
-
-  const session = await stripe.checkout.sessions.create(sessionParams)
-
-  if (uiMode === 'embedded') {
-    return NextResponse.json({ clientSecret: session.client_secret })
-  }
-
-  return NextResponse.json({ checkoutUrl: session.url })
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 import { stripe } from '@/lib/stripe'
 import {
   handleCheckoutSessionCompleted,
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     // Loga sem retornar 500 — Stripe re-envia eventos em caso de falha não-2xx
     console.error(`[stripe webhook] erro ao processar ${event.type}:`, err)
+    Sentry.captureException(err, { extra: { eventType: event.type } })
   }
 
   return NextResponse.json({ received: true })
