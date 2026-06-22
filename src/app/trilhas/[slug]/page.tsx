@@ -56,15 +56,23 @@ export default async function TrilhaDetalhe({
 
   const enrollmentByCourseId = new Map<string, { completedAt: Date | null }>()
   const progressByCourseId = new Map<string, number>()
+  let hasActiveSubscription = false
 
   if (user) {
     const currentUser = user
-    const enrollments = await prisma.courseEnrollment.findMany({
-      where: { userId: currentUser.userId, courseId: { in: courseIds } },
-      select: { courseId: true, completedAt: true },
-    })
+    const [enrollments, subscription] = await Promise.all([
+      prisma.courseEnrollment.findMany({
+        where: { userId: currentUser.userId, courseId: { in: courseIds } },
+        select: { courseId: true, completedAt: true },
+      }),
+      prisma.userSubscription.findFirst({
+        where: { userId: currentUser.userId, status: 'active' },
+        select: { id: true },
+      }),
+    ])
 
     enrollments.forEach(e => enrollmentByCourseId.set(e.courseId, e))
+    hasActiveSubscription = subscription !== null
 
     await Promise.all(
       enrollments.map(async e => {
@@ -125,7 +133,7 @@ export default async function TrilhaDetalhe({
       </div>
 
       {/* Bundle CTA */}
-      {track.isBundle && track.bundlePriceOneTime != null && (
+      {!hasActiveSubscription && user?.role !== 'admin' && track.isBundle && track.bundlePriceOneTime != null && (
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <p className="text-white font-semibold text-lg">Compre a trilha completa</p>
