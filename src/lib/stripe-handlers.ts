@@ -65,13 +65,44 @@ async function handleOneTimeCoursePurchase(session: Stripe.Checkout.Session): Pr
   console.log(`[stripe] checkout.session.completed (payment): enrollment criado para user ${userId} no curso ${courseId}`)
 }
 
+// Compra de bundle de trilha (mode: 'payment') matricula em todos os cursos da trilha de uma vez.
+async function handleTrackBundlePurchase(session: Stripe.Checkout.Session): Promise<void> {
+  const userId = session.metadata?.userId
+  const trackId = session.metadata?.trackId
+  if (!userId || !trackId) {
+    throw new Error('userId ou trackId ausente no metadata da session de compra de bundle')
+  }
+
+  const items = await prisma.courseTrackItem.findMany({
+    where: { trackId },
+    select: { courseId: true },
+  })
+
+  // Idempotente — Stripe pode reentregar o webhook; upsert por curso não duplica nem falha.
+  await Promise.all(
+    items.map(item =>
+      prisma.courseEnrollment.upsert({
+        where: { userId_courseId: { userId, courseId: item.courseId } },
+        create: { userId, courseId: item.courseId },
+        update: {},
+      })
+    )
+  )
+
+  console.log(`[stripe] checkout.session.completed (payment): bundle da trilha ${trackId} matriculou user ${userId} em ${items.length} cursos`)
+}
+
 export async function handleCheckoutSessionCompleted(
   event: Stripe.CheckoutSessionCompletedEvent
 ): Promise<void> {
   const session = event.data.object
 
   if (session.mode === 'payment') {
-    await handleOneTimeCoursePurchase(session)
+    if (session.metadata?.trackId) {
+      await handleTrackBundlePurchase(session)
+    } else {
+      await handleOneTimeCoursePurchase(session)
+    }
     return
   }
 

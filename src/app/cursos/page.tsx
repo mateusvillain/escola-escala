@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { CatalogFilters } from '@/components/cursos/CatalogFilters'
 import { CourseCard } from '@/components/cursos/CourseCard'
+import { TrackCard } from '@/components/trilhas/TrackCard'
 
 function EmptyState() {
   return (
@@ -54,34 +55,54 @@ export default async function CursosPage({
   const isAdmin = user?.role === 'admin'
   const hasFullCatalogAccess = userPlanType === 'premium' || isAdmin
 
-  const courses = await prisma.course.findMany({
-    where: {
-      status: 'published',
-      ...(!hasFullCatalogAccess && (planAccess === 'basic' || planAccess === 'premium')
-        ? { planAccess }
-        : {}),
-      ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
-    },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      thumbnailUrl: true,
-      planAccess: true,
-      instructor: {
-        select: {
-          user: { select: { name: true } },
+  const [courses, tracks] = await Promise.all([
+    prisma.course.findMany({
+      where: {
+        status: 'published',
+        trackItems: { none: {} },
+        ...(!hasFullCatalogAccess && (planAccess === 'basic' || planAccess === 'premium')
+          ? { planAccess }
+          : {}),
+        ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        thumbnailUrl: true,
+        planAccess: true,
+        instructor: {
+          select: {
+            user: { select: { name: true } },
+          },
+        },
+        modules: {
+          select: {
+            _count: { select: { lessons: true } },
+          },
         },
       },
-      modules: {
-        select: {
-          _count: { select: { lessons: true } },
-        },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.courseTrack.findMany({
+      where: {
+        status: 'published',
+        ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        thumbnailUrl: true,
+        isBundle: true,
+        bundlePriceOneTime: true,
+        _count: { select: { items: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+  ])
 
   return (
     <div>
@@ -94,35 +115,65 @@ export default async function CursosPage({
         <CatalogFilters hidePlanFilter={hasFullCatalogAccess} />
       </Suspense>
 
-      {courses.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map(course => {
-            const totalLessons = course.modules.reduce((sum, m) => sum + m._count.lessons, 0)
-            const hasAccess =
-              hasFullCatalogAccess ||
-              (userPlanType === 'basic' && course.planAccess === 'basic')
-            const hasEnrollment = enrolledCourseIds.has(course.id)
-
-            return (
-              <CourseCard
-                key={course.id}
-                title={course.title}
-                slug={course.slug}
-                description={course.description}
-                thumbnailUrl={course.thumbnailUrl}
-                planAccess={course.planAccess}
-                instructorName={course.instructor.user.name}
-                totalLessons={totalLessons}
-                hasAccess={hasAccess}
-                hasEnrollment={hasEnrollment}
-                isAuthenticated={user !== null}
+      {tracks.length > 0 && (
+        <div className="mb-10">
+          <lui-heading level="2" size="lg">Trilhas</lui-heading>
+          <p className="text-sm text-gray-500 mt-1 mb-4">Sequências de cursos organizadas por tema.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tracks.map(track => (
+              <TrackCard
+                key={track.id}
+                title={track.title}
+                slug={track.slug}
+                description={track.description}
+                thumbnailUrl={track.thumbnailUrl}
+                totalCourses={track._count.items}
+                isBundle={track.isBundle}
+                bundlePrice={
+                  !isAdmin && userPlanType === null && track.bundlePriceOneTime != null
+                    ? Number(track.bundlePriceOneTime)
+                    : null
+                }
               />
-            )
-          })}
+            ))}
+          </div>
         </div>
       )}
+
+      <div>
+        <lui-heading level="2" size="lg">Cursos sem trilha</lui-heading>
+        <p className="text-sm text-gray-500 mt-1 mb-4">Cursos avulsos, não vinculados a nenhuma trilha.</p>
+
+        {courses.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map(course => {
+              const totalLessons = course.modules.reduce((sum, m) => sum + m._count.lessons, 0)
+              const hasAccess =
+                hasFullCatalogAccess ||
+                (userPlanType === 'basic' && course.planAccess === 'basic')
+              const hasEnrollment = enrolledCourseIds.has(course.id)
+
+              return (
+                <CourseCard
+                  key={course.id}
+                  title={course.title}
+                  slug={course.slug}
+                  description={course.description}
+                  thumbnailUrl={course.thumbnailUrl}
+                  planAccess={course.planAccess}
+                  instructorName={course.instructor.user.name}
+                  totalLessons={totalLessons}
+                  hasAccess={hasAccess}
+                  hasEnrollment={hasEnrollment}
+                  isAuthenticated={user !== null}
+                />
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
