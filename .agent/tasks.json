@@ -1025,28 +1025,28 @@
     "id": "TASK-147",
     "title": "Habilitar Boleto na Checkout Session de compra avulsa",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-147.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-147.json",
     "passes": false
   },
   {
     "id": "TASK-148",
     "title": "Tratar webhooks de pagamento assíncrono para Boleto",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-148.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-148.json",
     "passes": false
   },
   {
     "id": "TASK-149",
     "title": "Página de retorno com estado \"pagamento pendente\" para Boleto",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-149.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-149.json",
     "passes": false
   },
   {
     "id": "TASK-150",
     "title": "Investigar e decidir sobre Boleto na assinatura recorrente",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-150.json",
+    "specFilePath": ".agent/tasks/deprecated/TASK-150.json",
     "passes": false
   },
   {

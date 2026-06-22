@@ -5,7 +5,7 @@
   "description": "Estender `src/lib/stripe-handlers.ts` para, ao confirmar o pagamento de um bundle de trilha (`metadata.trackId`), criar `CourseEnrollment` para cada curso da trilha de uma vez, em vez de para um único curso.",
   "acceptanceCriteria": [
     "`handleOneTimeCoursePurchase` (ou uma nova função `handleTrackBundlePurchase`) reconhece `session.metadata.trackId` e cria `CourseEnrollment` (via `upsert`, idempotente) para cada curso listado em `CourseTrackItem` da trilha",
-    "Pagamento via Boleto segue o mesmo fluxo assíncrono já tratado nas TASK-147/148 (matrícula só ocorre em `payment_status: 'paid'` ou no evento `async_payment_succeeded`)",
+    "Matrícula ocorre direto em `checkout.session.completed` — sem método assíncrono (Boleto) neste fluxo, não é necessário tratar `payment_status` diferente de `paid` (ver PRD seção 14.6)",
     "Reentrega do webhook pelo Stripe não duplica nem falha (idempotente, mesmo padrão já usado para compra avulsa individual)"
   ],
   "steps": [
@@ -18,10 +18,13 @@
     {
       "step": 2,
       "description": "Rotear pelo tipo de metadata",
-      "details": "No branch `session.mode === 'payment'` de `handleCheckoutSessionCompleted` (e nos handlers assíncronos da TASK-148), checar `session.metadata?.trackId` antes de `session.metadata?.courseId`, chamando o handler correspondente.",
+      "details": "No branch `session.mode === 'payment'` de `handleCheckoutSessionCompleted`, checar `session.metadata?.trackId` antes de `session.metadata?.courseId`, chamando o handler correspondente.",
       "pass": false
     }
   ],
-  "dependencies": ["TASK-148", "TASK-172"],
-  "estimatedComplexity": "medium"
+  "dependencies": ["TASK-172"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — esta task não depende mais da TASK-148 (despriorizada, movida para `.agent/tasks/deprecated/`)."
+  ]
 }

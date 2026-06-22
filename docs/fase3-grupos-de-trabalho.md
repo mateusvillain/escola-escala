@@ -1,10 +1,12 @@
 # Fase 3 — Grupos de Trabalho e Prompts de Execução
 
-Este documento divide as 34 tasks **ativas** da Fase 3 (`TASK-146` a `TASK-150` e `TASK-167` a `TASK-195`, detalhadas em `.agent/prd/PRD.md` seção 14 e em `.agent/tasks/`) em **8 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
+Este documento divide as tasks **ativas** da Fase 3 (`TASK-146`, `TASK-167` a `TASK-200`, detalhadas em `.agent/prd/PRD.md` seção 14 e em `.agent/tasks/`) em **8 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
 
 Critério de agrupamento: cada grupo corresponde a uma funcionalidade (ou a uma fatia coesa de uma funcionalidade maior) listada em `docs/fase3-oportunidades.md`.
 
 > **B2B despriorizado (2026-06-21):** os 4 sub-grupos de B2B (Modelos, Membros/Acesso, Cobrança, Painel — TASK-151 a TASK-166, antigos Grupos 2 a 5) foram retirados da execução ativa. As tasks correspondentes foram movidas para `.agent/tasks/deprecated/`, e os prompts de execução ficam preservados na seção **"Grupos despriorizados — B2B"** ao final deste documento. Não é cancelamento — é decisão de priorização, pendente de validar a demanda real de clientes corporativos com o cliente do projeto (ver `.agent/prd/PRD.md` seção 14.6). Os números de grupo (2 a 5) ficam reservados para esse spec e não são reaproveitados pelos grupos ativos abaixo.
+
+> **Boleto removido (2026-06-21):** o Grupo 1 (Boleto via Stripe, TASK-147 a TASK-150) foi removido da execução ativa. Motivo: o webhook de assinatura (`handleCheckoutSessionCompleted`) assume pagamento confirmado em `checkout.session.completed`, o que é falso para Boleto — habilitar sem o tratamento assíncrono completo concederia acesso pago antes da confirmação do pagamento (ver `.agent/prd/PRD.md` seção 14.6). O cliente optou por desabilitar Boleto direto no Stripe Dashboard em vez de implementar esse tratamento agora. As tasks foram movidas para `.agent/tasks/deprecated/`, e o prompt de execução fica preservado na seção **"Grupo despriorizado — Boleto"** ao final deste documento. O número de grupo (1) fica reservado para esse spec. O Grupo 6 (Trilhas e bundles), que reaproveitava a decisão de payment methods da TASK-147, foi ajustado para usar só cartão e não depende mais deste grupo.
 
 ## Como usar este documento
 
@@ -15,17 +17,16 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 ## Ordem de execução entre grupos
 
 1. **Grupo 0 (pré-requisitos) é bloqueante** — todos os outros grupos ativos dependem dele.
-2. Depois do Grupo 0, todos os grupos ativos podem ser feitos em paralelo (por agentes/desenvolvedores diferentes), com uma exceção:
-   - O **Grupo 6 (Trilhas e bundles)** depende do **Grupo 1 (Boleto)** já estar mesclado em `main`, porque a TASK-172 reaproveita o `payment_method_types` habilitado na TASK-147.
+2. Depois do Grupo 0, todos os grupos ativos podem ser feitos em paralelo (por agentes/desenvolvedores diferentes) — não há mais dependências entre grupos ativos (o Grupo 6 dependia do Grupo 1/Boleto, mas esse acoplamento foi removido junto com a remoção do Grupo 1).
 3. Dentro de cada grupo, as tasks devem ser feitas na ordem listada — a ordem já respeita as `dependencies` declaradas em cada `TASK-X.json`.
-4. Os Grupos 2 a 5 (B2B) estão despriorizados e fora desta ordem de execução — ver "Grupos despriorizados — B2B" ao final deste documento antes de retomá-los.
+4. Os Grupos 2 a 5 (B2B) estão despriorizados e o Grupo 1 (Boleto) foi removido — ambos fora desta ordem de execução — ver "Grupos despriorizados/removidos" ao final deste documento antes de retomá-los.
 
 | # | Grupo | Tasks | Depende de | Branch sugerida |
 |---|---|---|---|---|
 | 0 | Pré-requisitos da Fase 3 | TASK-146 | — | (sem PR de código) |
-| 1 | Boleto via Stripe (Pix adiado) | TASK-147 a 150 | Grupo 0 | `feat/fase3-boleto` |
+| 1 | ~~Boleto via Stripe~~ | TASK-147 a 150 | — | **removido** — ver seção ao final |
 | 2-5 | ~~B2B — Modelos, Membros, Cobrança, Painel~~ | TASK-151 a 166 | — | **despriorizado** — ver seção ao final |
-| 6 | Trilhas e bundles de cursos | TASK-167 a 173 | Grupo 0 **e Grupo 1** | `feat/fase3-trilhas-bundles` |
+| 6 | Trilhas e bundles de cursos | TASK-167 a 173 | Grupo 0 | `feat/fase3-trilhas-bundles` |
 | 7 | Conteúdo programado (drip content) | TASK-174 a 178 | Grupo 0 | `feat/fase3-conteudo-programado` |
 | 8 | Testes E2E com Playwright | TASK-179 a 184 | Grupo 0 | `feat/fase3-testes-e2e` |
 | 9 | Rate limiting distribuído | TASK-185 a 187 | Grupo 0 | `feat/fase3-rate-limit-redis` |
@@ -47,104 +48,24 @@ Você vai executar a TASK-146 do projeto "Plataforma de Cursos" (Next.js 16 + Pr
 Stream). Leia primeiro CLAUDE.md e AGENTS.md na raiz do repo para contexto geral, depois leia o spec completo
 em .agent/tasks/TASK-146.json e a seção 14 de .agent/prd/PRD.md.
 
-Esta task verifica os pré-requisitos da Fase 3 antes que qualquer outro grupo de trabalho comece:
+Esta task verifica os pré-requisitos da Fase 3 antes que qualquer outro grupo de trabalho comece. Boleto foi
+removido do planejamento ativo (ver `.agent/prd/PRD.md` seção 14.6) — não verificar/configurar nada relacionado
+a ele:
 1. Adicionar ao `.env.local` (SOMENTE placeholders, nunca valores reais): `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`,
    `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN`,
    `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`.
-2. Confirmar manualmente no Stripe Dashboard que Boleto está habilitado como payment method para a conta
-   (BRL/BR). Se não estiver, apenas reporte — não é algo que se resolve por código. Pix foi adiado desta
-   rodada (exige convite da Stripe para contas BR, não é configuração direta de Dashboard — ver
-   `docs/pix-habilitacao.md`); não verificar/bloquear por causa dele aqui.
-3. Criar (ou confirmar que já existe) um produto B2B com dois preços recorrentes por seat (mensal e anual) no
+2. Criar (ou confirmar que já existe) um produto B2B com dois preços recorrentes por seat (mensal e anual) no
    Stripe Dashboard, e preencher os Price IDs no `.env.local`.
-4. Confirmar se a integração Upstash Redis foi adicionada ao projeto via Vercel Marketplace. Se ainda não foi,
+3. Confirmar se a integração Upstash Redis foi adicionada ao projeto via Vercel Marketplace. Se ainda não foi,
    reporte como pendente — não é algo que se resolve só por código, requer ação no dashboard da Vercel.
-5. Confirmar se existe um projeto Sentry criado para a aplicação. Se ainda não existe, reporte como pendente.
-6. Marcar cada step do `.agent/tasks/TASK-146.json` como `"pass": true` somente após verificar de fato, e
+4. Confirmar se existe um projeto Sentry criado para a aplicação. Se ainda não existe, reporte como pendente.
+5. Marcar cada step do `.agent/tasks/TASK-146.json` como `"pass": true` somente após verificar de fato, e
    atualizar a entrada correspondente em `.agent/tasks.json` para `"passes": true`.
 
 Não abra PR para esta task — é só configuração local/verificação. Ao final, reporte um resumo de cada item:
 confirmado, pendente, ou bloqueado (e por quê). Itens pendentes (ex: Upstash/Sentry ainda não provisionados)
 não impedem o início dos grupos que não dependem deles — reporte isso claramente para que o trabalho em
-paralelo (ex: Grupo 1, Grupo 6) não fique bloqueado por algo que só afeta os Grupos 9 e 10.
-```
-
----
-
-## Grupo 1 — Boleto via Stripe (Pix adiado)
-
-**Tasks**: TASK-147, TASK-148, TASK-149, TASK-150
-**Depende de**: Grupo 0
-
-> **Pix foi adiado desta rodada.** Habilitar Pix para contas Stripe sediadas no Brasil exige convite da própria
-> Stripe — não é um toggle de Dashboard — e o time ainda não solicitou/recebeu esse convite. Ver
-> `docs/pix-habilitacao.md` para o passo a passo de solicitação e os pontos exatos do código a reverter quando
-> o convite for concedido (aqui em TASK-147/148/149 e também em TASK-172, no Grupo 6). Este grupo cobre **só
-> Boleto**.
-
-### Prompt para a IA
-
-```
-Você vai implementar o grupo "Boleto via Stripe" da Fase 3 da Plataforma de Cursos (Next.js 16 App Router +
-Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar — eles documentam os padrões
-obrigatórios do projeto (rotas, Zod v4, Prisma, webhooks Stripe).
-
-Contexto: hoje o checkout só aceita cartão de crédito. Boleto é relevante porque parte significativa do
-público brasileiro não tem ou prefere não usar cartão para pagamento. (Pix foi adiado desta rodada — exige
-convite da Stripe para contas BR, ver `docs/pix-habilitacao.md` — não implemente Pix neste grupo.) A
-complicação técnica é que Boleto é um método de pagamento ASSÍNCRONO — diferente do cartão, a confirmação não
-chega no evento `checkout.session.completed`, chega depois em `checkout.session.async_payment_succeeded` (ou
-`_failed`). O webhook atual (`src/lib/stripe-handlers.ts`) não trata isso e, sem o tratamento certo, a
-matrícula do aluno nunca aconteceria para quem paga com Boleto.
-
-Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/TASK-<id>.json antes de codar):
-1. TASK-147 — Habilitar Boleto na Checkout Session de compra avulsa (mode: 'payment')
-2. TASK-148 — Tratar webhooks de pagamento assíncrono (async_payment_succeeded/failed)
-3. TASK-149 — Página de retorno com estado "pagamento pendente" para Boleto
-4. TASK-150 — Investigar e decidir sobre Boleto na assinatura recorrente (mode: 'subscription')
-
-Dependências externas: TASK-146 (Grupo 0) deve ter confirmado Boleto habilitado na conta Stripe.
-
-Atenção a padrões do projeto:
-- Boleto só tem suporte garantido em `mode: 'payment'` (compra avulsa, `src/app/api/courses/[slug]/
-  purchase/route.ts`) — NÃO assuma que funciona em `mode: 'subscription'` sem confirmar na documentação
-  oficial do Stripe primeiro (é exatamente o objetivo da TASK-150, que é uma investigação, não uma
-  implementação garantida).
-- Em `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), o branch `session.mode === 'payment'`
-  hoje assume pagamento confirmado. Ajuste para só matricular quando `session.payment_status === 'paid'`;
-  para `unpaid` (caso comum de Boleto recém-criado), aguarde o evento assíncrono da TASK-148.
-- Webhooks Stripe podem ser reentregues — use `upsert`, nunca `create` puro.
-- Em produção, novos tipos de evento precisam ser habilitados manualmente em Developers → Webhooks no Stripe
-  Dashboard (localmente, via `stripe listen`, já chegam todos os eventos automaticamente) — mesmo padrão já
-  usado para `customer.subscription.trial_will_end` na Fase 2.
-- A TASK-150 pode legitimamente concluir como "não habilitar boleto recorrente nesta rodada" — não force a
-  feature se a documentação não confirmar suporte adequado ou se o comportamento de `past_due` durante a
-  janela de compensação (1-3 dias úteis) se mostrar problemático no teste.
-- Não inclua `pix` em `payment_method_types` — está fora de escopo deste grupo (ver `docs/pix-habilitacao.md`).
-
-Como trabalhar:
-1. Crie a branch `feat/fase3-boleto` a partir de `main` atualizada.
-2. Implemente TASK-147, depois TASK-148, depois TASK-149, nessa ordem — a TASK-149 só faz sentido com o
-   webhook assíncrono já funcionando.
-3. Implemente a TASK-150 por último — é investigação e pode ser feita de forma independente das outras três.
-4. Depois de cada task, confira uma a uma as `acceptanceCriteria` do spec correspondente antes de seguir para
-   a próxima.
-5. Valide o código: `npx tsc --noEmit` e `npx vitest run` devem passar sem erros novos.
-6. Suba o dev server e rode `stripe listen --forward-to localhost:3000/api/webhooks/stripe` em paralelo. Teste
-   manualmente: complete uma compra avulsa de curso escolhendo Boleto em modo teste, confirme que a página de
-   retorno mostra "pagamento pendente", marque o boleto como pago (o Stripe permite isso em modo teste), e
-   confirme que a matrícula é criada e a página passa a refletir acesso liberado.
-7. Marque `"pass": true` em cada step dos quatro JSONs de task e `"passes": true` nas entradas correspondentes
-   de `.agent/tasks.json`, só depois de validar de fato.
-8. Commit(s) com mensagens claras, seguindo o estilo dos commits existentes no repositório (confira `git log`).
-9. Abra um PR para `main` com `gh pr create`. Título: "feat: Boleto na compra avulsa de curso (TASK-147 a
-   150)". Na descrição, liste as 4 tasks concluídas (incluindo a decisão tomada na TASK-150, com justificativa),
-   o que foi testado manualmente, e link para a seção 14.1 do PRD (`.agent/prd/PRD.md`). Não faça merge — deixe
-   para revisão humana.
-
-Definition of Done: acceptanceCriteria de TASK-147 a 150 atendidas e marcadas; decisão da TASK-150 documentada
-no PRD com justificativa; fluxo de compra avulsa com Boleto testado manualmente até a matrícula ser criada;
-tsc e vitest passando; PR aberto.
+paralelo (ex: Grupo 6) não fique bloqueado por algo que só afeta os Grupos 9 e 10.
 ```
 
 ---
@@ -152,19 +73,13 @@ tsc e vitest passando; PR aberto.
 ## Grupo 6 — Trilhas e bundles de cursos
 
 **Tasks**: TASK-167, TASK-168, TASK-169, TASK-170, TASK-171, TASK-172, TASK-173
-**Depende de**: Grupo 0 **e Grupo 1 (Boleto) já mesclado em `main`**
+**Depende de**: Grupo 0
 
 ### Prompt para a IA
 
 ```
 Você vai implementar o grupo "Trilhas e bundles de cursos" da Fase 3 da Plataforma de Cursos (Next.js 16 +
 Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar.
-
-PRÉ-REQUISITO OBRIGATÓRIO: confirme que o grupo "Boleto via Stripe" (TASK-147 a 150) já está mesclado em
-`main` antes de começar — a TASK-172 deste grupo reaproveita o `payment_method_types: ['card', 'boleto']`
-habilitado na TASK-147. Se não estiver mesclado, implemente a TASK-172 só com cartão e deixe um TODO claro, ou
-espere o merge — não duplique a decisão de payment methods. Pix está fora de escopo aqui também — foi adiado
-da Fase 3 (ver `docs/pix-habilitacao.md`).
 
 Contexto: a estrutura de catálogo hoje é plana — um curso por vez, sem relação entre eles. Este grupo permite
 agrupar cursos relacionados em uma trilha (sequência com progressão) e, opcionalmente, vender essa trilha como
@@ -180,7 +95,9 @@ Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json
 6. TASK-172 — Checkout de bundle de trilha (POST /api/tracks/[slug]/purchase)
 7. TASK-173 — Matrícula em lote nos cursos da trilha ao comprar o bundle (webhook)
 
-Dependências externas: Grupo 1 (Boleto) mesclado — ver acima.
+Dependências externas: nenhuma além do Grupo 0. Boleto foi removido do planejamento da Fase 3 (ver
+`.agent/prd/PRD.md` seção 14.6) — TASK-172 usa só cartão (`mode: 'payment'`, sem `payment_method_types`
+customizado), e este grupo não depende mais de nenhum grupo de Boleto.
 
 Atenção a padrões do projeto:
 - Reordenação e remoção de cursos da trilha devem seguir EXATAMENTE o mesmo padrão já usado em módulos:
@@ -189,24 +106,22 @@ Atenção a padrões do projeto:
 - `TrackForm`/`TrackCourseList` (admin) devem espelhar `CourseForm`/`ModuleList` em estrutura — reaproveite os
   mesmos padrões de inputs nativos com Tailwind e de refetch pós-mutação via `onUpdate` callback.
 - Publicar uma trilha exige pelo menos 2 cursos associados — valide isso no `PATCH` do endpoint, não só na UI.
-- O checkout de bundle (TASK-172) é `mode: 'payment'`, igual à compra avulsa individual — inclua
-  `payment_method_types: ['card', 'boleto']` desde já (Pix adiado, ver `docs/pix-habilitacao.md`).
+- O checkout de bundle (TASK-172) é `mode: 'payment'`, igual à compra avulsa individual — só cartão, sem
+  `payment_method_types` customizado (Boleto removido da Fase 3, Pix adiado — ver `docs/pix-habilitacao.md`).
 - O webhook de matrícula em lote (TASK-173) deve rotear por `session.metadata.trackId` ANTES de
   `session.metadata.courseId` em `handleCheckoutSessionCompleted`, e usar `upsert` por curso (idempotente,
   reentrega de webhook não pode duplicar nem falhar).
 
 Como trabalhar:
-1. Confirme o pré-requisito (Grupo 1 mesclado) antes de criar a branch.
-2. Crie a branch `feat/fase3-trilhas-bundles` a partir de `main` atualizada (já incluindo o Grupo 1).
-3. Implemente as 7 tasks na ordem listada.
-4. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
-5. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
-6. Teste manualmente: crie uma trilha com 3 cursos publicados existentes via `/admin/trilhas`, reordene-os,
+1. Crie a branch `feat/fase3-trilhas-bundles` a partir de `main` atualizada.
+2. Implemente as 7 tasks na ordem listada.
+3. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
+4. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
+5. Teste manualmente: crie uma trilha com 3 cursos publicados existentes via `/admin/trilhas`, reordene-os,
    publique a trilha, marque como bundle com um preço de teste, acesse `/trilhas/[slug]` como aluno, compre o
-   bundle em modo teste com cartão, depois repita com Boleto, e confirme que o webhook matricula o aluno nos
-   3 cursos de uma vez.
-7. Marque `"pass": true` nos steps dos sete JSONs de task e `"passes": true` em `.agent/tasks.json`.
-8. Commit(s) e abra PR com `gh pr create`. Título: "feat: trilhas e bundles de cursos (TASK-167 a 173)".
+   bundle em modo teste com cartão, e confirme que o webhook matricula o aluno nos 3 cursos de uma vez.
+6. Marque `"pass": true` nos steps dos sete JSONs de task e `"passes": true` em `.agent/tasks.json`.
+7. Commit(s) e abra PR com `gh pr create`. Título: "feat: trilhas e bundles de cursos (TASK-167 a 173)".
    Descrição com o fluxo de ponta a ponta testado (criação → publicação → compra → matrícula em lote) e link
    para a seção 14.1 do PRD.
 
@@ -567,6 +482,95 @@ Como trabalhar:
 Definition of Done: acceptanceCriteria de TASK-196 a 200 atendidas e marcadas; fluxo completo testado
 manualmente (cadastro → Embedded Checkout → dashboard com assinatura ativa, incluindo fallback de 3DS);
 `/cadastro` sem plano continua funcionando sem alteração; tsc e vitest passando; PR aberto.
+```
+
+---
+
+## Grupo despriorizado — Boleto via Stripe (Grupo 1)
+
+> **Removido em 2026-06-21.** Durante a implementação do checkout integrado ao cadastro (Grupo 12), identificou-se que `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`) assume que toda Checkout Session de assinatura completada já foi paga, o que é falso para Boleto (status real fica `incomplete` até a compensação, 1-3 dias úteis). Habilitar Boleto sem o tratamento assíncrono completo concederia acesso pago antes da confirmação do pagamento. O cliente optou por desabilitar Boleto direto no Stripe Dashboard em vez de implementar esse tratamento agora — ver decisão completa em `.agent/prd/PRD.md` seção 14.6. As tasks TASK-147 a TASK-150 foram movidas para `.agent/tasks/deprecated/`. O prompt abaixo continua completo e utilizável sem alteração — basta ser retomado (e os `specFilePath` em `.agent/tasks.json` apontados de volta para `.agent/tasks/`) se a decisão for revertida, condicionado a implementar o tratamento assíncrono completo (steps 1-3 da TASK-148) antes de reabilitar Boleto em qualquer Checkout Session de assinatura.
+
+### Prompt para a IA
+
+```
+Você vai implementar o grupo "Boleto via Stripe" da Fase 3 da Plataforma de Cursos (Next.js 16 App Router +
+Prisma 7 + Stripe). Leia CLAUDE.md e AGENTS.md na raiz do repo antes de começar — eles documentam os padrões
+obrigatórios do projeto (rotas, Zod v4, Prisma, webhooks Stripe).
+
+ATENÇÃO — confirme antes de começar: este grupo foi removido do planejamento ativo da Fase 3 em 2026-06-21
+porque o webhook de assinatura (`handleCheckoutSessionCompleted`) assume pagamento confirmado em
+`checkout.session.completed`, o que é falso para Boleto — habilitar sem o tratamento assíncrono completo
+(steps 1-3 abaixo) concederia acesso pago antes da confirmação do pagamento. Isso está documentado em
+`.agent/prd/PRD.md` seção 14.6. Esta é uma decisão já tomada, não pendente de validação — só retome este grupo
+se a decisão for revertida explicitamente pelo cliente do projeto.
+
+Contexto: hoje o checkout só aceita cartão de crédito. Boleto é relevante porque parte significativa do
+público brasileiro não tem ou prefere não usar cartão para pagamento. (Pix foi adiado desta rodada — exige
+convite da Stripe para contas BR, ver `docs/pix-habilitacao.md` — não implemente Pix neste grupo.) A
+complicação técnica é que Boleto é um método de pagamento ASSÍNCRONO — diferente do cartão, a confirmação não
+chega no evento `checkout.session.completed`, chega depois em `checkout.session.async_payment_succeeded` (ou
+`_failed`). O webhook atual (`src/lib/stripe-handlers.ts`) não trata isso e, sem o tratamento certo, a
+matrícula do aluno nunca aconteceria para quem paga com Boleto (e, no caso da assinatura recorrente, o
+problema é o inverso: concede acesso pago antes da confirmação).
+
+Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/deprecated/TASK-<id>.json antes
+de codar):
+1. TASK-147 — Habilitar Boleto na Checkout Session de compra avulsa (mode: 'payment')
+2. TASK-148 — Tratar webhooks de pagamento assíncrono (async_payment_succeeded/failed)
+3. TASK-149 — Página de retorno com estado "pagamento pendente" para Boleto
+4. TASK-150 — Investigar e decidir sobre Boleto na assinatura recorrente (mode: 'subscription')
+
+Dependências externas: TASK-146 (Grupo 0) deve confirmar Boleto habilitado na conta Stripe (foi desabilitado
+em 2026-06-21 — precisa ser reabilitado no Dashboard antes de retomar este grupo).
+
+Atenção a padrões do projeto:
+- Boleto só tem suporte garantido em `mode: 'payment'` (compra avulsa, `src/app/api/courses/[slug]/
+  purchase/route.ts`) — NÃO assuma que funciona em `mode: 'subscription'` sem confirmar na documentação
+  oficial do Stripe primeiro (é exatamente o objetivo da TASK-150, que é uma investigação, não uma
+  implementação garantida).
+- Em `handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), o branch `session.mode === 'payment'`
+  hoje assume pagamento confirmado. Ajuste para só matricular quando `session.payment_status === 'paid'`;
+  para `unpaid` (caso comum de Boleto recém-criado), aguarde o evento assíncrono da TASK-148.
+- O MESMO problema existe hoje no branch de assinatura (`session.mode !== 'payment'`) de
+  `handleCheckoutSessionCompleted`: `subscriptionStatus = subscription.status === 'trialing' ? 'trialing' :
+  'active'` assume ativo incondicionalmente. A TASK-150 PRECISA corrigir isso (ou manter Boleto fora da
+  assinatura) antes de qualquer habilitação — não é opcional, é a causa raiz da remoção deste grupo.
+- Webhooks Stripe podem ser reentregues — use `upsert`, nunca `create` puro.
+- Em produção, novos tipos de evento precisam ser habilitados manualmente em Developers → Webhooks no Stripe
+  Dashboard (localmente, via `stripe listen`, já chegam todos os eventos automaticamente) — mesmo padrão já
+  usado para `customer.subscription.trial_will_end` na Fase 2.
+- A TASK-150 pode legitimamente concluir como "não habilitar boleto recorrente nesta rodada" — não force a
+  feature se a documentação não confirmar suporte adequado ou se o comportamento de `past_due` durante a
+  janela de compensação (1-3 dias úteis) se mostrar problemático no teste.
+- Não inclua `pix` em `payment_method_types` — está fora de escopo deste grupo (ver `docs/pix-habilitacao.md`).
+- Se retomado, TASK-172 (Grupo 6, já implementada sem Boleto) e `.agent/tasks.json` precisam ser atualizados de
+  volta para incluir `payment_method_types: ['card', 'boleto']`, e os `specFilePath` de TASK-147 a 150 movidos
+  de volta para `.agent/tasks/`.
+
+Como trabalhar:
+1. Crie a branch `feat/fase3-boleto` a partir de `main` atualizada.
+2. Implemente TASK-147, depois TASK-148, depois TASK-149, nessa ordem — a TASK-149 só faz sentido com o
+   webhook assíncrono já funcionando.
+3. Implemente a TASK-150 por último, corrigindo também o branch de assinatura de
+   `handleCheckoutSessionCompleted` antes de habilitar Boleto em qualquer Checkout Session de assinatura.
+4. Depois de cada task, confira uma a uma as `acceptanceCriteria` do spec correspondente antes de seguir para
+   a próxima.
+5. Valide o código: `npx tsc --noEmit` e `npx vitest run` devem passar sem erros novos.
+6. Suba o dev server e rode `stripe listen --forward-to localhost:3000/api/webhooks/stripe` em paralelo. Teste
+   manualmente: complete uma compra avulsa de curso escolhendo Boleto em modo teste, confirme que a página de
+   retorno mostra "pagamento pendente", marque o boleto como pago (o Stripe permite isso em modo teste), e
+   confirme que a matrícula é criada e a página passa a refletir acesso liberado.
+7. Marque `"pass": true` em cada step dos quatro JSONs de task e `"passes": true` nas entradas correspondentes
+   de `.agent/tasks.json`, só depois de validar de fato.
+8. Commit(s) com mensagens claras, seguindo o estilo dos commits existentes no repositório (confira `git log`).
+9. Abra um PR para `main` com `gh pr create`. Título: "feat: Boleto na compra avulsa de curso (TASK-147 a
+   150)". Na descrição, liste as 4 tasks concluídas (incluindo a decisão tomada na TASK-150, com justificativa),
+   o que foi testado manualmente, e link para a seção 14.1 do PRD (`.agent/prd/PRD.md`). Não faça merge — deixe
+   para revisão humana.
+
+Definition of Done: acceptanceCriteria de TASK-147 a 150 atendidas e marcadas; decisão da TASK-150 documentada
+no PRD com justificativa; o gap de status prematuro na assinatura corrigido; fluxo de compra avulsa com Boleto
+testado manualmente até a matrícula ser criada; tsc e vitest passando; PR aberto.
 ```
 
 ---

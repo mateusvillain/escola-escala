@@ -5,29 +5,26 @@
   "description": "Endpoint de compra avulsa do bundle de uma trilha, espelhando `POST /api/courses/[slug]/purchase` (TASK-95 a 99), mas matriculando o aluno em todos os cursos da trilha de uma vez (TASK-173) em vez de em um único curso.",
   "acceptanceCriteria": [
     "`POST /api/tracks/[slug]/purchase` exige usuário autenticado e trilha publicada com `isBundle: true` e `stripePriceIdBundle` definido",
-    "Cria Stripe Checkout Session `mode: 'payment'` com `payment_method_types: ['card', 'boleto']` (reaproveitando a decisão da TASK-147; Pix adiado, ver docs/pix-habilitacao.md) e `metadata: { userId, trackId }`",
+    "Cria Stripe Checkout Session `mode: 'payment'` (só cartão — Boleto foi removido do planejamento da Fase 3, ver PRD seção 14.6) e `metadata: { userId, trackId }`",
     "Retorna 403 com mensagem clara se a trilha não estiver configurada para venda de bundle"
   ],
   "steps": [
     {
       "step": 1,
       "description": "Criar o route handler",
-      "details": "Criar `src/app/api/tracks/[slug]/purchase/route.ts`, copiando a estrutura de `src/app/api/courses/[slug]/purchase/route.ts` e adaptando para `CourseTrack`/`stripePriceIdBundle`.",
+      "details": "Criar `src/app/api/tracks/[slug]/purchase/route.ts`, copiando a estrutura de `src/app/api/courses/[slug]/purchase/route.ts` e adaptando para `CourseTrack`/`stripePriceIdBundle`. Sem `payment_method_types` customizado — usa o default da conta Stripe (só cartão).",
       "pass": false
     },
     {
       "step": 2,
-      "description": "Incluir Boleto",
-      "details": "Incluir `payment_method_types: ['card', 'boleto']` na Checkout Session, já que este fluxo também é `mode: 'payment'` (mesma situação da TASK-147). Pix fica fora desta rodada.",
-      "pass": false
-    },
-    {
-      "step": 3,
       "description": "Testar em modo teste",
       "details": "Completar uma compra de bundle em modo teste com cartão e confirmar que o webhook (TASK-173) matricula o aluno em todos os cursos da trilha.",
       "pass": false
     }
   ],
-  "dependencies": ["TASK-147", "TASK-171"],
-  "estimatedComplexity": "low"
+  "dependencies": ["TASK-171"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — esta task não depende mais da TASK-147 (despriorizada, movida para `.agent/tasks/deprecated/`). Se Boleto for revisitado no futuro, ver o spec preservado em `.agent/tasks/deprecated/TASK-147.json` antes de adicionar `payment_method_types` aqui."
+  ]
 }

@@ -2,10 +2,9 @@
   "id": "TASK-146",
   "title": "Verificar pré-requisitos da Fase 3",
   "category": "setup",
-  "description": "Confirmar que os pré-requisitos específicos da Fase 3 (novas variáveis de ambiente, produto/preço B2B no Stripe Dashboard, ativação de Boleto e integrações de Upstash Redis e Sentry via Vercel Marketplace) estão disponíveis antes de iniciar a implementação das novas funcionalidades. Pix foi adiado desta rodada — ver docs/pix-habilitacao.md.",
+  "description": "Confirmar que os pré-requisitos específicos da Fase 3 (novas variáveis de ambiente, produto/preço B2B no Stripe Dashboard e integrações de Upstash Redis e Sentry via Vercel Marketplace) estão disponíveis antes de iniciar a implementação das novas funcionalidades. Boleto e Pix foram removidos/adiados desta rodada — ver PRD seção 14.6 e docs/pix-habilitacao.md.",
   "acceptanceCriteria": [
     "`.env.local` contém placeholders para `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`, `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` e `SENTRY_AUTH_TOKEN`",
-    "Boleto confirmado como payment method habilitado na conta Stripe para BRL/BR (Pix adiado desta rodada — ver docs/pix-habilitacao.md)",
     "Produto e preço recorrente por seat (B2B) criados no Stripe Dashboard, com Price IDs mensal e anual",
     "Integração Upstash Redis provisionada via Vercel Marketplace, ou decisão alternativa registrada",
     "Projeto Sentry criado para a aplicação Next.js, com DSN disponível, ou decisão de adiar registrada",
@@ -26,24 +25,12 @@
     },
     {
       "step": 3,
-      "description": "Confirmar Boleto no Stripe Dashboard",
-      "details": "Acessar Stripe Dashboard → Settings → Payment methods e confirmar que Boleto está habilitado para a conta. Pix foi adiado desta rodada — habilitar exige convite da Stripe para contas BR, não é um toggle direto no Dashboard (ver docs/pix-habilitacao.md) — não bloquear esta task por causa dele.",
-      "pass": false
-    },
-    {
-      "step": 4,
-      "description": "Criar produto/preço B2B por seat",
-      "details": "Criar um produto 'Plano Empresas' no Stripe Dashboard com dois preços recorrentes (mensal e anual) configurados para cobrança por quantidade (seat). Preencher os Price IDs no `.env.local`.",
-      "pass": false
-    },
-    {
-      "step": 5,
       "description": "Provisionar Upstash Redis via Vercel Marketplace",
       "details": "No painel do projeto na Vercel, adicionar a integração Upstash Redis (Marketplace) e copiar `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` para o `.env.local`. PENDENTE — bloqueado pela TASK-82 (deploy de produção na Vercel), que ainda não foi feita; não existe projeto Vercel linkado (`.vercel/`/`vercel.json` ausentes), e Marketplace integrations exigem um projeto já existente na Vercel. Não é algo a resolver agora — retomar quando a TASK-82 for concluída, ou diretamente na TASK-185 (Grupo 9), que reabre este mesmo provisionamento. Reportar como pendente; não bloqueia o início de nenhum outro grupo da Fase 3.",
       "pass": false
     },
     {
-      "step": 6,
+      "step": 4,
       "description": "Criar projeto Sentry",
       "details": "Criar um projeto Next.js no Sentry (sentry.io) e obter o DSN. Preencher `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` no `.env.local`.",
       "pass": false
@@ -52,8 +39,8 @@
   "dependencies": ["TASK-1"],
   "estimatedComplexity": "low",
   "technicalNotes": [
-    "Esta task gate as tasks de Boleto (TASK-147 em diante), B2B (TASK-151 em diante), rate limiting distribuído (TASK-185 em diante) e monitoramento de erro (TASK-188 em diante).",
     "Nenhum valor real de secret deve ser escrito no PRD, nas tasks, em logs ou no chat — apenas placeholders em `.env.local`.",
-    "Step 5 (Upstash via Vercel Marketplace) está pendente, bloqueado pela TASK-82 (deploy de produção na Vercel ainda não realizado) — registrado em 2026-06-21. Não bloqueia Grupo 1, Grupo 6 ou qualquer outro grupo que não seja o Grupo 9 (rate limiting distribuído)."
+    "Step 3 (Upstash via Vercel Marketplace) está pendente, bloqueado pela TASK-82 (deploy de produção na Vercel ainda não realizado) — registrado em 2026-06-21. Não bloqueia nenhum grupo ativo da Fase 3 além do Grupo 9 (rate limiting distribuído).",
+    "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — o antigo step 'Confirmar Boleto no Stripe Dashboard' foi removido desta task. TASK-147 a 150 (grupo de Boleto) estão em `.agent/tasks/deprecated/`."
   ]
 }
