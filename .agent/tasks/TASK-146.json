@@ -33,7 +33,7 @@
       "step": 4,
       "description": "Criar projeto Sentry",
       "details": "Criar um projeto Next.js no Sentry (sentry.io) e obter o DSN. Preencher `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` no `.env.local`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-1"],
@@ -41,6 +41,7 @@
   "technicalNotes": [
     "Nenhum valor real de secret deve ser escrito no PRD, nas tasks, em logs ou no chat — apenas placeholders em `.env.local`.",
     "Step 3 (Upstash via Vercel Marketplace) está pendente, bloqueado pela TASK-82 (deploy de produção na Vercel ainda não realizado) — registrado em 2026-06-21. Não bloqueia nenhum grupo ativo da Fase 3 além do Grupo 9 (rate limiting distribuído).",
-    "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — o antigo step 'Confirmar Boleto no Stripe Dashboard' foi removido desta task. TASK-147 a 150 (grupo de Boleto) estão em `.agent/tasks/deprecated/`."
+    "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — o antigo step 'Confirmar Boleto no Stripe Dashboard' foi removido desta task. TASK-147 a 150 (grupo de Boleto) estão em `.agent/tasks/deprecated/`.",
+    "Step 4 (Sentry) concluído em 2026-06-21: projeto Next.js criado no Sentry, `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` preenchidos em `.env.local` (validados por formato, não por valor). Token é um Organization Auth Token com escopo `org:ci` (fixo, voltado a upload de source maps e criação de release). Desbloqueia a TASK-188 (instalação do `@sentry/nextjs`) — falta apenas rodar o wizard oficial ou setup manual."
   ]
 }
