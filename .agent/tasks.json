@@ -1214,36 +1214,36 @@
     "id": "TASK-174",
     "title": "Campos de liberação programada (drip content) em Module",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-174.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-174.json",
+    "passes": true
   },
   {
     "id": "TASK-175",
     "title": "Helper isModuleReleased para calcular liberação programada",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-175.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-175.json",
+    "passes": true
   },
   {
     "id": "TASK-176",
     "title": "Aplicar checagem de liberação programada no acesso à aula",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-176.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-176.json",
+    "passes": true
   },
   {
     "id": "TASK-177",
     "title": "Indicador visual de módulo bloqueado por liberação programada",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-177.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-177.json",
+    "passes": true
   },
   {
     "id": "TASK-178",
     "title": "Configuração admin de liberação programada por módulo",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-178.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-178.json",
+    "passes": true
   },
   {
     "id": "TASK-179",

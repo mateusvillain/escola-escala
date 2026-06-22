@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
+import { isModuleReleased, getReleaseCountdownLabel } from '@/lib/drip-content'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
 import { StarRating } from '@/components/cursos/StarRating'
 import { ReviewReminderBanner } from '@/components/cursos/ReviewReminderBanner'
@@ -53,6 +54,9 @@ export default async function CursoDetalhe({
           id: true,
           title: true,
           order: true,
+          releaseType: true,
+          releaseDate: true,
+          releaseAfterDays: true,
           lessons: {
             orderBy: { order: 'asc' },
             select: {
@@ -97,6 +101,7 @@ export default async function CursoDetalhe({
   let isCompleted = false
   let myReview: { rating: number; comment: string | null; createdAt: Date } | null = null
   let lastWatchedLessonTitle: string | null = null
+  let enrollmentForDrip: { enrolledAt: Date } | null = null
 
   if (user) {
     const [subscription, enrollment, lastProgress, review] = await Promise.all([
@@ -106,7 +111,7 @@ export default async function CursoDetalhe({
       }),
       prisma.courseEnrollment.findFirst({
         where: { userId: user.userId, courseId: course.id },
-        select: { id: true, completedAt: true },
+        select: { id: true, completedAt: true, enrolledAt: true },
       }),
       prisma.lessonProgress.findFirst({
         where: {
@@ -133,17 +138,30 @@ export default async function CursoDetalhe({
     isCompleted = enrollment?.completedAt != null
     myReview = review
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null
+    enrollmentForDrip = enrollment
   }
 
-  // Modules for accordion — omit videoId if no access
-  const modules = course.modules.map(m => ({
-    ...m,
-    lessons: m.lessons.map(l => ({
-      ...l,
-      videoId: hasAccess ? l.videoId : null,
-    })),
-    quiz: m.quiz ? { id: m.quiz.id, questionCount: m.quiz._count.questions } : null,
-  }))
+  // hasEnrollment não implica que o aluno já abriu uma aula — pode vir de matrícula
+  // automática por assinatura, compra avulsa ou bundle de trilha. "Continue de onde
+  // parou" só faz sentido quando existe progresso real (LessonProgress).
+  const hasStarted = lastWatchedLessonTitle !== null
+
+  const bypassDrip = user?.role === 'admin'
+
+  // Modules for accordion — omit videoId se sem acesso ou se o módulo ainda não foi liberado
+  const modules = course.modules.map(m => {
+    const isReleased = bypassDrip || isModuleReleased(m, enrollmentForDrip)
+    return {
+      ...m,
+      lessons: m.lessons.map(l => ({
+        ...l,
+        videoId: (hasAccess && isReleased) || l.isPreview ? l.videoId : null,
+      })),
+      quiz: m.quiz ? { id: m.quiz.id, questionCount: m.quiz._count.questions } : null,
+      isReleased,
+      releaseLabel: isReleased ? null : getReleaseCountdownLabel(m, enrollmentForDrip),
+    }
+  })
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -261,7 +279,7 @@ export default async function CursoDetalhe({
             </Link>
           </div>
         </div>
-      ) : !hasEnrollment ? (
+      ) : !hasEnrollment || !hasStarted ? (
         <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-green-800 font-medium">Você tem acesso a este curso.</p>
           <Link

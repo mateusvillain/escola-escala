@@ -13,15 +13,17 @@
       "step": 1,
       "description": "Atualizar a sidebar do curso",
       "details": "Em `src/lib/course-sidebar.ts` (ou no componente que a consome), calcular `isModuleReleased` por módulo e marcar aulas como não clicáveis quando bloqueado, exibindo o texto de liberação.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Tratar o reason na página da aula",
       "details": "Na página de aula (`src/app/cursos/[slug]/aulas/[lessonId]`), tratar `reason: 'module_not_released'` retornado por `checkLessonAccess`, exibindo uma mensagem (reaproveitando o padrão visual de `UpgradePrompt`) em vez do player.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-176"],
+  "dependencies": [
+    "TASK-176"
+  ],
   "estimatedComplexity": "medium"
 }

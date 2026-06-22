@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { isModuleReleased } from '@/lib/drip-content'
 
 export type AccessReason =
   | 'not_authenticated'
@@ -6,6 +7,7 @@ export type AccessReason =
   | 'plan_upgrade_required'
   | 'subscription_inactive'
   | 'preview'
+  | 'module_not_released'
 
 export interface AccessResult {
   allowed: boolean
@@ -29,6 +31,9 @@ export async function checkLessonAccess(
       module: {
         select: {
           courseId: true,
+          releaseType: true,
+          releaseDate: true,
+          releaseAfterDays: true,
           course: {
             select: { planAccess: true },
           },
@@ -49,29 +54,39 @@ export async function checkLessonAccess(
   // Compra avulsa: enrollment direto dá acesso ao curso inteiro, independente de assinatura.
   const enrollment = await prisma.courseEnrollment.findUnique({
     where: { userId_courseId: { userId, courseId: lesson.module.courseId } },
-    select: { id: true },
-  })
-  if (enrollment) return { allowed: true }
-
-  const subscription = await prisma.userSubscription.findFirst({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    include: { plan: true },
+    select: { enrolledAt: true },
   })
 
-  if (!subscription) return { allowed: false, reason: 'no_subscription' }
+  let coursePlanAllowed = enrollment !== null
 
-  if (subscription.status !== 'active' && subscription.status !== 'trialing') {
-    return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
+  if (!coursePlanAllowed) {
+    const subscription = await prisma.userSubscription.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { plan: true },
+    })
+
+    if (!subscription) return { allowed: false, reason: 'no_subscription' }
+
+    if (subscription.status !== 'active' && subscription.status !== 'trialing') {
+      return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
+    }
+
+    const planType = subscription.plan.type
+    const courseAccess = lesson.module.course.planAccess
+
+    coursePlanAllowed = planType === 'premium' || (planType === 'basic' && courseAccess === 'basic')
+
+    if (!coursePlanAllowed) return { allowed: false, reason: 'plan_upgrade_required' }
   }
 
-  const planType = subscription.plan.type
-  const courseAccess = lesson.module.course.planAccess
+  // Liberação programada (drip content) é uma camada adicional sobre o acesso por
+  // plano/compra — nunca um substituto. Avaliada só depois de confirmar o acesso ao curso.
+  if (!isModuleReleased(lesson.module, enrollment)) {
+    return { allowed: false, reason: 'module_not_released' }
+  }
 
-  if (planType === 'premium') return { allowed: true }
-  if (planType === 'basic' && courseAccess === 'basic') return { allowed: true }
-
-  return { allowed: false, reason: 'plan_upgrade_required' }
+  return { allowed: true }
 }
 
 /**

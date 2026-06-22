@@ -35,6 +35,16 @@ interface SidebarModule {
   title: string
   lessons: SidebarLesson[]
   quiz: { passed: boolean } | null
+  isReleased: boolean
+  releaseLabel: string | null
+}
+
+function LockIcon() {
+  return (
+    <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v4h8z" />
+    </svg>
+  )
 }
 
 interface CourseSidebarProps {
@@ -218,13 +228,31 @@ export function CourseSidebar({
           <div className="divide-y divide-gray-50 max-h-[70vh] overflow-y-auto">
             {modules.map(module => (
               <div key={module.id} className="py-2">
-                <p className="px-4 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                  {module.title}
-                </p>
+                <div className="px-4 py-1.5 flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    {module.title}
+                  </p>
+                  {!module.isReleased && <LockIcon />}
+                </div>
+                {!module.isReleased && module.releaseLabel && (
+                  <p className="px-4 pb-1.5 text-xs text-gray-400">{module.releaseLabel}</p>
+                )}
                 <ul>
                   {module.lessons.map(lesson => {
                     const isCurrent = lesson.id === currentLessonId
                     const isCompleted = progress[lesson.id] ?? false
+
+                    if (!module.isReleased) {
+                      return (
+                        <li key={lesson.id}>
+                          <span className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                            <LockIcon />
+                            <span className="truncate">{lesson.title}</span>
+                          </span>
+                        </li>
+                      )
+                    }
+
                     return (
                       <li key={lesson.id}>
                         <Link
@@ -242,7 +270,7 @@ export function CourseSidebar({
                     )
                   })}
 
-                  {module.quiz && module.lessons.every(l => progress[l.id]) && (
+                  {module.isReleased && module.quiz && module.lessons.every(l => progress[l.id]) && (
                     <li>
                       <Link
                         href={`/cursos/${courseSlug}/modulos/${module.id}/quiz`}

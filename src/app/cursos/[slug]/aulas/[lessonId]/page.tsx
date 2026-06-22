@@ -5,11 +5,13 @@ import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { checkLessonAccess } from '@/lib/access'
+import { isModuleReleased, getReleaseCountdownLabel } from '@/lib/drip-content'
 import { getAdjacentLessons, type LessonAttachment } from '@/lib/utils/lessons'
 import { getCourseProgress } from '@/lib/progress'
 import { BunnyPlayer } from '@/components/player/BunnyPlayer'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { UpgradePrompt, type UpgradeReason } from '@/components/course/UpgradePrompt'
+import { ModuleLockedPrompt } from '@/components/course/ModuleLockedPrompt'
 import { LessonCompletionToggle } from '@/components/course/LessonCompletionToggle'
 
 export default async function AulaPage({
@@ -31,6 +33,9 @@ export default async function AulaPage({
         select: {
           id: true,
           title: true,
+          releaseType: true,
+          releaseDate: true,
+          releaseAfterDays: true,
           lessons: {
             orderBy: { order: 'asc' },
             select: { id: true, title: true, content: true, videoId: true, isPreview: true, attachments: true },
@@ -62,7 +67,10 @@ export default async function AulaPage({
 
   const access = await checkLessonAccess(user?.userId ?? null, lessonId, user?.role)
   const upgradeReason: UpgradeReason | undefined =
-    access.reason && access.reason !== 'not_authenticated' && access.reason !== 'preview'
+    access.reason &&
+    access.reason !== 'not_authenticated' &&
+    access.reason !== 'preview' &&
+    access.reason !== 'module_not_released'
       ? access.reason
       : undefined
 
@@ -70,10 +78,11 @@ export default async function AulaPage({
   let completedCount = 0
   let passedQuizIds = new Set<string>()
   let initialPositionSeconds = 0
+  let enrollment: { enrolledAt: Date } | null = null
   if (user) {
     const quizIds = course.modules.map(m => m.quiz?.id).filter((id): id is string => id != null)
 
-    const [progressRecords, courseProgress, quizAttempts] = await Promise.all([
+    const [progressRecords, courseProgress, quizAttempts, courseEnrollment] = await Promise.all([
       prisma.lessonProgress.findMany({
         where: { userId: user.userId, lesson: { module: { courseId: course.id } } },
         select: { lessonId: true, isCompleted: true, lastPositionSeconds: true },
@@ -85,19 +94,37 @@ export default async function AulaPage({
             select: { quizId: true },
           })
         : Promise.resolve([]),
+      prisma.courseEnrollment.findUnique({
+        where: { userId_courseId: { userId: user.userId, courseId: course.id } },
+        select: { enrolledAt: true },
+      }),
     ])
     progress = Object.fromEntries(progressRecords.map(r => [r.lessonId, r.isCompleted]))
     completedCount = courseProgress.completedLessons
     passedQuizIds = new Set(quizAttempts.map(a => a.quizId))
     initialPositionSeconds = progressRecords.find(r => r.lessonId === lessonId)?.lastPositionSeconds ?? 0
+    enrollment = courseEnrollment
   }
 
-  const sidebarModules = course.modules.map(m => ({
-    id: m.id,
-    title: m.title,
-    lessons: m.lessons.map(l => ({ id: l.id, title: l.title })),
-    quiz: m.quiz ? { passed: passedQuizIds.has(m.quiz.id) } : null,
-  }))
+  const bypassDrip = user?.role === 'admin'
+
+  const sidebarModules = course.modules.map(m => {
+    const isReleased = bypassDrip || isModuleReleased(m, enrollment)
+    return {
+      id: m.id,
+      title: m.title,
+      lessons: m.lessons.map(l => ({ id: l.id, title: l.title })),
+      quiz: m.quiz ? { passed: passedQuizIds.has(m.quiz.id) } : null,
+      isReleased,
+      releaseLabel: isReleased ? null : getReleaseCountdownLabel(m, enrollment),
+    }
+  })
+
+  const currentModule = course.modules.find(m => m.lessons.some(l => l.id === lessonId))
+  const currentModuleReleaseLabel =
+    access.reason === 'module_not_released' && currentModule
+      ? getReleaseCountdownLabel(currentModule, enrollment)
+      : null
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
@@ -134,6 +161,12 @@ export default async function AulaPage({
           )
         ) : access.reason === 'not_authenticated' ? (
           <LoginPrompt />
+        ) : access.reason === 'module_not_released' ? (
+          <ModuleLockedPrompt
+            releaseLabel={currentModuleReleaseLabel ?? 'Em breve'}
+            courseSlug={slug}
+            thumbnailUrl={course.thumbnailUrl}
+          />
         ) : (
           <UpgradePrompt
             reason={upgradeReason ?? 'no_subscription'}

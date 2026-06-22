@@ -3,11 +3,23 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const patchSchema = z.object({
-  title: z.string().min(1).max(255).optional(),
-  description: z.string().max(2000).nullable().optional(),
-  order: z.number().int().positive().optional(),
-});
+const patchSchema = z
+  .object({
+    title: z.string().min(1).max(255).optional(),
+    description: z.string().max(2000).nullable().optional(),
+    order: z.number().int().positive().optional(),
+    releaseType: z.enum(["immediate", "fixed_date", "days_after_enrollment"]).optional(),
+    releaseDate: z.coerce.date().nullable().optional(),
+    releaseAfterDays: z.number().int().positive().nullable().optional(),
+  })
+  .refine(data => data.releaseType !== "fixed_date" || data.releaseDate != null, {
+    message: "releaseDate é obrigatório quando releaseType é fixed_date",
+    path: ["releaseDate"],
+  })
+  .refine(data => data.releaseType !== "days_after_enrollment" || data.releaseAfterDays != null, {
+    message: "releaseAfterDays é obrigatório quando releaseType é days_after_enrollment",
+    path: ["releaseAfterDays"],
+  });
 
 export async function PATCH(
   request: NextRequest,
@@ -59,7 +71,16 @@ export async function PATCH(
   const module = await prisma.module.update({
     where: { id },
     data: { ...rest, ...(newOrder !== undefined ? { order: newOrder } : {}) },
-    select: { id: true, courseId: true, title: true, description: true, order: true },
+    select: {
+      id: true,
+      courseId: true,
+      title: true,
+      description: true,
+      order: true,
+      releaseType: true,
+      releaseDate: true,
+      releaseAfterDays: true,
+    },
   });
 
   return NextResponse.json({ module });

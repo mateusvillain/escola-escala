@@ -15,21 +15,23 @@
       "step": 1,
       "description": "Criar o helper",
       "details": "Criar `src/lib/drip-content.ts` com `isModuleReleased(module: { releaseType: ModuleReleaseType; releaseDate: Date | null; releaseAfterDays: number | null }, enrollment: { enrolledAt: Date } | null): boolean`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Implementar a lógica de cada tipo",
       "details": "`immediate` → `true`. `fixed_date` → comparar `Date.now() >= module.releaseDate.getTime()`. `days_after_enrollment` → se `!enrollment`, `false`; senão comparar `Date.now() >= enrollment.enrolledAt.getTime() + releaseAfterDays * 24*60*60*1000`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Adicionar testes unitários",
       "details": "Criar `src/lib/__tests__/drip-content.test.ts` cobrindo os três tipos e o caso de `enrollment: null` com `days_after_enrollment`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-174"],
+  "dependencies": [
+    "TASK-174"
+  ],
   "estimatedComplexity": "low"
 }

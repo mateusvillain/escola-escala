@@ -52,12 +52,17 @@ export default async function ModuleQuizPage({
   }
 
   const access = await checkCourseAccess(user.userId, moduleRecord.course.id, user.role)
+  // module_not_released nunca é retornado por checkCourseAccess (drip content é por aula, ver
+  // checkLessonAccess) — excluído aqui só para o narrowing de tipo bater com AccessReason.
   const upgradeReason: UpgradeReason | undefined =
-    access.reason && access.reason !== 'not_authenticated' && access.reason !== 'preview'
+    access.reason &&
+    access.reason !== 'not_authenticated' &&
+    access.reason !== 'preview' &&
+    access.reason !== 'module_not_released'
       ? access.reason
       : undefined
 
-  const sidebarData = await getCourseSidebarData(moduleRecord.course.id, user.userId)
+  const sidebarData = await getCourseSidebarData(moduleRecord.course.id, user.userId, user.role)
 
   if (!access.allowed) {
     return (

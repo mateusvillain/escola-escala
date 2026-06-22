@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef } from 'react'
 import { LessonList, type Lesson } from './LessonList'
 import { QuizEditor, type Quiz } from './QuizEditor'
+import { getReleaseSummary, type DripModule } from '@/lib/drip-content'
+import type { ModuleReleaseType } from '@/generated/prisma/client'
 
 interface Module {
   id: string
@@ -10,8 +12,21 @@ interface Module {
   title: string
   description: string | null
   order: number
+  releaseType: ModuleReleaseType
+  // Date no SSR inicial (props do Server Component); string ISO após refetch via fetch().json()
+  releaseDate: Date | string | null
+  releaseAfterDays: number | null
   lessons: Lesson[]
   quiz: Quiz | null
+}
+
+function toDate(value: Date | string | null): Date | null {
+  return value ? new Date(value) : null
+}
+
+function toDateInputValue(value: Date | string | null): string {
+  const date = toDate(value)
+  return date ? date.toISOString().slice(0, 10) : ''
 }
 
 interface ModuleListProps {
@@ -40,6 +55,12 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
 
   // Delete confirm state
   const [deleteTarget, setDeleteTarget] = useState<Module | null>(null)
+
+  // Release (drip content) inline edit state
+  const [editingReleaseId, setEditingReleaseId] = useState<string | null>(null)
+  const [releaseTypeForm, setReleaseTypeForm] = useState<ModuleReleaseType>('immediate')
+  const [releaseDateForm, setReleaseDateForm] = useState('')
+  const [releaseAfterDaysForm, setReleaseAfterDaysForm] = useState('')
 
   const refetch = useCallback(async () => {
     const res = await fetch(`/api/admin/courses/${courseId}`)
@@ -141,6 +162,55 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
   const handleEditKeyDown = (e: React.KeyboardEvent, moduleId: string) => {
     if (e.key === 'Enter') handleEditSave(moduleId)
     if (e.key === 'Escape') setEditingId(null)
+  }
+
+  // ── Liberação programada (drip content) ─────────────────────────────────────
+  const handleReleaseEditStart = (mod: Module, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingReleaseId(mod.id)
+    setReleaseTypeForm(mod.releaseType)
+    setReleaseDateForm(toDateInputValue(mod.releaseDate))
+    setReleaseAfterDaysForm(mod.releaseAfterDays != null ? String(mod.releaseAfterDays) : '')
+  }
+
+  const handleReleaseCancel = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingReleaseId(null)
+  }
+
+  const handleReleaseSave = async (moduleId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (releaseTypeForm === 'fixed_date' && !releaseDateForm) {
+      setError('Informe a data de liberação.')
+      return
+    }
+    if (releaseTypeForm === 'days_after_enrollment' && !releaseAfterDaysForm) {
+      setError('Informe o número de dias após a matrícula.')
+      return
+    }
+
+    setMutating(moduleId)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/modules/${moduleId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          releaseType: releaseTypeForm,
+          releaseDate: releaseTypeForm === 'fixed_date' ? releaseDateForm : null,
+          releaseAfterDays:
+            releaseTypeForm === 'days_after_enrollment' ? Number(releaseAfterDaysForm) : null,
+        }),
+      })
+      if (!res.ok) throw new Error()
+      setEditingReleaseId(null)
+      await refetch()
+    } catch {
+      setError('Erro ao atualizar a liberação do módulo.')
+    } finally {
+      setMutating(null)
+    }
   }
 
   // ── Reorder ───────────────────────────────────────────────────────────────
@@ -286,6 +356,17 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
                   {mod.lessons.length} {mod.lessons.length === 1 ? 'aula' : 'aulas'}
                 </span>
 
+                {/* Release (drip content) summary */}
+                <button
+                  type="button"
+                  onClick={e => handleReleaseEditStart(mod, e)}
+                  disabled={mutating !== null}
+                  title="Clique para configurar a liberação do módulo"
+                  className="flex-shrink-0 text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-full px-2 py-0.5 hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                >
+                  Liberação: {getReleaseSummary({ ...mod, releaseDate: toDate(mod.releaseDate) })}
+                </button>
+
                 {/* Actions */}
                 <div
                   className="flex items-center gap-1 flex-shrink-0"
@@ -328,6 +409,60 @@ export function ModuleList({ courseId, initialModules }: ModuleListProps) {
                   </button>
                 </div>
               </div>
+
+              {/* Release (drip content) inline editor */}
+              {editingReleaseId === mod.id && (
+                <div
+                  className="flex flex-wrap items-center gap-2 px-4 py-3 mt-1 bg-indigo-50 border border-indigo-200 rounded-lg"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <select
+                    value={releaseTypeForm}
+                    onChange={e => setReleaseTypeForm(e.target.value as ModuleReleaseType)}
+                    className="px-2 py-1 text-sm border border-indigo-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                  >
+                    <option value="immediate">Imediato</option>
+                    <option value="fixed_date">Data fixa</option>
+                    <option value="days_after_enrollment">Dias após matrícula</option>
+                  </select>
+
+                  {releaseTypeForm === 'fixed_date' && (
+                    <input
+                      type="date"
+                      value={releaseDateForm}
+                      onChange={e => setReleaseDateForm(e.target.value)}
+                      className="px-2 py-1 text-sm border border-indigo-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                    />
+                  )}
+
+                  {releaseTypeForm === 'days_after_enrollment' && (
+                    <input
+                      type="number"
+                      min={1}
+                      value={releaseAfterDaysForm}
+                      onChange={e => setReleaseAfterDaysForm(e.target.value)}
+                      placeholder="Dias"
+                      className="w-20 px-2 py-1 text-sm border border-indigo-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
+                    />
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={e => handleReleaseSave(mod.id, e)}
+                    disabled={isMutating}
+                    className="px-3 py-1 text-xs font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                  >
+                    {isMutating ? '...' : 'Salvar'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReleaseCancel}
+                    className="px-3 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
 
               {/* Expanded lesson list */}
               {isExpanded && (
