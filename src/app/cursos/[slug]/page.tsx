@@ -141,6 +141,11 @@ export default async function CursoDetalhe({
     enrollmentForDrip = enrollment
   }
 
+  // hasEnrollment não implica que o aluno já abriu uma aula — pode vir de matrícula
+  // automática por assinatura, compra avulsa ou bundle de trilha. "Continue de onde
+  // parou" só faz sentido quando existe progresso real (LessonProgress).
+  const hasStarted = lastWatchedLessonTitle !== null
+
   const bypassDrip = user?.role === 'admin'
 
   // Modules for accordion — omit videoId se sem acesso ou se o módulo ainda não foi liberado
@@ -274,7 +279,7 @@ export default async function CursoDetalhe({
             </Link>
           </div>
         </div>
-      ) : !hasEnrollment ? (
+      ) : !hasEnrollment || !hasStarted ? (
         <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-green-800 font-medium">Você tem acesso a este curso.</p>
           <Link
