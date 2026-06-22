@@ -190,7 +190,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<'/api/admin/
 | GET/PATCH/DELETE | `/api/admin/users/[id]` | Detalhe/edição/desativação de usuário |
 | GET | `/api/admin/subscriptions` | Listagem de assinaturas (admin) |
 | GET | `/api/admin/metrics` | Métricas para o dashboard admin |
-| POST | `/api/admin/videos/upload` | Upload de vídeo para Bunny Stream — **ver armadilha do limite de 4.5MB abaixo** |
+| POST | `/api/admin/videos/upload-init` | Cria o vídeo no Bunny Stream e retorna credenciais TUS; upload do arquivo em si vai direto do navegador para o Bunny Stream (`tus-js-client`), sem passar pelo servidor Next.js |
 
 ### Endpoints públicos / área do aluno
 
@@ -269,7 +269,7 @@ npx vitest run
 - **`instructorId`** em Course referencia `Instructor.id`, não `User.id`
 - **Lesson order:** sem unique constraint no DB — gap-closing após delete deve ser feito no cliente
 - **Slug único:** usar `getUniqueSlug()` de `@/lib/utils/slug.ts`, nunca gerar manualmente
-- **Upload de vídeo trava em produção:** `POST /api/admin/videos/upload` envia o arquivo via FormData direto pelo servidor Next.js. A Vercel limita payload de Serverless Functions a 4.5MB em todos os planos — não há como configurar isso em `next.config.ts`. Qualquer vídeo de aula real vai falhar em produção. Fix planejado em `TASK-83`: migrar para upload TUS direto do navegador para o Bunny Stream (`tus-js-client`), com o servidor apenas assinando as credenciais.
+- **Upload de vídeo é via TUS direto do navegador (TASK-83):** `POST /api/admin/videos/upload-init` só cria o vídeo no Bunny Stream e devolve `{ videoId, libraryId, uploadEndpoint, authorizationSignature, authorizationExpire }` — o arquivo nunca passa pelo servidor Next.js, evitando o limite de 4.5MB de payload das Functions da Vercel. `LessonEditor` usa `tus-js-client` para enviar direto para `https://video.bunnycdn.com/tusupload` com essas credenciais. A `BUNNY_STREAM_API_KEY` nunca é exposta ao cliente — a assinatura (`generateTusCredentials` em `src/lib/bunny.ts`) é calculada no servidor. Não recriar o endpoint antigo de upload via FormData.
 - **Stripe API version `2026-05-27.dahlia`:** `current_period_start`/`end` estão em `subscription.items.data[0]`, não em `subscription` — e o ID da subscription em invoices vem de `invoice.parent.subscription_details`, não de `invoice.subscription`. Ver `src/lib/stripe-handlers.ts`.
 - **Certificado em PDF:** armazenado como data URL base64 em `Certificate.fileUrl` (MVP, sem blob storage configurado). Para volume maior, migrar para Vercel Blob ou similar antes de produção.
 - **Rate limiting é em memória** (`src/lib/rate-limit.ts`) — zera a cada deploy/restart e não funciona entre múltiplas instâncias. Adequado para Fase 1, mas não é distribuído.
