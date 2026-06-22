@@ -66,6 +66,6 @@ A Fase 1 (B2C) está **essencialmente completa** — 80 das 83 tasks geradas no 
 | `src/types/lets-ui.d.ts` | Tipos TypeScript dos web components LetsUI |
 | `prisma/schema.prisma` | Schema completo do banco |
 | `.env.local` | Variáveis de ambiente (não commitado) |
-| `docs/bunny-stream-pricing.md` | Referência de custos do Bunny Stream |
+| `docs/pricing/bunny-stream-pricing.md` | Referência de custos do Bunny Stream |
 | `.agent/tasks/` | Tasks pendentes de implementação (TASK-81, 82, 83) |
 | `.agent/tasks/completed/` | Tasks já implementadas (80 tasks) |

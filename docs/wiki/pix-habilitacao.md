@@ -3,7 +3,7 @@
 > Pix foi adiado da Fase 3 em 2026-06-21. Este documento existe para que a solicitação à Stripe possa ser
 > aberta com antecedência (o convite não é instantâneo) e para deixar claro exatamente o que reverter no
 > código quando ele for concedido. Ver `docs/fase3-grupos-de-trabalho.md` (Grupo 1 e Grupo 6) e
-> `docs/stripe-pricing.md` (custo: 1,19% por transação, o método mais barato disponível) para o contexto
+> `docs/pricing/stripe-pricing.md` (custo: 1,19% por transação, o método mais barato disponível) para o contexto
 > completo da decisão.
 
 ## Por que foi adiado
@@ -60,4 +60,4 @@ revisitável, é uma limitação estrutural da própria Stripe para contas BR.
 ## Referência de custo
 
 Pix custa **1,19%** por transação — o método mais barato entre os disponíveis para o projeto (cartão nacional
-3,99% + R$ 0,39; Boleto R$ 3,45 fixo). Ver a tabela comparativa completa em `docs/stripe-pricing.md`.
+3,99% + R$ 0,39; Boleto R$ 3,45 fixo). Ver a tabela comparativa completa em `docs/pricing/stripe-pricing.md`.

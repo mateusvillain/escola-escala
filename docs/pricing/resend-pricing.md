@@ -32,7 +32,7 @@ Diferente do Bunny Stream (que tem cobrança contínua por storage/tráfego mesm
 
 - Free tier: **1 domínio** verificado (SPF/DKIM)
 - Pro/Scale: até 10 domínios
-- Hoje o projeto usa um único `SMTP_FROM` para todos os e-mails (ver `docs/emails-da-plataforma.md`), então 1 domínio é suficiente mesmo se decidir separar remetentes por *subdomínio* (ex: `notificacoes@` vs `suporte@` no mesmo domínio verificado não conta como domínio extra).
+- Hoje o projeto usa um único `SMTP_FROM` para todos os e-mails (ver `docs/wiki/emails-da-plataforma.md`), então 1 domínio é suficiente mesmo se decidir separar remetentes por *subdomínio* (ex: `notificacoes@` vs `suporte@` no mesmo domínio verificado não conta como domínio extra).
 
 ### 3. Automações (a partir do plano Pro)
 
@@ -48,7 +48,7 @@ Diferente do Bunny Stream (que tem cobrança contínua por storage/tráfego mesm
 
 ## Estimativas práticas
 
-Baseado nos e-mails que já existem (`docs/emails-da-plataforma.md`, seção 1: recuperação de senha, boas-vindas, fim de trial) somados aos 3 planejados e ainda não implementados (cobrança falhada, upsell, retomada — TASK-102/113/114/115/116).
+Baseado nos e-mails que já existem (`docs/wiki/emails-da-plataforma.md`, seção 1: recuperação de senha, boas-vindas, fim de trial) somados aos 3 planejados e ainda não implementados (cobrança falhada, upsell, retomada — TASK-102/113/114/115/116).
 
 ### Fase de desenvolvimento (mês 1)
 
@@ -101,7 +101,7 @@ Baseado nos e-mails que já existem (`docs/emails-da-plataforma.md`, seção 1: 
 | Crescimento da base de alunos | Mais cadastros, recuperações de senha e falhas de cobrança, proporcional ao tamanho da base |
 | Adoção do produto de Marketing Email (contatos/newsletter) | Cobrança separada por contato, não por envio — só se o escopo for além de transacional/engajamento |
 | Separação de remetentes por domínio (não subdomínio) | Free tier permite só 1 domínio verificado; múltiplos domínios exigem plano Pro |
-| Falha de SMTP | `sendEmail()` não tem retry (falha só é logada, ver `docs/emails-da-plataforma.md` seção 4) — não há risco de custo duplicado por reenvio automático |
+| Falha de SMTP | `sendEmail()` não tem retry (falha só é logada, ver `docs/wiki/emails-da-plataforma.md` seção 4) — não há risco de custo duplicado por reenvio automático |
 
 ---
 

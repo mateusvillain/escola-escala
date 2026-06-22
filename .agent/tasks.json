@@ -1018,8 +1018,8 @@
     "id": "TASK-146",
     "title": "Verificar pré-requisitos da Fase 3",
     "category": "setup",
-    "specFilePath": ".agent/tasks/TASK-146.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-146.json",
+    "passes": true
   },
   {
     "id": "TASK-147",
@@ -1368,35 +1368,35 @@
     "id": "TASK-196",
     "title": "Suporte a ui_mode 'embedded' no checkout de assinatura",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-196.json",
+    "specFilePath": ".agent/tasks/completed/TASK-196.json",
     "passes": true
   },
   {
     "id": "TASK-197",
     "title": "Componente EmbeddedCheckoutForm reutilizável",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-197.json",
+    "specFilePath": ".agent/tasks/completed/TASK-197.json",
     "passes": true
   },
   {
     "id": "TASK-198",
     "title": "Propagar plano escolhido de /planos para /cadastro",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-198.json",
+    "specFilePath": ".agent/tasks/completed/TASK-198.json",
     "passes": true
   },
   {
     "id": "TASK-199",
     "title": "Cadastro com checkout integrado (Embedded Checkout) e seleção de plano pós-cadastro",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-199.json",
+    "specFilePath": ".agent/tasks/completed/TASK-199.json",
     "passes": true
   },
   {
     "id": "TASK-200",
     "title": "Rota de retorno (fallback) do checkout embutido",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-200.json",
+    "specFilePath": ".agent/tasks/completed/TASK-200.json",
     "passes": true
   },
   {

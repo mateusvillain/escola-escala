@@ -2,7 +2,7 @@
   "id": "TASK-146",
   "title": "Verificar pré-requisitos da Fase 3",
   "category": "setup",
-  "description": "Confirmar que os pré-requisitos específicos da Fase 3 (novas variáveis de ambiente, produto/preço B2B no Stripe Dashboard e integrações de Upstash Redis e Sentry via Vercel Marketplace) estão disponíveis antes de iniciar a implementação das novas funcionalidades. Boleto e Pix foram removidos/adiados desta rodada — ver PRD seção 14.6 e docs/pix-habilitacao.md.",
+  "description": "Confirmar que os pré-requisitos específicos da Fase 3 (novas variáveis de ambiente, produto/preço B2B no Stripe Dashboard e integrações de Upstash Redis e Sentry via Vercel Marketplace) estão disponíveis antes de iniciar a implementação das novas funcionalidades. Boleto e Pix foram removidos/adiados desta rodada — ver PRD seção 14.6 e docs/wiki/pix-habilitacao.md.",
   "acceptanceCriteria": [
     "`.env.local` contém placeholders para `STRIPE_PRICE_ID_B2B_SEAT_MONTHLY`, `STRIPE_PRICE_ID_B2B_SEAT_ANNUAL`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN` e `SENTRY_AUTH_TOKEN`",
     "Produto e preço recorrente por seat (B2B) criados no Stripe Dashboard, com Price IDs mensal e anual",
@@ -14,8 +14,8 @@
     {
       "step": 1,
       "description": "Revisar a seção Fase 3 do PRD e listar pré-requisitos",
-      "details": "Ler `.agent/prd/PRD.md` seção 14 (Fase 3) e listar variáveis, contas e configurações necessárias antes de iniciar TASK-147 em diante.",
-      "pass": false
+      "details": "Concluído — a seção 14.5 do PRD (\"Pré-requisitos específicos da Fase 3\") já contém a tabela com os 4 itens (preços B2B, Upstash, Sentry, convite Pix) e o status de cada um, com referência cruzada a esta task. Os steps 2-4 abaixo derivam diretamente desse levantamento.",
+      "pass": true
     },
     {
       "step": 2,
@@ -26,8 +26,8 @@
     {
       "step": 3,
       "description": "Provisionar Upstash Redis via Vercel Marketplace",
-      "details": "No painel do projeto na Vercel, adicionar a integração Upstash Redis (Marketplace) e copiar `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` para o `.env.local`. PENDENTE — bloqueado pela TASK-82 (deploy de produção na Vercel), que ainda não foi feita; não existe projeto Vercel linkado (`.vercel/`/`vercel.json` ausentes), e Marketplace integrations exigem um projeto já existente na Vercel. Não é algo a resolver agora — retomar quando a TASK-82 for concluída, ou diretamente na TASK-185 (Grupo 9), que reabre este mesmo provisionamento. Reportar como pendente; não bloqueia o início de nenhum outro grupo da Fase 3.",
-      "pass": false
+      "details": "Decisão alternativa registrada (satisfaz a cláusula do critério de aceite): o provisionamento real NÃO foi feito aqui — fica integralmente delegado à TASK-185 (Grupo 9), que já é a dona desta mesma ação como seu próprio step 1 e agora carrega explicitamente a dependência de TASK-82 (deploy de produção, pré-requisito para qualquer integração via Vercel Marketplace — sem projeto linkado na Vercel, o Marketplace não tem onde provisionar). Repetir o provisionamento aqui duplicaria o rastreio sem necessidade.",
+      "pass": true
     },
     {
       "step": 4,
@@ -41,6 +41,7 @@
   "technicalNotes": [
     "Nenhum valor real de secret deve ser escrito no PRD, nas tasks, em logs ou no chat — apenas placeholders em `.env.local`.",
     "Step 3 (Upstash via Vercel Marketplace) está pendente, bloqueado pela TASK-82 (deploy de produção na Vercel ainda não realizado) — registrado em 2026-06-21. Não bloqueia nenhum grupo ativo da Fase 3 além do Grupo 9 (rate limiting distribuído).",
+    "Analisado em 2026-06-22: decidido NÃO mover este step para TASK-82 — TASK-82 é o deploy em si (conectar projeto, env vars, webhook Stripe, smoke test), não o dono de provisionamento de integrações de terceiros. O provisionamento do Upstash já é uma task própria, TASK-185 (Grupo 9), que reabre exatamente esta mesma ação como seu step 1. Mover para TASK-82 criaria uma terceira cópia do mesmo item de ação (TASK-146/TASK-82/TASK-185) sem dono único. Em vez disso, o bloqueio por TASK-82 foi adicionado às `dependencies` e `technicalNotes` da própria TASK-185, que é onde o trabalho de fato vai acontecer.",
     "Boleto foi removido do planejamento da Fase 3 em 2026-06-21 (ver PRD seção 14.6) — o antigo step 'Confirmar Boleto no Stripe Dashboard' foi removido desta task. TASK-147 a 150 (grupo de Boleto) estão em `.agent/tasks/deprecated/`.",
     "Step 4 (Sentry) concluído em 2026-06-21: projeto Next.js criado no Sentry, `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` preenchidos em `.env.local` (validados por formato, não por valor). Token é um Organization Auth Token com escopo `org:ci` (fixo, voltado a upload de source maps e criação de release). Desbloqueia a TASK-188 (instalação do `@sentry/nextjs`) — falta apenas rodar o wizard oficial ou setup manual."
   ]

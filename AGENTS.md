@@ -240,7 +240,7 @@ parsed.error.errors  // ❌ não existe em v4
 | Bunny Stream | ✅ Configurado | `BUNNY_STREAM_API_KEY`, `BUNNY_STREAM_LIBRARY_ID`, `BUNNY_STREAM_CDN_HOSTNAME` |
 | Stripe | ✅ Configurado (modo teste) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_*` |
 
-Consulte `docs/bunny-stream-pricing.md` para referência de custos do Bunny Stream.
+Consulte `docs/pricing/bunny-stream-pricing.md` para referência de custos do Bunny Stream.
 
 ---
 

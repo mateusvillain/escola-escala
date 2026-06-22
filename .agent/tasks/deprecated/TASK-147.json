@@ -2,7 +2,7 @@
   "id": "TASK-147",
   "title": "Habilitar Boleto na Checkout Session de compra avulsa",
   "category": "integration",
-  "description": "Adicionar Boleto como método de pagamento na Checkout Session de compra avulsa de curso (`mode: 'payment'`), permitindo que alunos brasileiros sem cartão de crédito completem a compra. Pix foi adiado desta rodada — habilitar exige convite da Stripe para contas BR, não é configuração direta de Dashboard (ver `docs/pix-habilitacao.md`) — e pode ser adicionado depois reaproveitando a mesma Checkout Session.",
+  "description": "Adicionar Boleto como método de pagamento na Checkout Session de compra avulsa de curso (`mode: 'payment'`), permitindo que alunos brasileiros sem cartão de crédito completem a compra. Pix foi adiado desta rodada — habilitar exige convite da Stripe para contas BR, não é configuração direta de Dashboard (ver `docs/wiki/pix-habilitacao.md`) — e pode ser adicionado depois reaproveitando a mesma Checkout Session.",
   "acceptanceCriteria": [
     "Boleto habilitado como payment method na conta Stripe para BRL/BR (TASK-146)",
     "`stripe.checkout.sessions.create` em `src/app/api/courses/[slug]/purchase/route.ts` inclui `payment_method_types: ['card', 'boleto']`",
@@ -27,6 +27,6 @@
   "technicalNotes": [
     "Boleto só tem suporte garantido em `mode: 'payment'` (pagamento único) — não adicionar este método na Checkout Session de assinatura (`mode: 'subscription'`) sem a investigação separada da TASK-150.",
     "Sem o tratamento de webhooks assíncronos da TASK-148, a matrícula do aluno pode nunca ocorrer para pagamentos via Boleto.",
-    "Pix foi adiado da Fase 3 — ver `docs/pix-habilitacao.md` para os pré-requisitos de habilitação e os pontos a reverter (aqui e em TASK-148, TASK-149, TASK-172) quando o convite da Stripe for concedido."
+    "Pix foi adiado da Fase 3 — ver `docs/wiki/pix-habilitacao.md` para os pré-requisitos de habilitação e os pontos a reverter (aqui e em TASK-148, TASK-149, TASK-172) quando o convite da Stripe for concedido."
   ]
 }

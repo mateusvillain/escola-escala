@@ -33,8 +33,8 @@
     {
       "step": 4,
       "description": "Tratar falha ao iniciar o checkout",
-      "details": "Se `POST /api/subscriptions/checkout` falhar (ex.: 400/409), manter o usuário em `step: 'account'` mas exibir um aviso com link direto para `/dashboard` — a conta já existe e o aluno não pode ficar sem rota de saída.",
-      "pass": false
+      "details": "Implementado em `startCheckout` (`RegisterForm.tsx`): falha de `POST /api/subscriptions/checkout` ou erro de rede seta `checkoutErrorMsg` sem mudar de step, exibindo um `Alert` + link \"Ir para o Dashboard\" no passo `account` (e o aviso equivalente no passo `plans`, que já oferece \"Continuar grátis\" como rota de saída). Verificado em 2026-06-22 lendo o código — só a flag não tinha sido marcada.",
+      "pass": true
     },
     {
       "step": 5,

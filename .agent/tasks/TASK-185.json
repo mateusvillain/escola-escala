@@ -28,6 +28,9 @@
       "pass": false
     }
   ],
-  "dependencies": ["TASK-146"],
-  "estimatedComplexity": "low"
+  "dependencies": ["TASK-146", "TASK-82"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Bloqueado por TASK-82 (deploy de produção na Vercel): integrações via Vercel Marketplace exigem um projeto já linkado na Vercel, que ainda não existe (`.vercel/`/`vercel.json` ausentes). Registrado em 2026-06-22 — antes disso, este step 1 não tem como ser executado. Dependência adicionada explicitamente (antes só estava documentada na TASK-146)."
+  ]
 }

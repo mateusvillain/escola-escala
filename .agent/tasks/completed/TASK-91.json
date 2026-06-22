@@ -11,7 +11,7 @@
     {
       "step": 1,
       "description": "Criar o documento",
-      "details": "Criado `docs/cupons-stripe.md` com o passo a passo de criação de Coupon (tipo de desconto, duration, redemption limit, expiration) e Promotion Code vinculado (código, restrições próprias como first-time-transaction e validade), além da nota sobre a incompatibilidade entre `allow_promotion_codes` e `discounts` na mesma Checkout Session (relevante para o futuro grupo de Programa de Indicação).",
+      "details": "Criado `docs/wiki/cupons-stripe.md` com o passo a passo de criação de Coupon (tipo de desconto, duration, redemption limit, expiration) e Promotion Code vinculado (código, restrições próprias como first-time-transaction e validade), além da nota sobre a incompatibilidade entre `allow_promotion_codes` e `discounts` na mesma Checkout Session (relevante para o futuro grupo de Programa de Indicação).",
       "pass": true
     },
     {

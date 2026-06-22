@@ -2,7 +2,7 @@
 
 Este documento divide as 62 tasks da Fase 2 (`TASK-84` a `TASK-145`, detalhadas em `.agent/prd/PRD.md` seção 13 e em `.agent/tasks/`) em **20 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
 
-Critério de agrupamento: cada grupo corresponde a uma das funcionalidades listadas em `docs/oportunidades-plataforma.md` (seções 1–5). Isso mantém os PRs pequenos e revisáveis, em vez de um PR gigante por sprint.
+Critério de agrupamento: cada grupo corresponde a uma das funcionalidades listadas na seção 13 do PRD (`.agent/prd/PRD.md`, seções 1–5 do levantamento original). Isso mantém os PRs pequenos e revisáveis, em vez de um PR gigante por sprint.
 
 ## Como usar este documento
 
@@ -194,7 +194,7 @@ então deve ser mesclada antes daquele.
 
 Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
 1. TASK-90 — Habilitar allow_promotion_codes no Checkout
-2. TASK-91 — Documentar processo de criação de cupons (docs/cupons-stripe.md)
+2. TASK-91 — Documentar processo de criação de cupons (docs/wiki/cupons-stripe.md)
 
 Dependências externas: nenhuma — pode começar imediatamente. IMPORTANTE: o grupo "Programa de indicação"
 depende deste aqui — avise se notar que ele já foi iniciado em paralelo, para evitar conflito de merge em
@@ -206,7 +206,7 @@ Como trabalhar:
    `src/app/api/subscriptions/checkout/route.ts`.
 3. Crie um cupom de teste no Stripe Dashboard (modo teste) e valide manualmente o fluxo completo de checkout
    com o código aplicado — descreva o teste no PR.
-4. Implemente TASK-91: escreva `docs/cupons-stripe.md` com o passo a passo de criação de Coupon + Promotion
+4. Implemente TASK-91: escreva `docs/wiki/cupons-stripe.md` com o passo a passo de criação de Coupon + Promotion
    Code, e onde ver relatórios de uso no Stripe Dashboard.
 5. Valide: `npx tsc --noEmit` sem erros novos.
 6. Marque `"pass": true` nos steps dos dois JSONs de task e `"passes": true` em `.agent/tasks.json`.

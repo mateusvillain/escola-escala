@@ -2,7 +2,7 @@
 
 Este documento divide as tasks **ativas** da Fase 3 (`TASK-146`, `TASK-167` a `TASK-200`, detalhadas em `.agent/prd/PRD.md` seção 14 e em `.agent/tasks/`) em **8 grupos de trabalho**. Cada grupo foi dimensionado para ser implementado por uma única sessão de agente (ou desenvolvedor) e entregue como **um PR só**, na ordem em que as tasks devem ser feitas dentro do grupo.
 
-Critério de agrupamento: cada grupo corresponde a uma funcionalidade (ou a uma fatia coesa de uma funcionalidade maior) listada em `docs/fase3-oportunidades.md`.
+Critério de agrupamento: cada grupo corresponde a uma funcionalidade (ou a uma fatia coesa de uma funcionalidade maior) listada na seção 14 do PRD (`.agent/prd/PRD.md`).
 
 > **B2B despriorizado (2026-06-21):** os 4 sub-grupos de B2B (Modelos, Membros/Acesso, Cobrança, Painel — TASK-151 a TASK-166, antigos Grupos 2 a 5) foram retirados da execução ativa. As tasks correspondentes foram movidas para `.agent/tasks/deprecated/`, e os prompts de execução ficam preservados na seção **"Grupos despriorizados — B2B"** ao final deste documento. Não é cancelamento — é decisão de priorização, pendente de validar a demanda real de clientes corporativos com o cliente do projeto (ver `.agent/prd/PRD.md` seção 14.6). Os números de grupo (2 a 5) ficam reservados para esse spec e não são reaproveitados pelos grupos ativos abaixo.
 
@@ -29,7 +29,7 @@ Cada seção abaixo tem um bloco "Prompt para a IA" pronto para ser colado no in
 | 6 | Trilhas e bundles de cursos | TASK-167 a 173 | Grupo 0 | `feat/fase3-trilhas-bundles` |
 | 7 | Conteúdo programado (drip content) | TASK-174 a 178 | Grupo 0 | `feat/fase3-conteudo-programado` |
 | 8 | Testes E2E com Playwright | TASK-179 a 184 | Grupo 0 | `feat/fase3-testes-e2e` |
-| 9 | Rate limiting distribuído | TASK-185 a 187 | Grupo 0 | `feat/fase3-rate-limit-redis` |
+| 9 | Rate limiting distribuído | TASK-185 a 187 | Grupo 0 + TASK-82 | `feat/fase3-rate-limit-redis` |
 | 10 | Monitoramento de erro (Sentry) | TASK-188 a 190 | Grupo 0 | `feat/fase3-monitoramento-erro` |
 | 11 | Event tracking de produto | TASK-191 a 195 | Grupo 0 | `feat/fase3-event-tracking` |
 | 12 | Checkout integrado ao cadastro (Embedded Checkout) | TASK-196 a 200 | — | `feat/fase3-checkout-cadastro` |
@@ -107,7 +107,7 @@ Atenção a padrões do projeto:
   mesmos padrões de inputs nativos com Tailwind e de refetch pós-mutação via `onUpdate` callback.
 - Publicar uma trilha exige pelo menos 2 cursos associados — valide isso no `PATCH` do endpoint, não só na UI.
 - O checkout de bundle (TASK-172) é `mode: 'payment'`, igual à compra avulsa individual — só cartão, sem
-  `payment_method_types` customizado (Boleto removido da Fase 3, Pix adiado — ver `docs/pix-habilitacao.md`).
+  `payment_method_types` customizado (Boleto removido da Fase 3, Pix adiado — ver `docs/wiki/pix-habilitacao.md`).
 - O webhook de matrícula em lote (TASK-173) deve rotear por `session.metadata.trackId` ANTES de
   `session.metadata.courseId` em `handleCheckoutSessionCompleted`, e usar `upsert` por curso (idempotente,
   reentrega de webhook não pode duplicar nem falhar).
@@ -273,7 +273,10 @@ Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json
 3. TASK-187 — Validar rate limiting distribuído entre múltiplas instâncias
 
 Dependências externas: TASK-146 (Grupo 0) deve ter confirmado se a integração Upstash já existe no projeto da
-Vercel. Se TASK-185 reportou como pendente, esta é a task que efetivamente provisiona.
+Vercel. Se TASK-185 reportou como pendente, esta é a task que efetivamente provisiona. **Bloqueador real: TASK-82
+(deploy de produção na Vercel)** — integrações via Vercel Marketplace exigem um projeto já linkado na Vercel, que
+só passa a existir depois do primeiro deploy. Confirme que a TASK-82 já foi concluída antes de iniciar a TASK-185;
+se não foi, este grupo fica pendente (não é algo que se resolve só com código).
 
 Atenção a padrões do projeto:
 - `rateLimit(ip, options)` hoje é síncrona — ao migrar para Redis ela passa a ser `async`. Busque TODOS os
@@ -432,7 +435,7 @@ a escolha de plano só acontece numa visita separada a `/planos`, e quem ainda n
 assinatura. Este grupo junta os dois passos numa página só, usando o Embedded Checkout do Stripe
 (`ui_mode: 'embedded'`) em vez do Checkout hospedado atual — o formulário de pagamento é renderizado num
 iframe dentro da própria página, sem redirecionar para `checkout.stripe.com`. Decidido em conversa com o
-cliente em 2026-06-21, fora do documento de oportunidades original (`docs/fase3-oportunidades.md`) — ver
+cliente em 2026-06-21, fora do escopo original do roadmap de Fase 3 — ver
 seção 14.7 do PRD.
 
 Tasks deste grupo, na ordem (leia o spec completo de cada uma em .agent/tasks/TASK-<id>.json antes de codar):
@@ -454,7 +457,7 @@ Atenção a padrões do projeto:
 - `useSearchParams()` exige `<Suspense>` no componente pai (AGENTS.md) — ajuste `CadastroPage` de acordo ao
   ler `plan`/`billing`/`ref` da query string.
 - Não há custo adicional do Stripe por usar Embedded em vez de Hosted Checkout — mesma Checkout Session, mesma
-  tabela de taxas (`docs/stripe-pricing.md`); não é necessário criar nada novo no Dashboard do Stripe por
+  tabela de taxas (`docs/pricing/stripe-pricing.md`); não é necessário criar nada novo no Dashboard do Stripe por
   causa do `ui_mode`.
 - Escopo apenas da assinatura recorrente (planos Básico/Premium) — não estenda Embedded Checkout à compra
   avulsa de curso nem ao bundle de trilha nesta rodada.
@@ -506,7 +509,7 @@ se a decisão for revertida explicitamente pelo cliente do projeto.
 
 Contexto: hoje o checkout só aceita cartão de crédito. Boleto é relevante porque parte significativa do
 público brasileiro não tem ou prefere não usar cartão para pagamento. (Pix foi adiado desta rodada — exige
-convite da Stripe para contas BR, ver `docs/pix-habilitacao.md` — não implemente Pix neste grupo.) A
+convite da Stripe para contas BR, ver `docs/wiki/pix-habilitacao.md` — não implemente Pix neste grupo.) A
 complicação técnica é que Boleto é um método de pagamento ASSÍNCRONO — diferente do cartão, a confirmação não
 chega no evento `checkout.session.completed`, chega depois em `checkout.session.async_payment_succeeded` (ou
 `_failed`). O webhook atual (`src/lib/stripe-handlers.ts`) não trata isso e, sem o tratamento certo, a
@@ -542,7 +545,7 @@ Atenção a padrões do projeto:
 - A TASK-150 pode legitimamente concluir como "não habilitar boleto recorrente nesta rodada" — não force a
   feature se a documentação não confirmar suporte adequado ou se o comportamento de `past_due` durante a
   janela de compensação (1-3 dias úteis) se mostrar problemático no teste.
-- Não inclua `pix` em `payment_method_types` — está fora de escopo deste grupo (ver `docs/pix-habilitacao.md`).
+- Não inclua `pix` em `payment_method_types` — está fora de escopo deste grupo (ver `docs/wiki/pix-habilitacao.md`).
 - Se retomado, TASK-172 (Grupo 6, já implementada sem Boleto) e `.agent/tasks.json` precisam ser atualizados de
   volta para incluir `payment_method_types: ['card', 'boleto']`, e os `specFilePath` de TASK-147 a 150 movidos
   de volta para `.agent/tasks/`.
