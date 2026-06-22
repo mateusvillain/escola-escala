@@ -36,6 +36,12 @@ enum SubscriptionStatus {
   trialing
 }
 
+enum ModuleReleaseType {
+  immediate
+  fixed_date
+  days_after_enrollment
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -123,13 +129,16 @@ model CourseTrackItem {
 }
 
 model Module {
-  id          String   @id @default(uuid())
-  courseId    String
-  course      Course   @relation(fields: [courseId], references: [id])
-  title       String
-  description String?
-  order       Int
-  createdAt   DateTime @default(now())
+  id               String            @id @default(uuid())
+  courseId         String
+  course           Course            @relation(fields: [courseId], references: [id])
+  title            String
+  description      String?
+  order            Int
+  releaseType      ModuleReleaseType @default(immediate)
+  releaseDate      DateTime?
+  releaseAfterDays Int?
+  createdAt        DateTime          @default(now())
 
   lessons Lesson[]
   quiz    Quiz?
