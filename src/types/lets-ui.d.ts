@@ -36,6 +36,40 @@ declare namespace React {
       'lui-card': React.HTMLAttributes<HTMLElement> & {
         'aria-label'?: string
       }
+      'lui-select': React.HTMLAttributes<HTMLElement> & {
+        label?: string
+        name?: string
+        options?: string
+        selected?: number
+        disabled?: boolean
+        required?: boolean
+        size?: 'xl' | 'lg' | 'md' | 'sm'
+        optional?: boolean
+        'optional-text'?: string
+        hint?: string
+        error?: boolean
+        'error-text'?: string
+        placeholder?: string
+        'force-state'?: string
+        'aria-label'?: string
+      }
+      'lui-native-select': React.HTMLAttributes<HTMLElement> & {
+        label?: string
+        name?: string
+        options?: string
+        selected?: number
+        disabled?: boolean
+        required?: boolean
+        size?: 'xl' | 'lg' | 'md' | 'sm'
+        optional?: boolean
+        'optional-text'?: string
+        hint?: string
+        error?: boolean
+        'error-text'?: string
+        placeholder?: string
+        'force-state'?: string
+        'aria-label'?: string
+      }
       'lui-tag': React.HTMLAttributes<HTMLElement> & {
         label?: string
         'tag-style'?: 'surface' | 'subtle' | 'outline'

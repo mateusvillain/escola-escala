@@ -15,25 +15,25 @@
       "step": 1,
       "description": "Criar o arquivo e validar o CEP de entrada",
       "details": "Criar `src/lib/viacep.ts`. Remover máscara do CEP recebido; se não tiver exatamente 8 dígitos, retornar `null` imediatamente sem fazer requisição.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Implementar a chamada com timeout",
       "details": "Usar `fetch(\\`https://viacep.com.br/ws/${cep}/json/\\`, { signal: AbortSignal.timeout(5000) })`. Envolver em try/catch — qualquer erro (timeout, rede, JSON inválido) retorna `null`, nunca propaga exceção.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Mapear a resposta",
       "details": "Se a resposta JSON tiver `erro: true`, retornar `null`. Caso contrário, mapear `logradouro→street`, `bairro→neighborhood`, `localidade→city`, `uf→state` para o tipo `ViaCepAddress`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Testes unitários com fetch mockado",
       "details": "Criar `src/lib/__tests__/viacep.test.ts` mockando `global.fetch` (Vitest `vi.fn()`) para os casos: sucesso, `{ erro: true }`, timeout/abort, erro de rede, CEP malformado (não deve chamar fetch).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],

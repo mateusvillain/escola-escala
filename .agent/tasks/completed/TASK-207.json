@@ -16,34 +16,38 @@
       "step": 1,
       "description": "Buscar os campos fiscais do usuário na page",
       "details": "Em `src/app/(app)/perfil/page.tsx`, adicionar os 8 campos fiscais ao `select` da query Prisma existente e passar como props para o novo componente.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar o componente FiscalDataForm",
       "details": "Criar `src/components/profile/FiscalDataForm.tsx`, seguindo EXATAMENTE o padrão de `EditProfileForm.tsx` (lui-input + leitura via `shadowRoot` em vez de react-hook-form, conforme AGENTS.md — formulário público simples). Campos: CPF/CNPJ, CEP, rua, número, complemento, bairro, cidade, UF.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Implementar o autofill por CEP",
       "details": "No `onBlur` do input de CEP (acessar via `shadowRoot` igual ao padrão de leitura), chamar `fetchAddressByCep`. Se retornar endereço, setar os valores dos inputs de rua/bairro/cidade/UF diretamente no `<input>` do shadow DOM (`el.shadowRoot.querySelector('input').value = ...` e disparar evento `input` para refletir no componente) apenas se esses campos estiverem vazios.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Implementar o submit",
       "details": "No submit, montar o body só com os campos preenchidos (mesmo padrão de `EditProfileForm`) e chamar `PATCH /api/users/me`. Exibir `Alert` de sucesso/erro igual ao padrão existente. Em caso de 400 com `issues` do Zod, mapear a mensagem do campo `cpfCnpj` para erro inline.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 5,
       "description": "Renderizar na página de perfil",
       "details": "Importar e renderizar `<FiscalDataForm />` em `src/app/(app)/perfil/page.tsx`, abaixo de `EditProfileForm`, dentro do mesmo `<div className=\"mt-6 space-y-8\">`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-203", "TASK-205", "TASK-206"],
+  "dependencies": [
+    "TASK-203",
+    "TASK-205",
+    "TASK-206"
+  ],
   "estimatedComplexity": "high",
   "technicalNotes": [
     "Não usar react-hook-form com `lui-input` — incompatibilidade de shadow DOM já documentada em AGENTS.md. Seguir o padrão de leitura/escrita manual via `shadowRoot` já usado em `EditProfileForm`/`ChangePasswordForm`.",

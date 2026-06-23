@@ -173,6 +173,28 @@ async function main() {
     stripeSubscriptionId: 'sub_test_premium',
   })
 
+  // Usuário sem assinatura, só com dados fiscais preenchidos — para testar a
+  // visualização da seção "Dados fiscais" em /admin/usuarios/[id] de forma
+  // isolada (sem pagamento/matrículas envolvidos).
+  await prisma.user.upsert({
+    where: { email: 'aluno.dados-fiscais@test.com' },
+    update: {},
+    create: {
+      email: 'aluno.dados-fiscais@test.com',
+      name: 'Aluno Dados Fiscais',
+      passwordHash,
+      role: Role.student,
+      cpfCnpj: '111.444.777-35',
+      addressStreet: 'Rua Augusta',
+      addressNumber: '500',
+      addressComplement: 'Apto 12',
+      addressNeighborhood: 'Consolação',
+      addressCity: 'São Paulo',
+      addressState: 'SP',
+      addressZipCode: '01305-000',
+    },
+  })
+
   console.log('Seed concluído.')
 }
 

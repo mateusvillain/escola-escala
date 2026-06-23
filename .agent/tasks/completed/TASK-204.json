@@ -16,31 +16,31 @@
       "step": 1,
       "description": "Criar o arquivo e a função de limpeza",
       "details": "Criar `src/lib/utils/document.ts`. Adicionar uma função interna `onlyDigits(value: string): string` que remove tudo que não é dígito.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Implementar validateCpf",
       "details": "Implementar o algoritmo padrão de dígito verificador de CPF (dois dígitos, pesos 10 a 2 e 11 a 2 sobre os 9 primeiros dígitos, módulo 11). Rejeitar strings com menos/mais de 11 dígitos após limpeza e sequências de dígito repetido.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Implementar validateCnpj",
       "details": "Implementar o algoritmo padrão de dígito verificador de CNPJ (dois dígitos, pesos 5 a 2/9 a 2 e 6 a 2/9 a 2, módulo 11). Rejeitar strings com menos/mais de 14 dígitos após limpeza e sequências de dígito repetido.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Implementar detectDocumentType e formatCpfCnpj",
       "details": "`detectDocumentType` decide por 11 vs 14 dígitos após `onlyDigits`. `formatCpfCnpj` aplica a máscara correspondente usando regex de substituição.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 5,
       "description": "Escrever os testes unitários",
       "details": "Criar `src/lib/utils/__tests__/document.test.ts` com Vitest, cobrindo os casos do acceptanceCriteria. Usar CPFs/CNPJs de teste publicamente conhecidos como válidos (ex. gerados por gerador de CPF de teste), nunca documentos reais.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],

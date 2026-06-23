@@ -15,28 +15,31 @@
       "step": 1,
       "description": "Estender o patchSchema",
       "details": "Adicionar os 8 campos fiscais como opcionais ao `patchSchema` existente. Usar `.refine()` para validar `cpfCnpj` com `detectDocumentType` + `validateCpf`/`validateCnpj` de `@/lib/utils/document` (TASK-204), retornando mensagem 'CPF/CNPJ inválido' se a validação falhar.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar addressState",
       "details": "Adicionar `addressState: z.string().length(2).regex(/^[A-Z]{2}$/).optional()` ao schema.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Atualizar o update do Prisma e o select",
       "details": "No `prisma.user.update`, espalhar os 8 campos fiscais com o mesmo padrão condicional já usado para `name`/`avatarUrl` (`...(campo !== undefined && { campo })`). Adicionar os 8 campos ao `select` de retorno do GET e do PATCH.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Testes",
       "details": "Cobrir manualmente ou via teste de API: PATCH só com `name` (sem regressão), PATCH com `cpfCnpj` válido, PATCH com `cpfCnpj` inválido (espera 400), PATCH com endereço completo.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-203", "TASK-204"],
+  "dependencies": [
+    "TASK-203",
+    "TASK-204"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "Nenhum destes campos é obrigatório nesta rodada — o acesso ao curso/assinatura nunca depende deles (decisão registrada em docs/fase4-planejamento.md item 1). A obrigatoriedade só aparece na hora de emitir nota fiscal (item 2), nunca aqui.",

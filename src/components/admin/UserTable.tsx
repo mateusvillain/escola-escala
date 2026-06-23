@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import Link from 'next/link'
 
 type Role = 'admin' | 'instructor' | 'student'
 type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing'
@@ -365,6 +366,14 @@ export function UserTable() {
                         )}
                       </div>
 
+                      {/* Detail page */}
+                      <Link
+                        href={`/admin/usuarios/${user.id}`}
+                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+                      >
+                        Ver detalhes
+                      </Link>
+
                       {/* Grant / Revoke trial */}
                       {user.freeTrialEligible ? (
                         <button
@@ -491,6 +500,7 @@ export function UserTable() {
           </div>
         </div>
       )}
+
     </div>
   )
 }

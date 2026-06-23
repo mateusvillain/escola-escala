@@ -2,7 +2,7 @@
   "id": "TASK-208",
   "title": "GET /api/admin/users/[id] retorna detalhe com dados fiscais",
   "category": "api-endpoint",
-  "description": "docs/fase4-planejamento.md assumia que `GET /api/admin/users/[id]` já existia — verificado durante a geração das tasks que NÃO existe (o arquivo `src/app/api/admin/users/[id]/route.ts` só tem `PATCH`, e não há página `/admin/usuarios/[id]`). Esta task cria o endpoint do zero, restrito a admin, para suporte conseguir ver/resolver nota fiscal pendente por dado fiscal faltante. Ponto de atenção LGPD: CPF/CNPJ não deve aparecer na listagem (`GET /api/admin/users`), só neste detalhe.",
+  "description": "[DEPRECADA] Implementada originalmente (endpoint criado e funcional), mas removida em seguida na mesma branch (`feat/fase4-cadastro-fiscal`, PR #24) por pedido explícito do usuário: em vez de um modal na `UserTable` consumindo este endpoint, a TASK-209 foi redefinida para uma página `/admin/usuarios/[id]` que busca os dados direto via Prisma (mesmo padrão server-component de `/admin/cursos/[id]`), cobrindo o mesmo caso de uso (e mais — também pagamento/assinaturas e acesso a cursos) sem precisar de uma API JSON separada. O endpoint ficou sem nenhum consumidor e foi removido de `src/app/api/admin/users/[id]/route.ts` (arquivo voltou a ter só `PATCH`). Descrição original preservada abaixo para histórico.\n\ndocs/fase4-planejamento.md assumia que `GET /api/admin/users/[id]` já existia — verificado durante a geração das tasks que NÃO existe (o arquivo `src/app/api/admin/users/[id]/route.ts` só tinha `PATCH`, e não havia página `/admin/usuarios/[id]`). Esta task criou o endpoint do zero, restrito a admin, para suporte conseguir ver/resolver nota fiscal pendente por dado fiscal faltante. Ponto de atenção LGPD: CPF/CNPJ não deve aparecer na listagem (`GET /api/admin/users`), só no detalhe — essa garantia continua valendo, agora coberta pela página da TASK-209.",
   "acceptanceCriteria": [
     "`GET /api/admin/users/[id]` adicionado ao mesmo arquivo de `src/app/api/admin/users/[id]/route.ts`, restrito a `role: admin` via `requireRole`",
     "Retorna os campos básicos já usados em `UserTable` (nome, e-mail, role, status, assinatura) MAIS os 8 campos fiscais de `User` (TASK-203)",
@@ -14,22 +14,24 @@
       "step": 1,
       "description": "Implementar o handler GET",
       "details": "Em `src/app/api/admin/users/[id]/route.ts`, adicionar `export async function GET(request: NextRequest, ctx: RouteContext<'/api/admin/users/[id]'>)`. Seguir o padrão de auth de `PATCH` já existente no mesmo arquivo (`requireRole(request, ['admin'])`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar e retornar o usuário com dados fiscais",
       "details": "`prisma.user.findUnique` com `select` incluindo `id, name, email, role, isActive, freeTrialEligible, createdAt, cpfCnpj, addressStreet, addressNumber, addressComplement, addressNeighborhood, addressCity, addressState, addressZipCode`. Retornar 404 se não encontrado.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Confirmar isolamento da listagem",
       "details": "Abrir `src/app/api/admin/users/route.ts` (listagem) e confirmar que o `select` usado ali NÃO inclui nenhum dos 8 campos fiscais. Se a listagem usar `select: undefined` (retorno completo do Prisma), adicionar um `select` explícito para garantir que CPF/CNPJ nunca vaze na listagem.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-203"],
+  "dependencies": [
+    "TASK-203"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Correção de premissa: docs/fase4-planejamento.md citava este endpoint e a página `/admin/usuarios/[id]` como já existentes — confirmado durante a geração das tasks que nenhum dos dois existe. Esta task e a TASK-209 cobrem o gap real.",

@@ -1,0 +1,58 @@
+{
+  "id": "TASK-209",
+  "title": "Página admin de detalhe do usuário (fiscal + pagamento + acesso)",
+  "category": "ui-ux",
+  "description": "Redefinida após a TASK-208/209 originais (modal de dados fiscais via `GET /api/admin/users/[id]`): por pedido explícito, em vez de um modal restrito a dado fiscal, criar uma página `/admin/usuarios/[id]` mostrando todos os dados cadastrados do usuário — conta, dados fiscais, pagamento/assinaturas (incluindo histórico, `stripeCustomerId`, `stripeSubscriptionId`), acesso a cursos (matrículas) e certificados. Mantendo segurança: rota protegida pelo mesmo `requireRole admin` server-side já aplicado a todo `/admin/*` (`src/app/admin/layout.tsx`); nunca seleciona `passwordHash`/`resetToken`/`resetTokenExpiry`; `GET /api/admin/users` (listagem) continua sem nenhum campo fiscal (LGPD).",
+  "acceptanceCriteria": [
+    "`src/app/admin/usuarios/[id]/page.tsx` — server component, busca o usuário via `prisma.user.findUnique` (mesmo padrão de `/admin/cursos/[id]`), `notFound()` se não existir",
+    "Seção Conta: nome, e-mail, role, status ativo/inativo, trial concedido, criado em, `stripeCustomerId`",
+    "Seção Dados fiscais: CPF/CNPJ formatado + endereço completo, ou estado vazio 'Nenhum dado fiscal cadastrado.'",
+    "Seção Pagamento: todas as `UserSubscription` do usuário (não só a mais recente) com plano, status, ciclo, período atual, `stripeSubscriptionId`, e código de indicação se houver",
+    "Seção Acesso a cursos: lista de `CourseEnrollment` com link para `/admin/cursos/[id]`, matriculado/concluído em",
+    "Seção Certificados: lista de `Certificate` emitidos, se houver",
+    "`UserTable.tsx` substitui o botão 'Ver dados fiscais' por um link 'Ver detalhes' (`next/link`) para `/admin/usuarios/${user.id}` — sem modal, sem fetch client-side",
+    "Nunca seleciona `passwordHash`/`resetToken`/`resetTokenExpiry`",
+    "Verificado em browser: sem login redireciona para `/login`; logado como `student` é bloqueado pelo layout admin (redireciona para `/dashboard`); logado como `admin` acessa normalmente; id inexistente retorna 404"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página de detalhe",
+      "details": "Criar `src/app/admin/usuarios/[id]/page.tsx` buscando `user` com `select` explícito (conta + fiscal + `subscriptions` + `enrollments.course` + `certificates.course` + `referralCode`), seguindo o padrão server-component de `src/app/admin/cursos/[id]/page.tsx`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Renderizar as seções",
+      "details": "Cards `bg-white rounded-xl border border-gray-200 p-6` para Conta, Dados fiscais, Pagamento, Acesso a cursos e Certificados, reaproveitando os labels/variantes de status/ciclo/plano já usados em `SubscriptionTable.tsx`/`UserTable.tsx`.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Atualizar UserTable",
+      "details": "Remover `fiscalModal`/`openFiscalModal`/`isFiscalDataEmpty`/o modal JSX e o import de `formatCpfCnpj`; adicionar `<Link href={`/admin/usuarios/${user.id}`}>Ver detalhes</Link>` na célula de ações.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Remover o GET de /api/admin/users/[id]",
+      "details": "O endpoint criado pela TASK-208 original ficou sem nenhum consumidor (a página busca direto via Prisma, mesmo padrão de `/admin/cursos/[id]`). Removido — ver TASK-208 em `deprecated/`.",
+      "pass": true
+    },
+    {
+      "step": 5,
+      "description": "Testar em browser",
+      "details": "Playwright headless: acesso sem login, como aluno (bloqueado) e como admin (sucesso); id inexistente (404); conteúdo das 5 seções confirmado visualmente para um usuário com dados fiscais, assinatura, matrículas e certificados.",
+      "pass": true
+    }
+  ],
+  "dependencies": [
+    "TASK-203"
+  ],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Substitui o desenho original (modal + `GET /api/admin/users/[id]`) por pedido explícito do usuário, depois do PR #24 já aberto — decisão tomada na própria branch `feat/fase4-cadastro-fiscal`, sem necessidade de nova task numerada já que cobre o mesmo gap (suporte ver dado completo do usuário), agora mais abrangente.",
+    "`stripeCustomerId`/`stripeSubscriptionId` são identificadores (não secrets) — já expostos em outros pontos do admin (`/admin/assinaturas`); seguro exibi-los aqui. Nenhum dado de cartão é armazenado pela plataforma (Stripe Checkout/Portal cuidam disso integralmente).",
+    "Escopo deliberadamente NÃO inclui: progresso por aula, tentativas de quiz, avaliações de curso, eventos de produto, log de auditoria — são dados de atividade/analytics, não 'dados cadastrados', e ampliariam o escopo sem pedido explícito."
+  ]
+}
