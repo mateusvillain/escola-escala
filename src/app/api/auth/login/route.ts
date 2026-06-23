@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
   );
   response.cookies.set("auth-token", token, {
     httpOnly: true,
-    sameSite: "strict",
+    // 'lax' (não 'strict') — ver justificativa em src/app/api/auth/register/route.ts.
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });

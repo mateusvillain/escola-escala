@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Criar o arquivo de configuração",
       "details": "Criar `playwright.config.ts` na raiz, usando `defineConfig` de `@playwright/test` (confirmar se é necessário adicionar a dependência `@playwright/test`, já que hoje só `playwright` está no `package.json`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Configurar webServer e baseURL",
       "details": "Definir `webServer: { command: 'npx next dev', url: 'http://localhost:3000', reuseExistingServer: !process.env.CI }` e `use: { baseURL: 'http://localhost:3000' }`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar a pasta e um spec de smoke",
       "details": "Criar `e2e/smoke.spec.ts` com um teste mínimo (ex.: `expect(page).toHaveTitle(/.../)` na home) para validar que a configuração funciona antes de escrever os specs reais.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-146"],

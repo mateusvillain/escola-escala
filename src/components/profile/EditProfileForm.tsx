@@ -95,7 +95,6 @@ export function EditProfileForm({ name, avatarUrl }: EditProfileFormProps) {
               type="submit"
               loading={loading}
               loadingText="Salvando..."
-              onClick={() => formRef.current?.requestSubmit()}
             />
           </lui-stack>
         </form>

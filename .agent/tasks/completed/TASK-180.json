@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Escrever o teste de cadastro",
       "details": "Em `e2e/auth.spec.ts`, navegar para `/cadastro`, preencher nome/e-mail (`teste+${Date.now()}@example.com`)/senha, submeter, e validar `expect(page).toHaveURL(/\\/dashboard/)`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Escrever o teste de login",
       "details": "Reaproveitar o e-mail criado no passo 1 (ou um `beforeAll` que cadastra um usuário), navegar para `/login`, preencher as credenciais e validar o redirecionamento para `/dashboard`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Escrever o teste de senha incorreta",
       "details": "Tentar login com a senha errada e validar que a mensagem de erro aparece na tela e que a navegação permanece em `/login`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-179"],

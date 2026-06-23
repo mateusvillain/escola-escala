@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Adicionar o script ao package.json",
       "details": "Em `package.json`, adicionar `\"test:e2e\": \"playwright test\"` ao bloco `scripts`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Atualizar AGENTS.md",
       "details": "Em `AGENTS.md`, seção \"Comandos úteis\", atualizar a linha de testes para incluir `npx playwright test` (E2E) ao lado de `npx vitest run` (unitário), e remover a observação de que Playwright \"ainda não tem config nem specs\" (TASK-179 a 183 resolvem isso).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-183"],
