@@ -1333,36 +1333,36 @@
     "id": "TASK-191",
     "title": "Modelo ProductEvent",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-191.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-191.json",
+    "passes": true
   },
   {
     "id": "TASK-192",
     "title": "Helper trackEvent para registrar eventos de produto",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-192.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-192.json",
+    "passes": true
   },
   {
     "id": "TASK-193",
     "title": "Instrumentar eventos-chave de checkout e consumo de aula",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-193.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-193.json",
+    "passes": true
   },
   {
     "id": "TASK-194",
     "title": "GET /api/admin/events/funnel agregação de funil",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-194.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-194.json",
+    "passes": true
   },
   {
     "id": "TASK-195",
     "title": "Seção de funil de conversão no AdminDashboard",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-195.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-195.json",
+    "passes": true
   },
   {
     "id": "TASK-196",

@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { checkLessonAccess } from '@/lib/access'
+import { trackEvent } from '@/lib/events'
 import { isModuleReleased, getReleaseCountdownLabel } from '@/lib/drip-content'
 import { getAdjacentLessons, type LessonAttachment } from '@/lib/utils/lessons'
 import { getCourseProgress } from '@/lib/progress'
@@ -66,6 +67,11 @@ export default async function AulaPage({
   }
 
   const access = await checkLessonAccess(user?.userId ?? null, lessonId, user?.role)
+
+  if (user && access.allowed) {
+    void trackEvent('lesson_started', user.userId, { lessonId, courseId: course.id })
+  }
+
   const upgradeReason: UpgradeReason | undefined =
     access.reason &&
     access.reason !== 'not_authenticated' &&

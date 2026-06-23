@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Adicionar o model ao schema",
       "details": "Em `prisma/schema.prisma`:\n```prisma\nmodel ProductEvent {\n  id        String   @id @default(uuid())\n  userId    String?\n  user      User?    @relation(fields: [userId], references: [id])\n  eventType String\n  metadata  Json?\n  createdAt DateTime @default(now())\n\n  @@index([eventType, createdAt])\n}\n```",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
       "details": "Rodar `npx prisma migrate dev --name add_product_event`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-146"],

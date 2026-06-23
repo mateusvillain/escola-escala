@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar o helper",
       "details": "Criar `src/lib/events.ts` com `export async function trackEvent(eventType: string, userId: string | null, metadata?: Record<string, unknown>): Promise<void>`, envolvendo `prisma.productEvent.create` em try/catch que apenas loga em caso de erro.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Documentar o padrão fire-and-forget",
       "details": "Adicionar nota no próprio arquivo (ou em AGENTS.md) orientando os call sites a chamar `void trackEvent(...)` em vez de `await trackEvent(...)`, para não atrasar a resposta da rota.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-191"],

@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { validateReferralCode } from '@/lib/referral'
+import { trackEvent } from '@/lib/events'
 import { PlansClient } from './PlansClient'
 import Link from 'next/link'
 
@@ -47,6 +48,8 @@ export default async function PlanosPage({
   }
 
   const validReferralCode = ref ? (await validateReferralCode(ref, userId)) ?? undefined : undefined
+
+  void trackEvent('plans_viewed', userId)
 
   return (
     <div className="min-h-screen flex flex-col">

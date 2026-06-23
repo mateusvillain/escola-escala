@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Buscar os dados do funil",
       "details": "No componente/página do `AdminDashboard`, buscar `GET /api/admin/events/funnel` (TASK-194) junto com as métricas financeiras já existentes.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Renderizar o funil",
       "details": "Exibir as três etapas com contagem absoluta e percentual de conversão entre etapas consecutivas, reaproveitando `<lui-card>`/`<lui-heading>` do design system.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar a lista de abandono",
       "details": "Listar as 5 aulas de maior drop-off com título, curso e link para `/admin/cursos/[id]` (ou direto para a aula, se a rota existir).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-194"],

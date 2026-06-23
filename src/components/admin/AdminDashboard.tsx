@@ -15,6 +15,25 @@ interface Metrics {
   ltvByPlan: { basic: number; premium: number }
 }
 
+interface AbandonedLesson {
+  lessonId: string
+  lessonTitle: string
+  courseId: string | null
+  courseTitle: string | null
+  startedCount: number
+  dropoffRate: number
+}
+
+interface Funnel {
+  days: number
+  plansViewed: number
+  checkoutsStarted: number
+  subscriptionsActivated: number
+  topAbandonedLessons: AbandonedLesson[]
+}
+
+const FUNNEL_PERIODS = [7, 30, 90] as const
+
 function formatCurrency(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
@@ -57,6 +76,107 @@ function SkeletonCard() {
   )
 }
 
+function conversionLabel(from: number, to: number): string {
+  if (from === 0) return '—'
+  return formatPercentage((to / from) * 100)
+}
+
+function FunnelStep({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="text-center px-4">
+      <div className="text-2xl font-bold text-gray-900">{value.toLocaleString('pt-BR')}</div>
+      <p className="text-sm text-gray-500 mt-0.5 whitespace-nowrap">{label}</p>
+    </div>
+  )
+}
+
+function FunnelArrow({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center px-2 text-gray-400">
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+      <span className="text-xs font-medium mt-0.5">{label}</span>
+    </div>
+  )
+}
+
+function FunnelSection({
+  funnel,
+  days,
+  onDaysChange,
+}: {
+  funnel: Funnel | null
+  days: number
+  onDaysChange: (days: number) => void
+}) {
+  return (
+    <div className="mb-10">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <lui-heading level="2" size="lg">Funil de conversão</lui-heading>
+        <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden">
+          {FUNNEL_PERIODS.map(period => (
+            <button
+              key={period}
+              onClick={() => onDaysChange(period)}
+              className={[
+                'px-4 py-2 text-sm font-medium transition-colors',
+                days === period ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50',
+              ].join(' ')}
+            >
+              {period} dias
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {funnel === null ? (
+        <SkeletonCard />
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center flex-wrap gap-2">
+          <FunnelStep label="Planos visualizados" value={funnel.plansViewed} />
+          <FunnelArrow label={conversionLabel(funnel.plansViewed, funnel.checkoutsStarted)} />
+          <FunnelStep label="Checkouts iniciados" value={funnel.checkoutsStarted} />
+          <FunnelArrow label={conversionLabel(funnel.checkoutsStarted, funnel.subscriptionsActivated)} />
+          <FunnelStep label="Assinaturas ativadas" value={funnel.subscriptionsActivated} />
+        </div>
+      )}
+
+      <div className="mt-6">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          Aulas com maior abandono
+        </h2>
+        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+          {funnel === null ? (
+            <SkeletonCard />
+          ) : funnel.topAbandonedLessons.length === 0 ? (
+            <p className="px-5 py-6 text-sm text-gray-400 text-center">
+              Sem dados suficientes nesse período.
+            </p>
+          ) : (
+            funnel.topAbandonedLessons.map(lesson => (
+              <Link
+                key={lesson.lessonId}
+                href={`/admin/aulas/${lesson.lessonId}`}
+                className="flex items-center justify-between gap-4 px-5 py-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{lesson.lessonTitle}</p>
+                  <p className="text-xs text-gray-500 truncate">{lesson.courseTitle ?? 'Curso removido'}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-semibold text-red-600">{formatPercentage(lesson.dropoffRate)}</p>
+                  <p className="text-xs text-gray-400">{lesson.startedCount} iniciaram</p>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const QUICK_LINKS = [
   { href: '/admin/cursos', label: 'Gerenciar Cursos', description: 'Criar, editar e publicar cursos' },
   { href: '/admin/usuarios', label: 'Gerenciar Usuários', description: 'Alunos, instrutores e admins' },
@@ -66,6 +186,8 @@ const QUICK_LINKS = [
 export function AdminDashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [funnel, setFunnel] = useState<Funnel | null>(null)
+  const [funnelDays, setFunnelDays] = useState<number>(30)
 
   useEffect(() => {
     fetch('/api/admin/metrics')
@@ -76,6 +198,17 @@ export function AdminDashboard() {
       .then(setMetrics)
       .catch(() => setError('Não foi possível carregar as métricas.'))
   }, [])
+
+  useEffect(() => {
+    setFunnel(null)
+    fetch(`/api/admin/events/funnel?days=${funnelDays}`)
+      .then(res => {
+        if (!res.ok) throw new Error()
+        return res.json()
+      })
+      .then(setFunnel)
+      .catch(() => {})
+  }, [funnelDays])
 
   return (
     <div>
@@ -191,6 +324,9 @@ export function AdminDashboard() {
           </>
         )}
       </div>
+
+      {/* Funil de conversão */}
+      <FunnelSection funnel={funnel} days={funnelDays} onDaysChange={setFunnelDays} />
 
       {/* Quick links */}
       <div>
