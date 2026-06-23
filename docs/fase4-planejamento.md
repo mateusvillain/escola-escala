@@ -2,10 +2,9 @@
 
 > **Nível deste documento: escopo e decisões, não execução.** Diferente de
 > `docs/fase3-grupos-de-trabalho.md` (que assume tasks já geradas em `.agent/tasks/`), este documento define
-> o que entra em cada frente, as decisões pendentes e a ordem proposta — **antes** de gerar as tasks
-> granulares. O próximo passo, depois deste doc ser revisado, é gerar `.agent/tasks/TASK-202.json` em
-> diante (próximo número livre após `TASK-201`) e um `docs/fase4-grupos-de-trabalho.md` no mesmo formato da
-> Fase 3, com prompts de execução prontos.
+> o que entra em cada frente e a ordem proposta. **Atualização:** as tasks granulares (`TASK-202` a `234`,
+> mais `TASK-151` a `166` reativadas) e `docs/fase4-grupos-de-trabalho.md` já foram gerados — este documento
+> continua valendo como registro do raciocínio e das decisões de escopo por trás delas.
 
 A Fase 4 cobre três frentes, na ordem em que foram solicitadas:
 
@@ -27,7 +26,7 @@ Antes de gerar qualquer task granular, três coisas fora do código precisam est
 |---|---|---|
 | **`TASK-82`** — deploy de produção na Vercel | Só a **emissão real** de nota fiscal contra receita real do item 2 — **não bloqueia desenvolvimento/teste**, ver detalhe abaixo | Pendente — já listada em `CLAUDE.md` como bloqueante de `TASK-201` e do Grupo 9 da Fase 3 (rate limiting distribuído); agora também bloqueia a emissão real da Fase 4 |
 | Abertura de conta Asaas PJ + confirmação com o contador (regime tributário, município de incidência do ISS, código de serviço da LC 116/2003) | Item 2 — ver `docs/wiki/nota-fiscal-nfse.md` | Não iniciado |
-| Validação de demanda de clientes corporativos com o cliente do projeto | Item 3 inteiro — decisão de produto, registrada em `.agent/prd/PRD.md` seção 14.6 | Não iniciado |
+| Validação de demanda de clientes corporativos com o cliente do projeto | Item 3 inteiro — decisão de produto, registrada em `.agent/prd/PRD.md` seção 14.6 | **Confirmado em 2026-06-23** — ver nota abaixo |
 
 **`TASK-82` não bloqueia o desenvolvimento do item 2.** O Sandbox do Asaas (`api-sandbox.asaas.com`) é um
 ambiente isolado, com conta própria e sem custo, e o ciclo completo (emitir, consultar, cancelar nota,
@@ -38,6 +37,16 @@ deploy a Stripe está em modo teste (sem receita real para documentar) e a conta
 precisa existir. Ou seja: todas as tasks de implementação e teste do item 2 podem ser feitas e validadas
 agora; o que fica pendente de `TASK-82` é só o momento de trocar a chave de API do Asaas de Sandbox para
 produção e começar a emitir notas de verdade.
+
+**A validação de demanda B2B foi confirmada em 2026-06-23.** O produto quer suportar assinatura tanto por
+pessoa física (B2C, já existente) quanto por pessoa jurídica comprando para os seus colaboradores (B2B), com
+os benefícios diferenciais já documentados em `docs/wiki/b2b-diferenciais.md`, disponível já no lançamento da
+plataforma — que ainda não tem data definida. Isso reverte a decisão de despriorização registrada em
+`.agent/prd/PRD.md` seção 14.6 (decisão tomada na Fase 3): o item 3 deste documento deixa de ser condicional
+e passa a fazer parte do escopo confirmado da Fase 4, seguindo a ordem técnica já descrita na seção "Ordem de
+execução proposta" abaixo. As tasks de B2B (`TASK-151` a `166`) já foram movidas de volta para
+`.agent/tasks/` e as tasks novas (`TASK-202` a `234`, incluindo os campos fiscais de `Organization`) já foram
+geradas — ver `docs/fase4-grupos-de-trabalho.md`.
 
 > Nota de setup: para testar o **webhook** do Asaas (não só a chamada de emissão) em desenvolvimento local,
 > provavelmente é necessário expor o `localhost` via túnel (ex. ngrok) — diferente da Stripe, não há
@@ -173,13 +182,15 @@ gatilho acima — fica para confirmar com o contador junto dos outros itens da s
 
 B2B foi especificado em detalhe na Fase 3 (`TASK-151` a `TASK-166`, 4 sub-grupos: Modelos, Membros/Acesso,
 Cobrança por seat, Painel) e depois despriorizado em 2026-06-21 por falta de validação de demanda — não por
-inviabilidade técnica (`.agent/prd/PRD.md` seção 14.6). As tasks foram movidas para
-`.agent/tasks/deprecated/` e os prompts de execução completos continuam em
+inviabilidade técnica (`.agent/prd/PRD.md` seção 14.6). Os prompts de execução completos continuam em
 `docs/fase3-grupos-de-trabalho.md`, seção "Grupos despriorizados — B2B".
 
-**A decisão de retomar isso na Fase 4 não está confirmada por este documento** — ela depende da validação
-de demanda com o cliente (pré-requisito da seção 0). O que segue assume que essa validação aconteceu e foi
-positiva.
+**A decisão de retomar isso na Fase 4 foi confirmada em 2026-06-23** (ver seção 0): a demanda de clientes
+corporativos existe, e o produto quer oferecer assinatura B2B (pessoa jurídica comprando para colaboradores)
+já no lançamento da plataforma, sem data definida ainda. As tasks `TASK-151` a `166` já foram movidas de
+volta de `.agent/tasks/deprecated/` para `.agent/tasks/`, e a task nova de campos fiscais em `Organization`
+(`TASK-222`) e as tasks de diferenciais priorizados (`TASK-226` a `234`) já foram geradas — ver
+`docs/fase4-grupos-de-trabalho.md`. O que segue não é mais uma suposição condicional.
 
 ### Escopo proposto
 
@@ -245,18 +256,18 @@ Item 2 (NFS-e via Asaas) ──── pode começar em paralelo no Sandbox,
         │                     mas emissão real depende de TASK-82
         ▼
 Item 3 (B2B) ── independente tecnicamente dos itens 1 e 2, MAS:
-                 - gated por validação de demanda (não técnico)
-                 - se retomado, "Organization" precisa dos mesmos
-                   campos fiscais do item 1 (CNPJ/endereço próprios)
+                 - demanda confirmada em 2026-06-23 — não é mais um gate de produto
+                 - "Organization" precisa dos mesmos campos fiscais do
+                   item 1 (CNPJ/endereço próprios) antes da cobrança por seat
 ```
 
 1. **Item 1 primeiro** — é prerequisito técnico direto do item 2, e baixo risco/escopo bem contido.
 2. **Item 2 em seguida** (ou em paralelo, usando Sandbox, enquanto a `TASK-82` não é concluída) — depende do
    item 1 para ter o que emitir.
-3. **Item 3 por último, condicionado à validação de demanda** — tecnicamente independente, mas se a
-   validação de demanda confirmar B2B, vale revisitar o `model Organization` (Parte A, `TASK-151`) **antes**
-   de implementar a cobrança por seat, para incluir os campos fiscais desde a origem e evitar uma migration
-   de correção depois.
+3. **Item 3 confirmado, mas tecnicamente independente dos itens 1 e 2** — a demanda já foi validada
+   (2026-06-23), então não há mais gate de produto bloqueando a implementação. O `model Organization` ganha
+   os campos fiscais (`TASK-222`) **antes** da cobrança por seat ser implementada, evitando a migration de
+   correção que aconteceria se a ordem fosse invertida — ver `docs/fase4-grupos-de-trabalho.md` Grupo 4.
 
 ## Numeração de tasks reservada
 
@@ -273,15 +284,17 @@ Próximo número livre: `TASK-202`. Proposta de faixas (a confirmar na geração
 
 ## Próximos passos
 
-1. Confirmar os 3 pré-requisitos não-técnicos da seção 0 (em especial a validação de demanda B2B, que é a
-   única decisão de produto pendente — os itens 1 e 2 não dependem de validação externa para começar).
-2. Resolver as decisões de escopo pendentes nos itens 1 e 2 (onde coletar o dado fiscal; granularidade da
-   emissão de nota).
-3. Gerar as tasks granulares (`.agent/tasks/TASK-202.json` em diante) para os itens 1 e 2, seguindo o mesmo
-   formato de `.agent/tasks/deprecated/TASK-151.json` (acceptanceCriteria, steps, dependencies).
-4. Escrever `docs/fase4-grupos-de-trabalho.md` no formato de `docs/fase3-grupos-de-trabalho.md`, com prompts
-   de execução prontos para cada grupo.
-5. Adicionar uma seção 15 a `.agent/prd/PRD.md` espelhando a seção 14, quando este escopo for aprovado.
+1. Confirmar os 2 pré-requisitos não-técnicos da seção 0 que ainda restam pendentes (`TASK-82`/deploy de
+   produção e abertura de conta Asaas PJ de produção) — a validação de demanda B2B já foi confirmada em
+   2026-06-23 e não é mais uma pendência.
+2. ~~Resolver as decisões de escopo pendentes nos itens 1 e 2~~ — resolvidas na geração das tasks granulares
+   (Opção B de coleta de dado fiscal; emissão por cobrança individual assumida no desenho do gatilho).
+   Granularidade de emissão (individual vs. lote mensal) ainda depende de confirmação com o contador.
+3. ~~Gerar as tasks granulares~~ — feito: `TASK-202` a `234`, mais `TASK-151` a `166` reativadas, ver
+   `docs/fase4-grupos-de-trabalho.md`.
+4. ~~Escrever `docs/fase4-grupos-de-trabalho.md`~~ — feito.
+5. Adicionar uma seção 15 a `.agent/prd/PRD.md` espelhando a seção 14 — ainda pendente, não bloqueia a
+   implementação dos grupos já definidos em `docs/fase4-grupos-de-trabalho.md`.
 
 ## Referências
 

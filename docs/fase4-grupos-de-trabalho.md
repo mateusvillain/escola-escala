@@ -8,11 +8,15 @@ as tasks devem ser feitas dentro do grupo — mesmo formato de `docs/fase3-grupo
 Critério de agrupamento: cada grupo corresponde a uma fatia coesa de uma das três frentes definidas em
 `docs/fase4-planejamento.md` (cadastro fiscal, NFS-e via Asaas, B2B).
 
-> **Pré-condição para os Grupos 4 a 9 (todo o item 3, B2B):** a demanda de clientes corporativos ainda não
-> está validada com o cliente do projeto (`.agent/prd/PRD.md` seção 14.6, `docs/fase4-planejamento.md` seção
-> 0). As 49 tasks deste documento estão todas geradas e prontas, mas **os Grupos 4 a 9 não estão autorizados
-> para implementação até essa validação ser confirmada explicitamente** — gerar a task não é decidir
-> implementá-la. Os Grupos 0 a 3 (cadastro fiscal + NFS-e) não dependem dessa validação.
+> **Demanda B2B confirmada (2026-06-23):** diferente do que valia quando estas tasks foram geradas, a
+> demanda de clientes corporativos para o item 3 (B2B) foi validada — o produto quer suportar assinatura
+> tanto por pessoa física (B2C) quanto por pessoa jurídica comprando para os colaboradores (B2B), com os
+> benefícios já documentados em `docs/wiki/b2b-diferenciais.md`, disponível já no lançamento da plataforma
+> (sem data definida ainda). **Os Grupos 4 a 9 estão autorizados para implementação** — a sequência entre
+> eles segue só a ordem técnica descrita em "Ordem de execução entre grupos" abaixo, não mais uma aprovação
+> de produto pendente. `docs/fase4-planejamento.md` já foi atualizado com esta confirmação; `.agent/prd/PRD.md`
+> seção 14.6 mantém o registro histórico da decisão original de despriorização na Fase 3, que esta
+> confirmação reverte.
 
 ## Como usar este documento
 
@@ -31,9 +35,9 @@ Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 2. **Grupo 1 (cadastro fiscal)** pode começar imediatamente, em paralelo ao Grupo 0.
 3. **Grupos 2 e 3 (NFS-e via Asaas)** dependem do Grupo 1 (precisam dos campos fiscais no `User`) e são
    sequenciais entre si (Grupo 3 depende do Grupo 2).
-4. **Grupos 4 a 9 (B2B)** dependem da validação de demanda (ver pré-condição acima) e formam uma cadeia:
-   Grupo 4 → Grupo 5 → (Grupo 6 e Grupo 7 em paralelo, mas Grupo 6 também depende dos Grupos 2/3 prontos) →
-   Grupo 8 e Grupo 9 podem rodar em paralelo entre si, depois do Grupo 5.
+4. **Grupos 4 a 9 (B2B)** formam uma cadeia técnica: Grupo 4 → Grupo 5 → (Grupo 6 e Grupo 7 em paralelo, mas
+   Grupo 6 também depende dos Grupos 2/3 prontos) → Grupo 8 e Grupo 9 podem rodar em paralelo entre si,
+   depois do Grupo 5.
 
 | #   | Grupo                                                      | Tasks                          | Depende de              | Branch sugerida                          | Status      |
 | --- | ----------------------------------------------------------- | ------------------------------- | ------------------------ | ----------------------------------------- | ----------- |
@@ -71,15 +75,16 @@ Esta task verifica os pré-requisitos não-técnicos da Fase 4 antes que os grup
    end-to-end dos Grupos 2/3).
 3. Confirmar status de `TASK-82` (deploy de produção) e da conta Asaas PJ de produção — registrar pendência
    sem bloquear nenhum grupo de implementação/teste em Sandbox.
-4. Perguntar EXPLICITAMENTE ao usuário se a demanda de clientes corporativos (B2B) já foi validada com o
-   cliente do projeto. Registrar a resposta com destaque — se não confirmada, os Grupos 4 a 9 (todo o item 3
-   de docs/fase4-planejamento.md) NÃO estão autorizados para implementação, mesmo já tendo task gerada.
+4. Registrar que a demanda de clientes corporativos (B2B) já foi confirmada em 2026-06-23 — o produto quer
+   suportar assinatura tanto B2C quanto B2B (pessoa jurídica comprando para colaboradores) já no lançamento
+   da plataforma (sem data definida ainda). Os Grupos 4 a 9 estão autorizados para implementação.
 5. Marcar cada step do `.agent/tasks/TASK-202.json` como `"pass": true` somente após verificar de fato, e
    atualizar a entrada correspondente em `.agent/tasks.json` para `"passes": true`.
 
 Não abra PR para esta task — é só configuração local/verificação. Ao final, reporte um resumo de cada item:
 confirmado, pendente, ou bloqueado (e por quê), deixando claro que pendências do Asaas Sandbox/produção não
-bloqueiam o Grupo 1, e que a confirmação de demanda B2B é a única que bloqueia código (Grupos 4 a 9).
+bloqueiam nenhum grupo de implementação/teste em Sandbox, e que a demanda B2B já está confirmada (não é mais
+um bloqueio para os Grupos 4 a 9).
 ```
 
 ---
@@ -284,13 +289,14 @@ justificativa; PR aberto.
 ## Grupo 4 — B2B Parte A: Modelos de dados + campos fiscais
 
 **Tasks**: TASK-151, TASK-152, TASK-153, TASK-154, TASK-222
-**Depende de**: Grupo 0, Grupo 1 — **e da confirmação de demanda B2B (ver pré-condição no topo deste documento)**
+**Depende de**: Grupo 0, Grupo 1
 
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: a demanda de clientes corporativos (B2B) precisa estar validada com o
-cliente do projeto (ver TASK-202/Grupo 0). Se não estiver, pare e avise — não implemente.
+Contexto de produto: a demanda de clientes corporativos (B2B) já está confirmada (2026-06-23) — o objetivo é
+suportar assinatura tanto B2C quanto B2B (pessoa jurídica comprando para colaboradores) já no lançamento da
+plataforma (sem data definida ainda). Pode implementar diretamente, sem confirmação adicional de produto.
 
 Use o prompt completo do grupo "B2B — Modelos de dados" já existente em docs/fase3-grupos-de-trabalho.md
 (seção "Grupo 2 — B2B: Modelos de dados") como base — ele cobre TASK-151 a TASK-154 (Organization,
@@ -339,13 +345,12 @@ aplicada sem afetar tabelas existentes; PR aberto.
 ## Grupo 5 — B2B Parte A: Membros, convites e acesso
 
 **Tasks**: TASK-155, TASK-156, TASK-157, TASK-158, TASK-159, TASK-160, TASK-161, TASK-166
-**Depende de**: Grupo 4 — **e da confirmação de demanda B2B**
+**Depende de**: Grupo 4
 
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: a demanda de clientes corporativos (B2B) precisa estar validada (ver
-Grupo 0). Confirme também que o Grupo 4 (TASK-151 a 154, 222) já está mesclado em `main`.
+ATENÇÃO — confirme antes de começar: que o Grupo 4 (TASK-151 a 154, 222) já está mesclado em `main`.
 
 Use o prompt completo do grupo "B2B — Membros, convites e acesso" já existente em
 docs/fase3-grupos-de-trabalho.md (seção "Grupo 3 — B2B: Membros, convites e acesso") — verificado durante o
@@ -364,14 +369,14 @@ Definition of Done: igual ao definido no prompt original (docs/fase3-grupos-de-t
 ## Grupo 6 — B2B Parte A: Cobrança por seat + NFS-e B2B
 
 **Tasks**: TASK-162, TASK-163, TASK-221, TASK-225
-**Depende de**: Grupo 5, Grupo 2 e Grupo 3 (NFS-e do item 2 já implementado) — **e da confirmação de demanda B2B**
+**Depende de**: Grupo 5, Grupo 2 e Grupo 3 (NFS-e do item 2 já implementado)
 
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: demanda B2B validada (Grupo 0); Grupo 5 (membros) mesclado; Grupos 2 e 3
-(NFS-e via Asaas, item 2 completo) mesclados — este grupo é o único de B2B que depende do item 2 inteiro, não
-só dos modelos de cadastro fiscal.
+ATENÇÃO — confirme antes de começar: Grupo 5 (membros) mesclado; Grupos 2 e 3 (NFS-e via Asaas, item 2
+completo) mesclados — este grupo é o único de B2B que depende do item 2 inteiro, não só dos modelos de
+cadastro fiscal.
 
 Use o prompt completo do grupo "B2B — Cobrança por seat" já existente em docs/fase3-grupos-de-trabalho.md
 (seção "Grupo 4 — B2B: Cobrança por seat") como base para TASK-162 e TASK-163 — está completo e correto, sem
@@ -425,13 +430,13 @@ B2B testados sem regressão na assinatura individual; emissão de NFS-e B2B test
 ## Grupo 7 — B2B Parte A: Painel da organização + dados fiscais
 
 **Tasks**: TASK-164, TASK-165, TASK-223, TASK-224
-**Depende de**: Grupo 5, Grupo 4 — **e da confirmação de demanda B2B**
+**Depende de**: Grupo 5, Grupo 4
 
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: demanda B2B validada (Grupo 0); Grupo 5 (membros) e Grupo 4 (modelos +
-campos fiscais de Organization) mesclados.
+ATENÇÃO — confirme antes de começar: Grupo 5 (membros) e Grupo 4 (modelos + campos fiscais de Organization)
+mesclados.
 
 Use o prompt completo do grupo "B2B — Painel da organização" já existente em docs/fase3-grupos-de-trabalho.md
 (seção "Grupo 5 — B2B: Painel da organização") como base para TASK-164 e TASK-165 — está completo e correto.
@@ -478,7 +483,7 @@ testados; fluxo de dados fiscais do owner testado; PR aberto.
 ## Grupo 8 — B2B diferencial: Conteúdo próprio + dashboard de engajamento
 
 **Tasks**: TASK-226, TASK-227, TASK-228, TASK-229, TASK-230
-**Depende de**: Grupo 4, Grupo 5 — **e da confirmação de demanda B2B**
+**Depende de**: Grupo 4, Grupo 5
 
 > Prioridade #1 de `docs/wiki/b2b-diferenciais.md`: sem conteúdo próprio e dashboard de engajamento, a oferta
 > B2B não passa de "a mesma assinatura individual paga em lote", o que dificulta justificar um preço por seat
@@ -489,8 +494,7 @@ testados; fluxo de dados fiscais do owner testado; PR aberto.
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: demanda B2B validada (Grupo 0); Grupo 4 (modelos) e Grupo 5 (membros e
-acesso) mesclados.
+ATENÇÃO — confirme antes de começar: Grupo 4 (modelos) e Grupo 5 (membros e acesso) mesclados.
 
 Você vai implementar o primeiro diferencial de produto B2B (de docs/wiki/b2b-diferenciais.md, item 1:
 "Conteúdo próprio da organização" + item 2: "Dashboard de engajamento") da Fase 4 da Plataforma de Cursos
@@ -556,7 +560,7 @@ organizações testado; dashboard de engajamento exibindo dados corretos; PR abe
 ## Grupo 9 — B2B diferencial: Compliance e auditoria
 
 **Tasks**: TASK-231, TASK-232, TASK-233, TASK-234
-**Depende de**: Grupo 5 — **e da confirmação de demanda B2B**
+**Depende de**: Grupo 5
 
 > Prioridade #2 de `docs/wiki/b2b-diferenciais.md`: gancho de venda para empresas reguladas ou com
 > treinamento obrigatório recorrente.
@@ -564,7 +568,7 @@ organizações testado; dashboard de engajamento exibindo dados corretos; PR abe
 ### Prompt para a IA
 
 ```
-ATENÇÃO — confirme antes de começar: demanda B2B validada (Grupo 0); Grupo 5 (membros e acesso) mesclado.
+ATENÇÃO — confirme antes de começar: Grupo 5 (membros e acesso) mesclado.
 
 Você vai implementar o segundo diferencial de produto B2B (docs/wiki/b2b-diferenciais.md, item 3:
 "Compliance e auditoria") da Fase 4 da Plataforma de Cursos (Next.js 16 + Prisma 7). Leia CLAUDE.md, AGENTS.md
@@ -639,5 +643,6 @@ aplicado nesta rodada).
 - `docs/wiki/b2b-diferenciais.md` — diferenciais de produto do B2B, priorização e itens sem task
 - `docs/fase3-grupos-de-trabalho.md` — prompts originais de B2B Parte A (`TASK-151` a `166`), reaproveitados
   com adendo nos Grupos 4, 6 e 7 deste documento
-- `.agent/prd/PRD.md` seção 14.6 — decisão de despriorização original do B2B na Fase 3, ainda não revertida
-  por confirmação de demanda
+- `.agent/prd/PRD.md` seção 14.6 — decisão de despriorização original do B2B na Fase 3; revertida nesta Fase
+  4 com a confirmação de demanda em 2026-06-23 (ver nota no topo deste documento e em
+  `docs/fase4-planejamento.md`)
