@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { formatCpfCnpj } from '@/lib/utils/document'
+import Link from 'next/link'
 
 type Role = 'admin' | 'instructor' | 'student'
 type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing'
@@ -31,37 +31,6 @@ interface ConfirmModal {
   userName: string
   action: 'deactivate' | 'reactivate' | 'change-role' | 'grant-trial' | 'revoke-trial'
   newRole?: Role
-}
-
-interface FiscalData {
-  cpfCnpj: string | null
-  addressStreet: string | null
-  addressNumber: string | null
-  addressComplement: string | null
-  addressNeighborhood: string | null
-  addressCity: string | null
-  addressState: string | null
-  addressZipCode: string | null
-}
-
-interface FiscalModalState {
-  userId: string
-  userName: string
-  data: FiscalData | null
-  loading: boolean
-}
-
-function isFiscalDataEmpty(data: FiscalData): boolean {
-  return (
-    !data.cpfCnpj &&
-    !data.addressStreet &&
-    !data.addressNumber &&
-    !data.addressComplement &&
-    !data.addressNeighborhood &&
-    !data.addressCity &&
-    !data.addressState &&
-    !data.addressZipCode
-  )
 }
 
 const ROLE_LABELS: Record<Role, string> = {
@@ -135,7 +104,6 @@ export function UserTable() {
   const [searchInput, setSearchInput] = useState(currentSearch)
   const [confirmModal, setConfirmModal] = useState<ConfirmModal | null>(null)
   const [pendingRole, setPendingRole] = useState<Record<string, Role>>({})
-  const [fiscalModal, setFiscalModal] = useState<FiscalModalState | null>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -231,18 +199,6 @@ export function UserTable() {
       action: 'change-role',
       newRole,
     })
-  }
-
-  const openFiscalModal = async (user: User) => {
-    setFiscalModal({ userId: user.id, userName: user.name, data: null, loading: true })
-    try {
-      const res = await fetch(`/api/admin/users/${user.id}`)
-      if (!res.ok) throw new Error()
-      const json = await res.json()
-      setFiscalModal({ userId: user.id, userName: user.name, data: json.user, loading: false })
-    } catch {
-      setFiscalModal({ userId: user.id, userName: user.name, data: null, loading: false })
-    }
   }
 
   return (
@@ -410,14 +366,13 @@ export function UserTable() {
                         )}
                       </div>
 
-                      {/* Fiscal data */}
-                      <button
-                        onClick={() => openFiscalModal(user)}
-                        disabled={actionLoading === user.id}
-                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors disabled:opacity-50"
+                      {/* Detail page */}
+                      <Link
+                        href={`/admin/usuarios/${user.id}`}
+                        className="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
                       >
-                        Ver dados fiscais
-                      </button>
+                        Ver detalhes
+                      </Link>
 
                       {/* Grant / Revoke trial */}
                       {user.freeTrialEligible ? (
@@ -546,67 +501,6 @@ export function UserTable() {
         </div>
       )}
 
-      {/* Fiscal Data Modal */}
-      {fiscalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setFiscalModal(null)}
-          />
-          <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">
-              Dados fiscais — <span className="font-medium">{fiscalModal.userName}</span>
-            </h3>
-
-            {fiscalModal.loading ? (
-              <p className="text-sm text-gray-500">Carregando...</p>
-            ) : !fiscalModal.data || isFiscalDataEmpty(fiscalModal.data) ? (
-              <p className="text-sm text-gray-400">Nenhum dado fiscal cadastrado.</p>
-            ) : (
-              <div className="space-y-2 text-sm text-gray-700">
-                <p>
-                  <span className="font-medium">CPF/CNPJ:</span>{' '}
-                  {fiscalModal.data.cpfCnpj ? formatCpfCnpj(fiscalModal.data.cpfCnpj) : '—'}
-                </p>
-                <p>
-                  <span className="font-medium">CEP:</span> {fiscalModal.data.addressZipCode ?? '—'}
-                </p>
-                <p>
-                  <span className="font-medium">Endereço:</span>{' '}
-                  {[fiscalModal.data.addressStreet, fiscalModal.data.addressNumber]
-                    .filter(Boolean)
-                    .join(', ') || '—'}
-                </p>
-                {fiscalModal.data.addressComplement && (
-                  <p>
-                    <span className="font-medium">Complemento:</span>{' '}
-                    {fiscalModal.data.addressComplement}
-                  </p>
-                )}
-                <p>
-                  <span className="font-medium">Bairro:</span>{' '}
-                  {fiscalModal.data.addressNeighborhood ?? '—'}
-                </p>
-                <p>
-                  <span className="font-medium">Cidade/UF:</span>{' '}
-                  {[fiscalModal.data.addressCity, fiscalModal.data.addressState]
-                    .filter(Boolean)
-                    .join(' / ') || '—'}
-                </p>
-              </div>
-            )}
-
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setFiscalModal(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

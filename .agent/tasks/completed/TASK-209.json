@@ -1,41 +1,58 @@
 {
   "id": "TASK-209",
-  "title": "UI admin para visualizar dados fiscais do usuário",
+  "title": "Página admin de detalhe do usuário (fiscal + pagamento + acesso)",
   "category": "ui-ux",
-  "description": "Expor os dados fiscais retornados pela TASK-208 na UI admin, para suporte resolver nota fiscal pendente por dado faltante — sem criar uma página `/admin/usuarios/[id]` nova (não existe e não há mais nenhuma outra informação de detalhe que justifique criá-la agora); em vez disso, adicionar uma ação 'Ver dados fiscais' na própria `UserTable` que abre um modal com o resultado de `GET /api/admin/users/[id]`.",
+  "description": "Redefinida após a TASK-208/209 originais (modal de dados fiscais via `GET /api/admin/users/[id]`): por pedido explícito, em vez de um modal restrito a dado fiscal, criar uma página `/admin/usuarios/[id]` mostrando todos os dados cadastrados do usuário — conta, dados fiscais, pagamento/assinaturas (incluindo histórico, `stripeCustomerId`, `stripeSubscriptionId`), acesso a cursos (matrículas) e certificados. Mantendo segurança: rota protegida pelo mesmo `requireRole admin` server-side já aplicado a todo `/admin/*` (`src/app/admin/layout.tsx`); nunca seleciona `passwordHash`/`resetToken`/`resetTokenExpiry`; `GET /api/admin/users` (listagem) continua sem nenhum campo fiscal (LGPD).",
   "acceptanceCriteria": [
-    "Botão/ação 'Ver dados fiscais' em cada linha de `UserTable` (`src/components/admin/UserTable.tsx`), ao lado das ações existentes",
-    "Ao clicar, chama `GET /api/admin/users/[id]` e abre um modal exibindo CPF/CNPJ e o endereço completo",
-    "Usuário sem nenhum dado fiscal preenchido mostra estado vazio claro ('Nenhum dado fiscal cadastrado'), não campos em branco sem contexto",
-    "Modal segue o mesmo padrão visual do modal de confirmação já existente no componente (mesmo backdrop/estrutura)",
-    "Verificado em browser: abrir o modal para um usuário com dados fiscais preenchidos e para um sem nenhum dado preenchido"
+    "`src/app/admin/usuarios/[id]/page.tsx` — server component, busca o usuário via `prisma.user.findUnique` (mesmo padrão de `/admin/cursos/[id]`), `notFound()` se não existir",
+    "Seção Conta: nome, e-mail, role, status ativo/inativo, trial concedido, criado em, `stripeCustomerId`",
+    "Seção Dados fiscais: CPF/CNPJ formatado + endereço completo, ou estado vazio 'Nenhum dado fiscal cadastrado.'",
+    "Seção Pagamento: todas as `UserSubscription` do usuário (não só a mais recente) com plano, status, ciclo, período atual, `stripeSubscriptionId`, e código de indicação se houver",
+    "Seção Acesso a cursos: lista de `CourseEnrollment` com link para `/admin/cursos/[id]`, matriculado/concluído em",
+    "Seção Certificados: lista de `Certificate` emitidos, se houver",
+    "`UserTable.tsx` substitui o botão 'Ver dados fiscais' por um link 'Ver detalhes' (`next/link`) para `/admin/usuarios/${user.id}` — sem modal, sem fetch client-side",
+    "Nunca seleciona `passwordHash`/`resetToken`/`resetTokenExpiry`",
+    "Verificado em browser: sem login redireciona para `/login`; logado como `student` é bloqueado pelo layout admin (redireciona para `/dashboard`); logado como `admin` acessa normalmente; id inexistente retorna 404"
   ],
   "steps": [
     {
       "step": 1,
-      "description": "Adicionar estado e fetch do detalhe fiscal",
-      "details": "Em `UserTable.tsx`, adicionar estado `fiscalModal: { userId: string; data: FiscalData | null; loading: boolean } | null`. Ao clicar no novo botão, abrir o modal em estado loading e chamar `fetch(\\`/api/admin/users/${userId}\\`)`.",
+      "description": "Criar a página de detalhe",
+      "details": "Criar `src/app/admin/usuarios/[id]/page.tsx` buscando `user` com `select` explícito (conta + fiscal + `subscriptions` + `enrollments.course` + `certificates.course` + `referralCode`), seguindo o padrão server-component de `src/app/admin/cursos/[id]/page.tsx`.",
       "pass": true
     },
     {
       "step": 2,
-      "description": "Adicionar o botão de ação na tabela",
-      "details": "Na célula de ações de cada linha, adicionar um botão 'Ver dados fiscais' com o mesmo estilo dos botões secundários já existentes (`bg-gray-50 border-gray-200`).",
+      "description": "Renderizar as seções",
+      "details": "Cards `bg-white rounded-xl border border-gray-200 p-6` para Conta, Dados fiscais, Pagamento, Acesso a cursos e Certificados, reaproveitando os labels/variantes de status/ciclo/plano já usados em `SubscriptionTable.tsx`/`UserTable.tsx`.",
       "pass": true
     },
     {
       "step": 3,
-      "description": "Renderizar o modal de dados fiscais",
-      "details": "Reaproveitar a estrutura visual do modal de confirmação existente (backdrop + card branco). Mostrar CPF/CNPJ formatado e o endereço em linhas, ou o estado vazio se todos os campos fiscais forem `null`.",
+      "description": "Atualizar UserTable",
+      "details": "Remover `fiscalModal`/`openFiscalModal`/`isFiscalDataEmpty`/o modal JSX e o import de `formatCpfCnpj`; adicionar `<Link href={`/admin/usuarios/${user.id}`}>Ver detalhes</Link>` na célula de ações.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Remover o GET de /api/admin/users/[id]",
+      "details": "O endpoint criado pela TASK-208 original ficou sem nenhum consumidor (a página busca direto via Prisma, mesmo padrão de `/admin/cursos/[id]`). Removido — ver TASK-208 em `deprecated/`.",
+      "pass": true
+    },
+    {
+      "step": 5,
+      "description": "Testar em browser",
+      "details": "Playwright headless: acesso sem login, como aluno (bloqueado) e como admin (sucesso); id inexistente (404); conteúdo das 5 seções confirmado visualmente para um usuário com dados fiscais, assinatura, matrículas e certificados.",
       "pass": true
     }
   ],
   "dependencies": [
-    "TASK-208"
+    "TASK-203"
   ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
-    "Não criar `/admin/usuarios/[id]` como página nova — ver nota de correção de premissa na TASK-208. O modal na própria listagem é suficiente para o caso de uso de suporte.",
-    "Verificar em browser usando Playwright ou manualmente, conforme guideline de UI deste projeto."
+    "Substitui o desenho original (modal + `GET /api/admin/users/[id]`) por pedido explícito do usuário, depois do PR #24 já aberto — decisão tomada na própria branch `feat/fase4-cadastro-fiscal`, sem necessidade de nova task numerada já que cobre o mesmo gap (suporte ver dado completo do usuário), agora mais abrangente.",
+    "`stripeCustomerId`/`stripeSubscriptionId` são identificadores (não secrets) — já expostos em outros pontos do admin (`/admin/assinaturas`); seguro exibi-los aqui. Nenhum dado de cartão é armazenado pela plataforma (Stripe Checkout/Portal cuidam disso integralmente).",
+    "Escopo deliberadamente NÃO inclui: progresso por aula, tentativas de quiz, avaliações de curso, eventos de produto, log de auditoria — são dados de atividade/analytics, não 'dados cadastrados', e ampliariam o escopo sem pedido explícito."
   ]
 }
