@@ -7,6 +7,7 @@ import { Button, Alert } from '@/components/ui'
 import { registerSchema } from '@/lib/schemas/auth'
 import { EmbeddedCheckoutForm } from '@/components/checkout/EmbeddedCheckoutForm'
 import { PlanPicker } from '@/components/checkout/PlanPicker'
+import { RegisterFiscalStep } from '@/components/auth/RegisterFiscalStep'
 import { resolvePriceId, type PlanBillingCycle, type PlanPriceIds, type PlanType } from '@/lib/plans'
 
 interface Props {
@@ -51,12 +52,14 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
 
   const preselectedPriceId = plan && billingCycle ? resolvePriceId(priceIds, plan, billingCycle) : undefined
   const wantsSubscription = !!preselectedPriceId
-  const [step, setStep] = useState<'account' | 'plans' | 'checkout' | 'checkout-error'>(
+  const [step, setStep] = useState<'account' | 'plans' | 'fiscal' | 'checkout' | 'checkout-error'>(
     checkoutError ? 'checkout-error' : 'account',
   )
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [checkoutErrorMsg, setCheckoutErrorMsg] = useState<string | null>(null)
-  const [planLoading, setPlanLoading] = useState<'free' | PlanType | null>(null)
+  const [pendingPlan, setPendingPlan] = useState<PlanType | null>(plan ?? null)
+  const [pendingBilling, setPendingBilling] = useState<PlanBillingCycle | null>(billingCycle ?? null)
+  const [checkoutStarting, setCheckoutStarting] = useState(false)
 
   function getValues() {
     const form = formRef.current
@@ -107,10 +110,18 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
     router.push('/dashboard')
   }
 
-  async function handleSelectPaid(selectedPlan: PlanType, selectedBilling: PlanBillingCycle) {
-    setPlanLoading(selectedPlan)
-    await startCheckout(resolvePriceId(priceIds, selectedPlan, selectedBilling), selectedBilling)
-    setPlanLoading(null)
+  function handleSelectPaid(selectedPlan: PlanType, selectedBilling: PlanBillingCycle) {
+    setCheckoutErrorMsg(null)
+    setPendingPlan(selectedPlan)
+    setPendingBilling(selectedBilling)
+    setStep('fiscal')
+  }
+
+  async function handleFiscalContinue() {
+    if (!pendingPlan || !pendingBilling) return
+    setCheckoutStarting(true)
+    await startCheckout(resolvePriceId(priceIds, pendingPlan, pendingBilling), pendingBilling)
+    setCheckoutStarting(false)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -141,13 +152,12 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
       })
 
       if (res.status === 201) {
-        if (wantsSubscription && preselectedPriceId && billingCycle) {
-          await startCheckout(preselectedPriceId, billingCycle)
-          setLoading(false)
+        if (wantsSubscription) {
+          setStep('fiscal')
         } else {
           setStep('plans')
-          setLoading(false)
         }
+        setLoading(false)
         return
       }
 
@@ -193,14 +203,33 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
         <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 2 de 2</lui-body>
         <lui-heading level="2">Sua conta foi criada. Escolha um plano</lui-heading>
         <lui-stack space="md">
+          <PlanPicker onSelectFree={handleSelectFree} onSelectPaid={handleSelectPaid} loadingPlan={null} />
+        </lui-stack>
+      </lui-card>
+    )
+  }
+
+  if (step === 'fiscal') {
+    return (
+      <lui-card aria-label="Dados fiscais">
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 2 de 3' : 'Etapa 3 de 4'}
+        </lui-body>
+        <lui-heading level="2">Dados para a nota fiscal</lui-heading>
+        <lui-stack space="md">
+          <Alert
+            variant="info"
+            title="Por que pedimos isso"
+            content="Assinaturas pagas exigem emissão de nota fiscal — precisamos do seu CPF/CNPJ e endereço completo antes de seguir para o pagamento."
+          />
           {checkoutErrorMsg && (
             <Alert
-              variant="caution"
+              variant="danger"
               title="Não foi possível iniciar a assinatura"
-              content={`${checkoutErrorMsg} Você pode tentar de novo ou continuar gratuitamente por enquanto.`}
+              content={checkoutErrorMsg}
             />
           )}
-          <PlanPicker onSelectFree={handleSelectFree} onSelectPaid={handleSelectPaid} loadingPlan={planLoading} />
+          <RegisterFiscalStep onContinue={handleFiscalContinue} continueLoading={checkoutStarting} />
         </lui-stack>
       </lui-card>
     )
@@ -210,7 +239,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
     return (
       <lui-card aria-label="Concluir assinatura">
         <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
-          {wantsSubscription ? 'Etapa 2 de 2' : 'Etapa 3 de 3'}
+          {wantsSubscription ? 'Etapa 3 de 3' : 'Etapa 4 de 4'}
         </lui-body>
         <lui-heading level="2">Quase lá — conclua sua assinatura</lui-heading>
         <lui-stack space="md">
@@ -231,20 +260,6 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
       <lui-stack space="md">
         {submitError && (
           <Alert variant="danger" title="Erro ao criar conta" content={submitError} />
-        )}
-
-        {checkoutErrorMsg && (
-          <Alert
-            variant="caution"
-            title="Conta criada, mas a assinatura não foi iniciada"
-            content={`${checkoutErrorMsg} Você já pode acessar sua conta e assinar mais tarde em /planos.`}
-          />
-        )}
-
-        {checkoutErrorMsg && (
-          <Link href="/dashboard" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
-            Ir para o Dashboard
-          </Link>
         )}
 
         <form ref={formRef} onSubmit={handleSubmit}>
