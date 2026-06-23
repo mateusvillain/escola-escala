@@ -2,8 +2,9 @@
 
 import { useRef, useState } from 'react'
 import { Alert, Button } from '@/components/ui'
-import { fetchAddressByCep } from '@/lib/viacep'
+import { fetchAddressByCep, validateCep } from '@/lib/viacep'
 import { detectDocumentType, validateCpf, validateCnpj } from '@/lib/utils/document'
+import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 
 interface Props {
   onContinue: () => void
@@ -43,6 +44,17 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+// `<select>` nativo: diferente do lui-input, `name` é um atributo padrão do
+// DOM em elementos de formulário, sempre refletido pelo React independente
+// de SSR/CSR — não precisa do mesmo workaround acima.
+function getSelectElement(form: HTMLFormElement, name: string): HTMLSelectElement | null {
+  return form.querySelector(`select[name="${name}"]`)
+}
+
+function readSelectValue(form: HTMLFormElement, name: string): string {
+  return getSelectElement(form, name)?.value ?? ''
+}
+
 export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
@@ -54,7 +66,18 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
     if (!form) return
 
     const cep = readShadowValue(form, 'addressZipCode').trim()
-    if (cep.replace(/\D/g, '').length !== 8) return
+    if (!cep) return
+
+    if (!validateCep(cep)) {
+      setFieldErrors((prev) => ({ ...prev, addressZipCode: 'CEP inválido' }))
+      return
+    }
+
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next.addressZipCode
+      return next
+    })
 
     const address = await fetchAddressByCep(cep)
     if (!address) return
@@ -68,8 +91,9 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
     if (!readShadowValue(form, 'addressCity').trim()) {
       writeShadowValue(form, 'addressCity', address.city)
     }
-    if (!readShadowValue(form, 'addressState').trim()) {
-      writeShadowValue(form, 'addressState', address.state)
+    const stateSelect = getSelectElement(form, 'addressState')
+    if (stateSelect && !stateSelect.value) {
+      stateSelect.value = address.state
     }
   }
 
@@ -89,7 +113,7 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
       addressComplement: readShadowValue(form, 'addressComplement').trim(),
       addressNeighborhood: readShadowValue(form, 'addressNeighborhood').trim(),
       addressCity: readShadowValue(form, 'addressCity').trim(),
-      addressState: readShadowValue(form, 'addressState').trim().toUpperCase(),
+      addressState: readSelectValue(form, 'addressState'),
     }
 
     const errors: Record<string, string> = {}
@@ -103,8 +127,8 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
       if (!valid) errors.cpfCnpj = 'CPF/CNPJ inválido'
     }
 
-    if (values.addressState && !errors.addressState && !/^[A-Za-z]{2}$/.test(values.addressState)) {
-      errors.addressState = 'UF inválida'
+    if (values.addressZipCode && !errors.addressZipCode && !validateCep(values.addressZipCode)) {
+      errors.addressZipCode = 'CEP inválido'
     }
 
     if (Object.keys(errors).length > 0) {
@@ -127,11 +151,14 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
       }
 
       const data = await res.json()
-      const cpfIssue = (data.issues as { path: string[]; message: string }[] | undefined)?.find(
-        (issue) => issue.path[0] === 'cpfCnpj'
-      )
-      if (cpfIssue) {
-        setFieldErrors({ cpfCnpj: cpfIssue.message })
+      const issues = data.issues as { path: string[]; message: string }[] | undefined
+      const cpfIssue = issues?.find((issue) => issue.path[0] === 'cpfCnpj')
+      const cepIssue = issues?.find((issue) => issue.path[0] === 'addressZipCode')
+      if (cpfIssue || cepIssue) {
+        setFieldErrors({
+          ...(cpfIssue && { cpfCnpj: cpfIssue.message }),
+          ...(cepIssue && { addressZipCode: cepIssue.message }),
+        })
       } else {
         setErrorMsg(data.error ?? 'Erro ao salvar dados fiscais.')
       }
@@ -203,15 +230,29 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
             error={!!fieldErrors.addressCity}
             error-text={fieldErrors.addressCity ?? ''}
           />
-          <lui-input
-            label="UF"
-            name="addressState"
-            placeholder="SP"
-            maxlength="2"
-            required
-            error={!!fieldErrors.addressState}
-            error-text={fieldErrors.addressState ?? ''}
-          />
+          <div>
+            <label htmlFor="addressState" className="block text-sm text-gray-700 mb-1">
+              Estado
+            </label>
+            <select
+              id="addressState"
+              name="addressState"
+              defaultValue=""
+              required
+              className={[
+                'w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500',
+                fieldErrors.addressState ? 'border-red-500' : 'border-gray-300',
+              ].join(' ')}
+            >
+              <option value="" disabled>Selecione</option>
+              {BRAZILIAN_STATES.map((uf) => (
+                <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </select>
+            {fieldErrors.addressState && (
+              <p className="text-xs text-red-600 mt-1">{fieldErrors.addressState}</p>
+            )}
+          </div>
           <Button
             label="Continuar para pagamento"
             type="submit"

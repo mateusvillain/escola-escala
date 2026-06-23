@@ -3,7 +3,8 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Alert } from '@/components/ui'
-import { fetchAddressByCep } from '@/lib/viacep'
+import { fetchAddressByCep, validateCep } from '@/lib/viacep'
+import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 
 interface FiscalDataFormProps {
   cpfCnpj: string | null
@@ -32,6 +33,14 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+function getSelectElement(form: HTMLFormElement, name: string): HTMLSelectElement | null {
+  return form.querySelector(`select[name="${name}"]`)
+}
+
+function readSelectValue(form: HTMLFormElement, name: string): string {
+  return getSelectElement(form, name)?.value ?? ''
+}
+
 export function FiscalDataForm(props: FiscalDataFormProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
@@ -39,13 +48,24 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [cpfError, setCpfError] = useState<string | null>(null)
+  const [cepError, setCepError] = useState<string | null>(null)
 
   async function handleCepBlur() {
     const form = formRef.current
     if (!form) return
 
     const cep = readShadowValue(form, 'addressZipCode').trim()
-    if (cep.replace(/\D/g, '').length !== 8) return
+    if (!cep) {
+      setCepError(null)
+      return
+    }
+
+    if (!validateCep(cep)) {
+      setCepError('CEP inválido')
+      return
+    }
+
+    setCepError(null)
 
     const address = await fetchAddressByCep(cep)
     if (!address) return
@@ -59,8 +79,9 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
     if (!readShadowValue(form, 'addressCity').trim()) {
       writeShadowValue(form, 'addressCity', address.city)
     }
-    if (!readShadowValue(form, 'addressState').trim()) {
-      writeShadowValue(form, 'addressState', address.state)
+    const stateSelect = getSelectElement(form, 'addressState')
+    if (stateSelect && !stateSelect.value) {
+      stateSelect.value = address.state
     }
   }
 
@@ -69,6 +90,7 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
     setStatus('idle')
     setErrorMsg(null)
     setCpfError(null)
+    setCepError(null)
 
     const form = formRef.current
     if (!form) return
@@ -81,7 +103,12 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
       addressComplement: readShadowValue(form, 'addressComplement').trim(),
       addressNeighborhood: readShadowValue(form, 'addressNeighborhood').trim(),
       addressCity: readShadowValue(form, 'addressCity').trim(),
-      addressState: readShadowValue(form, 'addressState').trim().toUpperCase(),
+      addressState: readSelectValue(form, 'addressState'),
+    }
+
+    if (values.addressZipCode && !validateCep(values.addressZipCode)) {
+      setCepError('CEP inválido')
+      return
     }
 
     const body = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== ''))
@@ -102,11 +129,12 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
         router.refresh()
       } else {
         const data = await res.json()
-        const cpfIssue = (data.issues as { path: string[]; message: string }[] | undefined)?.find(
-          (issue) => issue.path[0] === 'cpfCnpj'
-        )
-        if (cpfIssue) {
-          setCpfError(cpfIssue.message)
+        const issues = data.issues as { path: string[]; message: string }[] | undefined
+        const cpfIssue = issues?.find((issue) => issue.path[0] === 'cpfCnpj')
+        const cepIssue = issues?.find((issue) => issue.path[0] === 'addressZipCode')
+        if (cpfIssue || cepIssue) {
+          if (cpfIssue) setCpfError(cpfIssue.message)
+          if (cepIssue) setCepError(cepIssue.message)
         } else {
           setErrorMsg(data.error ?? 'Erro ao salvar.')
           setStatus('error')
@@ -152,6 +180,8 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               placeholder="00000-000"
               value={props.addressZipCode ?? ''}
               optional
+              error={!!cepError}
+              error-text={cepError ?? ''}
               onBlur={handleCepBlur}
             />
             <lui-input
@@ -189,14 +219,22 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               value={props.addressCity ?? ''}
               optional
             />
-            <lui-input
-              label="UF"
-              name="addressState"
-              placeholder="SP"
-              maxlength="2"
-              value={props.addressState ?? ''}
-              optional
-            />
+            <div>
+              <label htmlFor="addressState" className="block text-sm text-gray-700 mb-1">
+                Estado <span className="text-gray-400">(opcional)</span>
+              </label>
+              <select
+                id="addressState"
+                name="addressState"
+                defaultValue={props.addressState ?? ''}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione</option>
+                {BRAZILIAN_STATES.map((uf) => (
+                  <option key={uf} value={uf}>{uf}</option>
+                ))}
+              </select>
+            </div>
             <Button
               label="Salvar dados fiscais"
               type="submit"

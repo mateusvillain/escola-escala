@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { detectDocumentType, validateCpf, validateCnpj } from "@/lib/utils/document";
+import { validateCep } from "@/lib/viacep";
+import { BRAZILIAN_STATES } from "@/lib/brazilian-states";
 
 const fiscalSelect = {
   cpfCnpj: true,
@@ -53,7 +55,7 @@ const patchSchema = z.object({
   addressComplement: z.string().optional(),
   addressNeighborhood: z.string().optional(),
   addressCity: z.string().optional(),
-  addressState: z.string().length(2).regex(/^[A-Z]{2}$/).optional(),
+  addressState: z.enum(BRAZILIAN_STATES).optional(),
   addressZipCode: z.string().optional(),
 }).refine(
   (data) => {
@@ -70,6 +72,12 @@ const patchSchema = z.object({
     return false;
   },
   { message: "CPF/CNPJ inválido", path: ["cpfCnpj"] }
+).refine(
+  (data) => {
+    if (!data.addressZipCode) return true;
+    return validateCep(data.addressZipCode);
+  },
+  { message: "CEP inválido", path: ["addressZipCode"] }
 );
 
 export async function PATCH(request: NextRequest) {

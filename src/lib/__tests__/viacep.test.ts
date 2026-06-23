@@ -1,5 +1,21 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchAddressByCep } from "../viacep";
+import { fetchAddressByCep, validateCep } from "../viacep";
+
+describe("validateCep", () => {
+  it("aceita CEP com 8 dígitos, com ou sem máscara", () => {
+    expect(validateCep("01001-000")).toBe(true);
+    expect(validateCep("01001000")).toBe(true);
+  });
+
+  it("rejeita CEP com menos ou mais de 8 dígitos", () => {
+    expect(validateCep("123")).toBe(false);
+    expect(validateCep("010010001")).toBe(false);
+  });
+
+  it("rejeita entrada vazia", () => {
+    expect(validateCep("")).toBe(false);
+  });
+});
 
 describe("fetchAddressByCep", () => {
   afterEach(() => {

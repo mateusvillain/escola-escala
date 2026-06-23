@@ -13,6 +13,10 @@ interface ViaCepResponse {
   uf?: string;
 }
 
+export function validateCep(cep: string): boolean {
+  return /^\d{8}$/.test(cep.replace(/\D/g, ""));
+}
+
 export async function fetchAddressByCep(cep: string): Promise<ViaCepAddress | null> {
   const digits = cep.replace(/\D/g, "");
   if (digits.length !== 8) return null;
