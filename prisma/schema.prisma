@@ -66,6 +66,7 @@ model User {
   adminAuditLogs AdminAuditLog[]
   quizAttempts   QuizAttempt[]
   referralCode   ReferralCode?
+  productEvents  ProductEvent[]
 }
 
 model Instructor {
@@ -294,4 +295,15 @@ model QuizAttempt {
   score       Float
   passed      Boolean
   completedAt DateTime @default(now())
+}
+
+model ProductEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  eventType String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
 }

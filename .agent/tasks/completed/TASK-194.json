@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/admin/events/funnel/route.ts` com `GET`, protegido por `requireRole`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Agregar as contagens do funil",
       "details": "Usar `prisma.productEvent.groupBy({ by: ['eventType'], where: { eventType: { in: ['plans_viewed', 'checkout_started', 'subscription_activated'] }, createdAt: { gte: rangeStart } }, _count: true })` para montar o funil.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Calcular o drop-off por aula",
       "details": "Para cada `lessonId` presente em eventos `lesson_started` no período, contar quantos têm `LessonProgress.isCompleted: true` correspondente para o mesmo `userId`/`lessonId`, ordenando pela maior proporção de não concluídos e retornando o top 5.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-193"],

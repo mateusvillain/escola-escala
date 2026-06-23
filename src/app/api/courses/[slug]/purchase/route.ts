@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { trackEvent } from '@/lib/events'
 
 export async function POST(
   request: NextRequest,
@@ -68,6 +69,8 @@ export async function POST(
         courseId: course.id,
       },
     })
+
+    void trackEvent('checkout_started', dbUser.id, { courseId: course.id, type: 'one_time_course' })
 
     return NextResponse.json({ url: session.url })
   } catch (err) {

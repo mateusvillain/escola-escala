@@ -6,6 +6,7 @@ import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { validateReferralCode } from '@/lib/referral'
+import { trackEvent } from '@/lib/events'
 
 const schema = z.object({
   priceId: z.string().min(1),
@@ -107,6 +108,8 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams)
+
+    void trackEvent('checkout_started', dbUser.id, { billingCycle, priceId })
 
     if (uiMode === 'embedded') {
       return NextResponse.json({ clientSecret: session.client_secret })

@@ -2,6 +2,7 @@ import type Stripe from 'stripe'
 import { stripe } from './stripe'
 import { prisma } from './prisma'
 import { sendWelcomeEmail, sendTrialEndingEmail, sendPaymentFailedEmail } from './email'
+import { trackEvent } from './events'
 
 type PlanType = 'basic' | 'premium'
 type BillingCycle = 'monthly' | 'annual'
@@ -144,6 +145,8 @@ export async function handleCheckoutSessionCompleted(
       ...(referredByCode && { referredByCode }),
     },
   })
+
+  void trackEvent('subscription_activated', userId, { planType: planInfo.type, billingCycle: planInfo.billingCycle })
 
   // Garante que o User tem stripeCustomerId salvo (segurança contra race condition)
   const dbUser = await prisma.user.findUnique({
