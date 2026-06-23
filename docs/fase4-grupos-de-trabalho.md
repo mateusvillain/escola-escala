@@ -42,7 +42,7 @@ Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 | #   | Grupo                                                      | Tasks                          | Depende de              | Branch sugerida                          | Status      |
 | --- | ----------------------------------------------------------- | ------------------------------- | ------------------------ | ----------------------------------------- | ----------- |
 | 0   | Pré-requisitos da Fase 4                                    | TASK-202                       | —                        | (sem PR de código)                        | ⏳ Pendente |
-| 1   | Complemento do cadastro de usuários                          | TASK-203 a 209                 | Grupo 0                  | `feat/fase4-cadastro-fiscal`              | ⏳ Pendente |
+| 1   | Complemento do cadastro de usuários                          | TASK-203 a 209                 | Grupo 0                  | `feat/fase4-cadastro-fiscal`              | ✅ Concluído (PR #24) |
 | 2   | NFS-e: modelo, cliente Asaas e gatilho de emissão            | TASK-210 a 214                 | Grupo 0, Grupo 1         | `feat/fase4-nfse-emissao`                 | ⏳ Pendente |
 | 3   | NFS-e: webhook, painel de pendências e entrega ao aluno      | TASK-215 a 220                 | Grupo 2                  | `feat/fase4-nfse-webhook-entrega`         | ⏳ Pendente |
 | 4   | B2B Parte A: Modelos de dados + campos fiscais               | TASK-151 a 154, 222            | Grupo 0, Grupo 1         | `feat/fase4-b2b-modelos`                  | ⏳ Pendente |
