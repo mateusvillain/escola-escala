@@ -1,0 +1,37 @@
+{
+  "id": "TASK-218",
+  "title": "GET /api/fiscal-invoices/[id]/download",
+  "category": "api-endpoint",
+  "description": "Endpoint de download da nota fiscal pelo próprio aluno — canal permanente (pull), independente do e-mail nativo do Asaas (TASK-220), no mesmo espírito de `GET /api/certificates/[courseId]/download`. Diferente do certificado (gerado pela própria plataforma em `pdf-lib`), a nota fiscal é hospedada pelo Asaas — este endpoint só redireciona para a URL já salva em `FiscalInvoice.pdfUrl`.",
+  "acceptanceCriteria": [
+    "`GET /api/fiscal-invoices/[id]/download` exige autenticação e só permite acesso ao `FiscalInvoice` cujo `userId` é o do usuário autenticado (admin pode acessar qualquer um)",
+    "404 se o `FiscalInvoice` não existir ou não pertencer ao usuário",
+    "Se `status !== 'issued'` ou `pdfUrl` for nulo, retorna 409 com mensagem clara ('Nota fiscal ainda não disponível para download') em vez de redirecionar para uma URL vazia",
+    "Se `pdfUrl` estiver preenchido, `NextResponse.redirect(pdfUrl)`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/fiscal-invoices/[id]/download/route.ts`. Usar `getAuthUser` (não `requireRole`, qualquer usuário autenticado pode tentar, a restrição é por dono do registro).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar e validar o registro",
+      "details": "`prisma.fiscalInvoice.findUnique({ where: { id } })`. Se não existir, 404. Se `userId !== auth.userId` e `auth.role !== 'admin'`, 404 (não revelar existência de notas de terceiros, mesmo padrão já usado em `GET /api/organizations/me`).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar o redirect condicional",
+      "details": "Se `status !== 'issued'` ou `!pdfUrl`, retornar 409. Caso contrário, `NextResponse.redirect(pdfUrl)`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-210"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Diferente do certificado, não há um modo `data:` base64 aqui — o PDF é hospedado pelo Asaas, então sempre é um redirect, nunca um stream de buffer."
+  ]
+}

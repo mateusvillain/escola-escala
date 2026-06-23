@@ -1,0 +1,37 @@
+{
+  "id": "TASK-228",
+  "title": "Seletor de organização no CourseForm admin",
+  "category": "ui-ux",
+  "description": "Permitir que o admin marque um curso como conteúdo próprio de uma organização (TASK-226) na própria tela de criação/edição de curso já existente (`/admin/cursos/novo`, `/admin/cursos/[id]`), sem criar nenhuma tela nova.",
+  "acceptanceCriteria": [
+    "`CourseForm` ganha um campo select opcional 'Organização (conteúdo privado)', listando as organizações existentes — vazio/nenhum por padrão (curso do catálogo público, comportamento atual inalterado)",
+    "Ao salvar com uma organização selecionada, `PATCH/POST` envia `organizationId`; ao deixar vazio, envia `null` explicitamente (não omite o campo, para permitir reverter um curso de organização para o catálogo público)",
+    "Listagem `/admin/cursos` (`CourseTable`) mostra um indicador visual (`lui-tag`) quando o curso pertence a uma organização, com o nome dela",
+    "Verificado em browser: criar um curso vinculado a uma organização de teste, confirmar que não aparece em `/cursos` (catálogo público), e reverter para catálogo público alterando o select para vazio"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o select ao CourseForm",
+      "details": "Em `src/components/admin/CourseForm.tsx`, adicionar um `<select>` nativo (mesmo padrão de inputs nativos já usado em formulários admin, AGENTS.md) listando organizações via um novo `GET /api/admin/organizations` simples (ou reaproveitar uma lista já existente, se houver) com opção 'Nenhuma (catálogo público)'.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Atualizar o submit",
+      "details": "Incluir `organizationId` no body do POST/PATCH de curso, enviando `null` explicitamente quando a opção 'Nenhuma' estiver selecionada.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar a listagem",
+      "details": "Em `CourseTable` (admin), adicionar uma `lui-tag` com o nome da organização quando `course.organizationId` estiver preenchido.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-226"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Não criar uma tela de autoria separada para o owner da organização — decisão de escopo já registrada na TASK-226."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "TASK-231",
+  "title": "Campo de validade (expiresAt) em Certificate",
+  "category": "data-model",
+  "description": "Diferencial #2 de docs/wiki/b2b-diferenciais.md (compliance e auditoria): permitir que um certificado tenha data de validade, relevante para treinamentos obrigatórios recorrentes (ex. anuais) em contexto corporativo. Campo opcional — certificados individuais (B2C) continuam sem validade, `expiresAt: null`.",
+  "acceptanceCriteria": [
+    "`Certificate` ganha `expiresAt DateTime?`, opcional",
+    "Migration aplicada sem alterar nenhum certificado existente (todos ficam com `expiresAt: null`)",
+    "Nenhuma mudança de comportamento para certificados sem validade — UI de download (TASK-218/já existente) e geração de PDF não exigem este campo"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o campo ao schema",
+      "details": "Em `prisma/schema.prisma`, `model Certificate`, adicionar `expiresAt DateTime?`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_certificate_expiry` e `npx prisma generate`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Esta task não define COMO `expiresAt` é preenchido (ex. automaticamente N meses após emissão para cursos marcados como 'obrigatório recorrente') — isso exigiria um campo adicional em `Course` para marcar periodicidade, fora do escopo desta rodada. Por ora, `expiresAt` é preenchido manualmente (ex. pelo admin) ou fica nulo. A TASK-233 (lembrete de renovação) só age sobre certificados que JÁ têm `expiresAt` preenchido."
+  ]
+}

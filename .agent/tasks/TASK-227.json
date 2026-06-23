@@ -1,0 +1,37 @@
+{
+  "id": "TASK-227",
+  "title": "Controle de acesso a curso de organização",
+  "category": "security",
+  "description": "Estender `checkLessonAccess`/`checkCourseAccess` (`src/lib/access.ts`) para que cursos com `organizationId` preenchido (TASK-226) só sejam acessíveis a membros ATIVOS dessa organização — nunca por assinatura individual (mesmo `premium`) nem por compra avulsa, já que não é conteúdo do catálogo geral.",
+  "acceptanceCriteria": [
+    "`checkLessonAccess`/`checkCourseAccess`, ao identificar `course.organizationId` preenchido, ignoram a checagem de assinatura individual/compra avulsa e checam exclusivamente se o usuário é `OrganizationMember` dessa organização com `OrganizationSubscription.status` ativo (mesma checagem já estendida pela TASK-155)",
+    "Usuário com assinatura `premium` individual, mas que não é membro da organização, recebe `allowed: false` ao tentar acessar um curso de organização — mesmo padrão de isolamento que já existe entre organizações diferentes",
+    "Trilha (`CourseTrack`) que combine cursos do catálogo geral com um curso de organização respeita a regra de acesso por curso individualmente — confirmar que `checkCourseAccess` já é chamado por curso, não por trilha inteira, e que isso continua valendo aqui",
+    "`role === 'admin'` continua tendo acesso a qualquer curso, igual ao comportamento já existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Estender checkLessonAccess",
+      "details": "Em `src/lib/access.ts`, adicionar uma checagem antes da lógica de plano/assinatura: se `lesson.module.course.organizationId` não for nulo, pular a checagem de `UserSubscription`/`CourseEnrollment` e checar membership ativo na organização (mesma query já usada pela extensão da TASK-155), retornando `plan_upgrade_required` (ou um novo `AccessReason` mais específico, ex. `organization_membership_required`) se não for membro.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Estender checkCourseAccess de forma simétrica",
+      "details": "Aplicar a mesma lógica em `checkCourseAccess`, mantendo as duas funções consistentes (mesmo princípio já documentado em AGENTS.md).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar isolamento entre organizações",
+      "details": "Com duas organizações de teste e um curso de organização em cada, confirmar que um membro da Organização A não acessa o curso da Organização B, mesmo autenticado e com assinatura B2B ativa na própria A.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-226", "TASK-155"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Adicionar `organization_membership_required` a `AccessReason` (`src/lib/access.ts`) em vez de reaproveitar `plan_upgrade_required` — são causas diferentes e a UI (`UpgradePrompt`) provavelmente precisa de uma mensagem diferente para cada uma."
+  ]
+}

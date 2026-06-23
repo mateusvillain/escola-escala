@@ -1,0 +1,45 @@
+{
+  "id": "TASK-215",
+  "title": "Webhook POST /api/webhooks/asaas",
+  "category": "api-endpoint",
+  "description": "Criar o webhook que recebe atualização de status da nota fiscal do Asaas (emitida, erro, cancelada) — fonte de webhook separada da Stripe, com verificação própria de autenticidade (token do Asaas), seguindo o mesmo princípio de verificação já usado em `POST /api/webhooks/stripe`, mas não o mesmo mecanismo (plataformas diferentes). Atualiza o `FiscalInvoice` correspondente e popula `pdfUrl` quando a nota é autorizada.",
+  "acceptanceCriteria": [
+    "`POST /api/webhooks/asaas` (`src/app/api/webhooks/asaas/route.ts`) verifica um token de autenticidade do Asaas antes de processar qualquer evento — confirmar na documentação oficial (`docs.asaas.com/docs/webhook-para-notas-fiscais`) o mecanismo exato (token em header, ex. `asaas-access-token`) durante a implementação",
+    "Requisição sem o token correto (ou token incorreto) retorna 401 sem processar o evento",
+    "Eventos tratados: `INVOICE_AUTHORIZED` (atualiza `status: 'issued'` e popula `pdfUrl` a partir do campo confirmado na TASK-211), `INVOICE_ERROR` (`status: 'error'`, `errorMessage`), `INVOICE_CANCELED` (`status: 'canceled'`) — outros tipos de evento (`CREATED`, `UPDATED`, `SYNCHRONIZED`, `PROCESSING_CANCELLATION`, `CANCELLATION_DENIED`) são logados mas não alteram `status`",
+    "Localiza o `FiscalInvoice` pelo `asaasInvoiceId` do evento — se não encontrar nenhum registro correspondente, loga um aviso e retorna 200 (não é erro do nosso lado, mas também não deve causar retry infinito do Asaas)",
+    "Endpoint sempre retorna 200 para eventos processados com sucesso, mesmo que o `FiscalInvoice` já estivesse no status final (idempotente a reentrega)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Configurar o token de webhook no Asaas e no .env.local",
+      "details": "No painel do Asaas (Sandbox), gerar/configurar o token de autenticidade do webhook de notas fiscais. Adicionar `ASAAS_WEBHOOK_TOKEN` ao `.env.local` (já placeholder desde TASK-202) com o valor real de teste.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar a verificação de autenticidade",
+      "details": "Ler o header de token do Asaas (confirmar nome exato na doc oficial) e comparar com `process.env.ASAAS_WEBHOOK_TOKEN` usando comparação em tempo constante, se disponível, senão comparação direta. Retornar 401 se não corresponder.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar o switch de eventos",
+      "details": "Parsear o body do evento (incluindo `event` e o objeto `invoice` com `id`). Buscar `FiscalInvoice` por `asaasInvoiceId`. Para `INVOICE_AUTHORIZED`/`INVOICE_ERROR`/`INVOICE_CANCELED`, atualizar `status` (e `pdfUrl`/`errorMessage` conforme o caso) via `prisma.fiscalInvoice.update`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testar no Sandbox",
+      "details": "Expor `localhost` via túnel (ex. ngrok, ver nota de setup em docs/fase4-planejamento.md seção 0) e configurar a URL pública no painel do Asaas Sandbox. Disparar uma emissão de nota de teste (TASK-211/214) e confirmar que o webhook chega e atualiza o `FiscalInvoice` para `issued` com `pdfUrl` preenchido.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-210", "TASK-211", "TASK-202"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Não usar `stripe.webhooks.constructEvent` nem nenhum mecanismo da Stripe aqui — são plataformas diferentes, com mecanismos de verificação próprios.",
+    "Setup de túnel local (ngrok ou similar) é necessário para testar este webhook em desenvolvimento — diferente da Stripe, não há uma ferramenta equivalente a `stripe listen` para reenvio direto à porta local (já registrado em docs/fase4-planejamento.md seção 0)."
+  ]
+}

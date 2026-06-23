@@ -1,0 +1,45 @@
+{
+  "id": "TASK-206",
+  "title": "PATCH /api/users/me aceita campos fiscais",
+  "category": "api-endpoint",
+  "description": "Estender o endpoint existente `PATCH /api/users/me` (`src/app/api/users/me/route.ts`) para aceitar os campos fiscais opcionais (CPF/CNPJ e endereço) adicionados em TASK-203, validando com a função de checksum da TASK-204. Mantém o comportamento atual (nome, avatar, senha) inalterado — os campos fiscais são só mais um bloco opcional no mesmo `patchSchema`.",
+  "acceptanceCriteria": [
+    "`patchSchema` em `src/app/api/users/me/route.ts` ganha `cpfCnpj`, `addressStreet`, `addressNumber`, `addressComplement`, `addressNeighborhood`, `addressCity`, `addressState`, `addressZipCode`, todos `.optional()`",
+    "`cpfCnpj`, se enviado, é validado com `validateCpf`/`validateCnpj` (TASK-204) via `.refine()` do Zod v4 — retorna 400 com mensagem clara se inválido",
+    "`addressState`, se enviado, aceita só 2 letras maiúsculas (UF)",
+    "Atualizar só nome/avatar/senha (sem nenhum campo fiscal no body) continua funcionando exatamente como antes — nenhuma regressão",
+    "Resposta do `GET`/`PATCH` continua sem expor `passwordHash`/`resetToken`, e passa a incluir os novos campos fiscais no `select`"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Estender o patchSchema",
+      "details": "Adicionar os 8 campos fiscais como opcionais ao `patchSchema` existente. Usar `.refine()` para validar `cpfCnpj` com `detectDocumentType` + `validateCpf`/`validateCnpj` de `@/lib/utils/document` (TASK-204), retornando mensagem 'CPF/CNPJ inválido' se a validação falhar.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Validar addressState",
+      "details": "Adicionar `addressState: z.string().length(2).regex(/^[A-Z]{2}$/).optional()` ao schema.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar o update do Prisma e o select",
+      "details": "No `prisma.user.update`, espalhar os 8 campos fiscais com o mesmo padrão condicional já usado para `name`/`avatarUrl` (`...(campo !== undefined && { campo })`). Adicionar os 8 campos ao `select` de retorno do GET e do PATCH.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testes",
+      "details": "Cobrir manualmente ou via teste de API: PATCH só com `name` (sem regressão), PATCH com `cpfCnpj` válido, PATCH com `cpfCnpj` inválido (espera 400), PATCH com endereço completo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-203", "TASK-204"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Nenhum destes campos é obrigatório nesta rodada — o acesso ao curso/assinatura nunca depende deles (decisão registrada em docs/fase4-planejamento.md item 1). A obrigatoriedade só aparece na hora de emitir nota fiscal (item 2), nunca aqui.",
+    "Zod v4: usar `.issues`, não `.errors`, no tratamento de erro de parse — ver AGENTS.md."
+  ]
+}

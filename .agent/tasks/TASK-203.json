@@ -1,0 +1,38 @@
+{
+  "id": "TASK-203",
+  "title": "Campos de CPF/CNPJ e endereço no model User",
+  "category": "data-model",
+  "description": "Adicionar ao model `User` os campos fiscais necessários para emitir NFS-e (item 2): documento (CPF ou CNPJ) e endereço completo. Campos flat, no mesmo estilo de `avatarUrl` — sem model `Address` separado, já que não há caso de uso de múltiplos endereços por usuário (decisão registrada em docs/fase4-planejamento.md item 1).",
+  "acceptanceCriteria": [
+    "`User` ganha os campos: `cpfCnpj String?`, `addressStreet String?`, `addressNumber String?`, `addressComplement String?`, `addressNeighborhood String?`, `addressCity String?`, `addressState String?` (UF, 2 letras), `addressZipCode String?` (CEP)",
+    "Todos os campos são opcionais (`?`) — nenhum usuário existente é afetado pela migration, e o cadastro/checkout atual continua funcionando sem alteração",
+    "Migration aplicada sem alterar nenhuma tabela ou dado existente",
+    "`npx prisma generate` executado e tipos atualizados"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar os campos ao schema",
+      "details": "Em `prisma/schema.prisma`, dentro de `model User`, adicionar após `avatarUrl`:\n```prisma\ncpfCnpj             String?\naddressStreet        String?\naddressNumber        String?\naddressComplement    String?\naddressNeighborhood  String?\naddressCity          String?\naddressState         String?\naddressZipCode       String?\n```\nNão usar `@unique` em `cpfCnpj` — não há decisão de impedir documentos duplicados nesta rodada.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_user_fiscal_fields` e `npx prisma generate`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar que nada quebrou",
+      "details": "Rodar `npx tsc --noEmit` e `npx vitest run` — nenhum erro novo deve aparecer, já que todos os campos são opcionais.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`addressState` guarda a UF (2 letras, ex. 'SP') — não criar um enum dos 27 estados nesta rodada, validação de formato fica a cargo do Zod na TASK-206.",
+    "Estes mesmos campos (exceto sufixo) servem de referência de nome para os campos fiscais de `Organization` que a TASK-222 (B2B) vai adicionar depois — manter os nomes (`addressStreet`, `addressCity` etc.) consistentes entre os dois models facilita reaproveitar código de formulário/validação."
+  ]
+}

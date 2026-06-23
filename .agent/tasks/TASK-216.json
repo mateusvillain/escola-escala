@@ -1,0 +1,36 @@
+{
+  "id": "TASK-216",
+  "title": "GET /api/admin/fiscal-invoices lista pendências e erros",
+  "category": "api-endpoint",
+  "description": "Endpoint admin que lista notas fiscais não emitidas por dado faltante (`pending_data`) ou erro da API (`error`), para acompanhamento manual — não é um sistema de retry automático nesta rodada, é visibilidade mínima para não perder nota fiscal de vista (escopo já definido em docs/fase4-planejamento.md item 2).",
+  "acceptanceCriteria": [
+    "`GET /api/admin/fiscal-invoices` restrito a `role: admin`, aceita query param `status` (`pending_data` | `error` | `issued` | `scheduled` | `canceled`, default: retorna `pending_data` + `error` juntos)",
+    "Retorna paginado (mesmo padrão de `GET /api/admin/users`/`GET /api/admin/subscriptions`), incluindo nome/e-mail do usuário, valor, status, `errorMessage` (se houver) e data de criação",
+    "Ordenado por `createdAt` decrescente (mais recentes primeiro)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/admin/fiscal-invoices/route.ts` com `GET`, seguindo o padrão de paginação/filtro já usado em `src/app/api/admin/subscriptions/route.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar o filtro de status",
+      "details": "Se `status` não for passado na query, filtrar `status: { in: ['pending_data', 'error'] }`. Se passado, filtrar pelo valor exato.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Incluir dados do usuário",
+      "details": "`include: { user: { select: { name: true, email: true } } }` no `findMany`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-210"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Quando o item 3 (B2B) for retomado e a TASK-221 adicionar `organizationId`, este endpoint precisa incluir também o nome da organização quando `userId` for nulo — não implementar isso agora, só deixar a query preparada para `include` condicional."
+  ]
+}

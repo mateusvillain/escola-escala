@@ -1,0 +1,45 @@
+{
+  "id": "TASK-205",
+  "title": "Integração ViaCEP para autofill de endereço",
+  "category": "integration",
+  "description": "Criar um wrapper para a API pública ViaCEP (gratuita, sem chave) que busca cidade/UF/bairro/rua a partir de um CEP, para reduzir fricção no formulário de dados fiscais (TASK-207). A API é uma dependência externa nova — timeout e fallback são obrigatórios, já que a indisponibilidade do ViaCEP nunca pode bloquear o preenchimento manual do endereço.",
+  "acceptanceCriteria": [
+    "`src/lib/viacep.ts` exporta `fetchAddressByCep(cep: string): Promise<ViaCepAddress | null>`",
+    "Requisição usa `AbortController` com timeout de no máximo 5 segundos",
+    "Retorna `null` (nunca lança exceção) em caso de timeout, erro de rede, CEP não encontrado (`{ erro: true }` na resposta do ViaCEP) ou CEP malformado",
+    "CEP é normalizado (remove máscara) antes da chamada; CEPs com menos/mais de 8 dígitos retornam `null` sem chamar a API",
+    "Tipo `ViaCepAddress` expõe `street`, `neighborhood`, `city`, `state` (UF) mapeados dos campos `logradouro`, `bairro`, `localidade`, `uf` da resposta do ViaCEP"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o arquivo e validar o CEP de entrada",
+      "details": "Criar `src/lib/viacep.ts`. Remover máscara do CEP recebido; se não tiver exatamente 8 dígitos, retornar `null` imediatamente sem fazer requisição.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar a chamada com timeout",
+      "details": "Usar `fetch(\\`https://viacep.com.br/ws/${cep}/json/\\`, { signal: AbortSignal.timeout(5000) })`. Envolver em try/catch — qualquer erro (timeout, rede, JSON inválido) retorna `null`, nunca propaga exceção.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Mapear a resposta",
+      "details": "Se a resposta JSON tiver `erro: true`, retornar `null`. Caso contrário, mapear `logradouro→street`, `bairro→neighborhood`, `localidade→city`, `uf→state` para o tipo `ViaCepAddress`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Testes unitários com fetch mockado",
+      "details": "Criar `src/lib/__tests__/viacep.test.ts` mockando `global.fetch` (Vitest `vi.fn()`) para os casos: sucesso, `{ erro: true }`, timeout/abort, erro de rede, CEP malformado (não deve chamar fetch).",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "ViaCEP não exige chave de API nem autenticação — não adicionar nenhuma variável de ambiente para isso.",
+    "Esta função é chamada do client (formulário em TASK-207) — considerar se a chamada deve ser feita direto do browser para `viacep.com.br` ou proxied por uma rota própria; ViaCEP permite CORS direto do browser, então o caminho mais simples é chamar direto do client, sem rota own no Next.js. Confirmar CORS na implementação antes de decidir."
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "TASK-210",
+  "title": "Modelo FiscalInvoice",
+  "category": "data-model",
+  "description": "Criar o model `FiscalInvoice`, registro interno de cada nota fiscal emitida (ou pendente de emissão) via Asaas. Necessário por dois motivos: idempotência (o webhook da Stripe pode reentregar — sem um registro único por cobrança, o mesmo pagamento geraria duas notas) e entrega ao aluno (canal de download, TASK-218/219). Escopo desta task é só `User` — `organizationId` (B2B) é adicionado depois pela TASK-221, só se/quando o item 3 for retomado, para não criar uma relação Prisma para um model `Organization` que pode não existir ainda no schema.",
+  "acceptanceCriteria": [
+    "Enum `FiscalInvoiceStatus` criado com os valores: `pending_data` (falta CPF/CNPJ ou endereço), `scheduled` (enviada ao Asaas, aguardando emissão), `issued` (emitida com sucesso), `error` (falha na API ou rejeitada), `canceled`",
+    "Model `FiscalInvoice` com `id`, `userId` (FK para `User`, obrigatório nesta rodada), `stripeInvoiceId String?`, `stripeSessionId String?`, `asaasCustomerId String?`, `asaasInvoiceId String?`, `status FiscalInvoiceStatus`, `pdfUrl String?`, `errorMessage String?`, `createdAt`, `updatedAt`",
+    "Constraint de unicidade em `stripeInvoiceId` (quando presente) e em `stripeSessionId` (quando presente) — garante que o mesmo evento da Stripe nunca gera dois registros",
+    "Migration aplicada sem alterar nenhuma tabela existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o enum e o model ao schema",
+      "details": "Em `prisma/schema.prisma`:\n```prisma\nenum FiscalInvoiceStatus {\n  pending_data\n  scheduled\n  issued\n  error\n  canceled\n}\n\nmodel FiscalInvoice {\n  id               String              @id @default(uuid())\n  userId           String\n  user             User                @relation(fields: [userId], references: [id])\n  stripeInvoiceId  String?             @unique\n  stripeSessionId  String?             @unique\n  asaasCustomerId  String?\n  asaasInvoiceId   String?\n  status           FiscalInvoiceStatus\n  pdfUrl           String?\n  errorMessage     String?\n  createdAt        DateTime            @default(now())\n  updatedAt        DateTime            @updatedAt\n}\n```\nAdicionar `fiscalInvoices FiscalInvoice[]` à lista de relações de `model User`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_fiscal_invoice` e `npx prisma generate`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar que nada quebrou",
+      "details": "Rodar `npx tsc --noEmit` e `npx vitest run`.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`userId` é obrigatório (não nullable) nesta rodada porque o item 3 (B2B) ainda não está confirmado — se for retomado, a TASK-221 relaxa `userId` para opcional e adiciona `organizationId` opcional + constraint garantindo que exatamente um dos dois esteja preenchido. Não adicionar `organizationId` aqui especulativamente.",
+    "Tanto `stripeInvoiceId` quanto `stripeSessionId` são opcionais porque a origem da cobrança pode ser uma fatura de assinatura recorrente (`invoice.payment_succeeded`) OU uma session de compra avulsa (`checkout.session.completed`) — só um dos dois é preenchido por registro, dependendo do gatilho (ver TASK-214).",
+    "Granularidade de emissão (por cobrança individual, não em lote mensal) está implícita neste desenho — é a decisão pendente de confirmar com o contador (seção 0 de docs/fase4-planejamento.md); se a decisão for lote mensal, este model precisa de revisão antes da TASK-214."
+  ]
+}

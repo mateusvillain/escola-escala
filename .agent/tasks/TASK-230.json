@@ -1,0 +1,28 @@
+{
+  "id": "TASK-230",
+  "title": "UI do dashboard de engajamento no painel /organizacao",
+  "category": "ui-ux",
+  "description": "Exibir os dados de `GET /api/organizations/me/engagement` (TASK-229) no painel `/organizacao`, visível só para o `owner` — mesma seção onde já está a lista de membros (TASK-164).",
+  "acceptanceCriteria": [
+    "Nova seção 'Engajamento da equipe' em `/organizacao`, visível só para `owner`, com uma linha por membro: nome, cursos concluídos, em andamento, atrasados (destacados visualmente, ex. `lui-tag` `caution`) e tempo de estudo total formatado (horas/minutos)",
+    "Estado vazio claro quando a organização não tem nenhum membro com progresso ainda",
+    "Verificado em browser: owner visualiza a seção com dados de membros de teste com progresso variado (concluído, em andamento, atrasado)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o componente",
+      "details": "Criar `src/components/organization/EngagementDashboard.tsx`, buscando dados de `GET /api/organizations/me/engagement`. Tabela simples, reaproveitando `<lui-card>`/`<lui-tag>` do design system, mesmo princípio da seção de funil do AdminDashboard (TASK-195).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Renderizar condicionalmente no painel",
+      "details": "Em `src/app/organizacao/page.tsx`, renderizar `<EngagementDashboard />` apenas quando `myRole === 'owner'`, abaixo da lista de membros existente (TASK-164).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-229", "TASK-164"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}

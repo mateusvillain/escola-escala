@@ -1,0 +1,39 @@
+{
+  "id": "TASK-219",
+  "title": "UI de download de nota fiscal no dashboard do aluno",
+  "category": "ui-ux",
+  "description": "Exibir as notas fiscais do aluno (emitidas e pendentes) em `/dashboard` ou `/perfil`, com link de download para as emitidas, no mesmo padrão visual do card de certificado já existente no dashboard.",
+  "acceptanceCriteria": [
+    "Nova seção/card listando as `FiscalInvoice` do usuário autenticado (via `GET /api/users/me` estendido ou um novo `GET /api/fiscal-invoices/me`), mais recente primeiro",
+    "Nota com `status: 'issued'` mostra botão/link 'Baixar nota fiscal' apontando para `GET /api/fiscal-invoices/[id]/download` (TASK-218)",
+    "Nota com `status: 'pending_data'` mostra uma mensagem clara indicando que falta completar CPF/CNPJ ou endereço, com link direto para a seção de dados fiscais em `/perfil` (TASK-207)",
+    "Nota com `status: 'scheduled'` ou `'error'` mostra um estado intermediário ('Em processamento' / 'Erro ao emitir, equipe já notificada') sem expor detalhes técnicos do erro ao aluno",
+    "Nenhuma nota fiscal pendente bloqueia a visualização do resto do dashboard — é só uma seção informativa adicional",
+    "Verificado em browser: usuário com nota emitida (Sandbox), usuário com `pending_data`, usuário sem nenhuma nota fiscal (estado vazio ou seção ausente)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar GET /api/fiscal-invoices/me",
+      "details": "Criar `src/app/api/fiscal-invoices/me/route.ts`, retornando as `FiscalInvoice` do usuário autenticado ordenadas por `createdAt` decrescente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o componente de listagem",
+      "details": "Criar `src/components/dashboard/FiscalInvoiceList.tsx` (ou equivalente), reaproveitando o padrão visual do card de certificado já existente no dashboard do aluno.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Renderizar no dashboard",
+      "details": "Adicionar o componente à página do dashboard do aluno, condicionalmente (só renderiza se houver pelo menos uma `FiscalInvoice`).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-218"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Este é o canal 'pull' descrito em docs/fase4-planejamento.md ('Entrega ao aluno') — complementar, não substituto, do e-mail nativo do Asaas (TASK-220)."
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "TASK-222",
+  "title": "Campos fiscais (CNPJ, razão social, endereço) em Organization",
+  "category": "data-model",
+  "description": "Adicionar à `Organization` (TASK-151, reativada) os campos fiscais necessários para emitir NFS-e em nome da empresa cliente — mesmos nomes de campo de `User` (TASK-203), já que a `Organization` é quem efetivamente emite a nota na cobrança B2B, não o `owner` individual. Confirmado durante a verificação dos specs reais de B2B que nem `TASK-151` nem `TASK-156`/`164` cobriam esse dado (ver docs/fase4-planejamento.md, seção 'Interação com os itens 1 e 2').",
+  "acceptanceCriteria": [
+    "`Organization` ganha `cnpj String?`, `legalName String?` (razão social, diferente de `name`, que é o nome fantasia/de exibição), `addressStreet String?`, `addressNumber String?`, `addressComplement String?`, `addressNeighborhood String?`, `addressCity String?`, `addressState String?`, `addressZipCode String?`",
+    "Todos os campos são opcionais — organizações já criadas (se houver) não são afetadas",
+    "Migration aplicada sem alterar nenhuma tabela existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar os campos ao schema",
+      "details": "Em `prisma/schema.prisma`, dentro de `model Organization`, adicionar `cnpj String?`, `legalName String?` e os 7 campos de endereço com os MESMOS nomes usados em `User` (TASK-203) — isso permite reaproveitar o helper `isFiscalDataComplete` (TASK-213) e a validação de CNPJ (TASK-204) sem duplicar lógica.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_organization_fiscal_fields` e `npx prisma generate`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar que nada quebrou",
+      "details": "Rodar `npx tsc --noEmit` e `npx vitest run`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-151", "TASK-204"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "`cnpj`, não `cpfCnpj` — diferente de `User`, uma `Organization` nunca emite nota por CPF, sempre CNPJ. Isso significa que `isFiscalDataComplete` (TASK-213) precisa de uma pequena adaptação (ou uma segunda função, `isOrganizationFiscalDataComplete`) que valida só `validateCnpj`, não `detectDocumentType`.",
+    "`legalName` (razão social) é distinto de `Organization.name` (já existente, usado como nome de exibição/fantasia em `/organizacao` e convites) — a nota fiscal exige a razão social, que pode ser diferente do nome usado na UI."
+  ]
+}

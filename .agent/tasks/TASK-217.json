@@ -1,0 +1,38 @@
+{
+  "id": "TASK-217",
+  "title": "Painel admin /admin/notas-fiscais",
+  "category": "ui-ux",
+  "description": "Página admin que consome `GET /api/admin/fiscal-invoices` (TASK-216) para dar visibilidade às notas pendentes/com erro, permitindo ao suporte identificar e resolver manualmente (ex. avisar o aluno que falta CPF/endereço).",
+  "acceptanceCriteria": [
+    "Nova página `/admin/notas-fiscais`, com link na `AdminSidebar`",
+    "Tabela com nome/e-mail do usuário, valor, status (com `lui-tag` colorida por status, mesmo padrão de `UserTable`), motivo do erro (quando houver) e data",
+    "Filtro por status (mesmos valores do endpoint)",
+    "Estado vazio claro quando não há nenhuma pendência",
+    "Verificado em browser: acessar a página, filtrar por status, confirmar que reflete os dados de teste"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a página e o componente",
+      "details": "Criar `src/app/admin/notas-fiscais/page.tsx` e `src/components/admin/FiscalInvoiceTable.tsx`, seguindo a estrutura geral de `UserTable.tsx` (fetch client-side, filtros via query string, tabela com `lui-tag`).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar à sidebar",
+      "details": "Adicionar item 'Notas Fiscais' em `AdminSidebar`, com link para `/admin/notas-fiscais`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Verificar em browser",
+      "details": "Criar dados de teste com `FiscalInvoice` em `pending_data` e `error` (via Prisma Studio ou pelo fluxo real da TASK-214) e confirmar a renderização e os filtros.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-216"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Reaproveitar `<lui-tag>`/`<lui-heading>` do design system, consistente com o resto do painel admin (mesmo princípio já aplicado na seção de funil do AdminDashboard, TASK-195)."
+  ]
+}

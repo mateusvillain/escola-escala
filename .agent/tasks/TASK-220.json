@@ -1,0 +1,38 @@
+{
+  "id": "TASK-220",
+  "title": "Configurar e validar a notificação nativa do Asaas",
+  "category": "integration",
+  "description": "Confirmar e validar no Sandbox o canal primário de entrega da nota fiscal definido em docs/fase4-planejamento.md ('Entrega ao aluno'): o e-mail automático nativo do Asaas (`Customer.email` + `notificationDisabled: false`). A documentação pública do Asaas confirma esse comportamento para o produto em geral, mas não especificamente para o caso de `Customer` usado só para nota avulsa (sem cobrança processada pelo Asaas) — esta task fecha essa lacuna com teste real em Sandbox antes de decidir se basta o e-mail nativo ou se é preciso substituir por e-mail próprio via Resend.",
+  "acceptanceCriteria": [
+    "`createOrGetCustomer` (TASK-211) cria o `Customer` no Asaas com `notificationDisabled: false` (ou omitido, se esse for o default confirmado na doc) e `email` igual ao `User.email`",
+    "Teste manual no Sandbox confirma se o e-mail de nota fiscal chega de fato à caixa de entrada de um usuário de teste quando o `Customer` é usado só para nota avulsa, sem nenhuma cobrança processada pelo Asaas",
+    "Decisão registrada (em comentário no código ou em docs/fase4-planejamento.md): manter o e-mail nativo do Asaas como único canal de e-mail (default), OU substituir por e-mail próprio via Resend disparado pelo webhook `INVOICE_AUTHORIZED` (TASK-215) — só se o teste mostrar falha ou branding inadequado",
+    "Se a decisão for substituir por Resend: criar o template de e-mail em `src/lib/email-templates.ts` (mesmo padrão de `welcomeEmailHtml`/`paymentFailedEmailHtml`) e o envio em `src/lib/email.ts`, disparado no handler de `INVOICE_AUTHORIZED` da TASK-215, e desativar a notificação nativa (`notificationDisabled: true`) para evitar e-mail duplicado"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Testar o e-mail nativo no Sandbox",
+      "details": "Com o ciclo completo da TASK-211/214 funcionando em Sandbox, emitir uma nota fiscal de teste para um e-mail de teste de verdade (ver lembrete de memória: Resend Sandbox só entrega para o e-mail verificado do projeto — usar esse mesmo e-mail de teste aqui, não um e-mail genérico) e confirmar se o e-mail nativo do Asaas chega.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Avaliar o conteúdo/branding recebido",
+      "details": "Se o e-mail chegar, avaliar se o conteúdo/remetente (branding Asaas) é aceitável para o aluno final ou se destoa da comunicação já estabelecida da plataforma (Resend, ver `src/lib/email-templates.ts`).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Decidir e implementar conforme o resultado",
+      "details": "Se o teste passar e o branding for aceitável: nenhuma implementação adicional, só registrar a decisão. Se falhar ou o branding for inadequado: implementar o template e o disparo via Resend (steps detalhados no acceptanceCriteria), e setar `notificationDisabled: true` na criação do `Customer` (TASK-211) para não duplicar.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-211", "TASK-214", "TASK-215"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Esta task é a validação explícita do ponto que docs/fase4-planejamento.md marcou como 'não confirmado pela documentação pública, validar no Sandbox' — não pular esta validação assumindo que o e-mail nativo funciona.",
+    "Evitar mandar os dois e-mails (nativo do Asaas + Resend) — gera duplicidade e confusão para o aluno."
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "TASK-214",
+  "title": "Gatilho de emissão de nota fiscal no webhook da Stripe",
+  "category": "integration",
+  "description": "Disparar a emissão de nota fiscal dentro de `handleInvoicePaymentSucceeded`/`handleCheckoutSessionCompleted` (`src/lib/stripe-handlers.ts`), depois que o pagamento já está confirmado — chamando o cliente Asaas (TASK-211). Se o usuário não tiver dados fiscais completos (TASK-213), a emissão fica marcada como `pending_data`, sem bloquear o acesso ao curso/assinatura já concedido pelo handler existente.",
+  "acceptanceCriteria": [
+    "`handleInvoicePaymentSucceeded` (renovação de assinatura) cria um `FiscalInvoice` por `stripeInvoiceId`, idempotente via `upsert` — reentrega do mesmo evento nunca gera duas notas",
+    "`handleCheckoutSessionCompleted`, no branch de assinatura (`mode: 'subscription'`, primeira cobrança), cria um `FiscalInvoice` por `stripeSessionId`, mesma idempotência",
+    "Se `isFiscalDataComplete(user)` (TASK-213) retornar `false`, cria o `FiscalInvoice` com `status: 'pending_data'` e RETORNA sem chamar a API do Asaas — nenhuma chamada externa é feita para dado incompleto",
+    "Se completo, chama `createOrGetCustomer` + `scheduleInvoice` (TASK-211), salva `asaasCustomerId`/`asaasInvoiceId` e marca `status: 'scheduled'`",
+    "Falha na chamada ao Asaas (erro de rede, 4xx/5xx) é capturada, registrada em `FiscalInvoice.errorMessage` com `status: 'error'`, e NUNCA lançada para fora do handler — o webhook da Stripe deve responder 200 independente do resultado da emissão de nota fiscal",
+    "Nenhuma mudança no comportamento de matrícula/ativação de assinatura já existente nos dois handlers — a emissão de nota é estritamente aditiva"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar a função compartilhada triggerFiscalInvoice",
+      "details": "Em `src/lib/stripe-handlers.ts` (ou um novo `src/lib/fiscal-invoice-trigger.ts`, se ficar mais limpo separar), criar `async function triggerFiscalInvoice(params: { userId: string; value: number; stripeInvoiceId?: string; stripeSessionId?: string })`. Buscar o `user` com os campos fiscais, checar `isFiscalDataComplete`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar o caminho pending_data",
+      "details": "Se incompleto, `prisma.fiscalInvoice.upsert` com `status: 'pending_data'` pela chave única (`stripeInvoiceId` ou `stripeSessionId`) e retornar sem chamar o Asaas.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar o caminho de emissão",
+      "details": "Se completo, envolver a chamada ao Asaas em try/catch. Sucesso: `upsert` com `status: 'scheduled'`, `asaasCustomerId`, `asaasInvoiceId`, `municipalServiceCode` via `getMunicipalServiceCode` (TASK-212). Falha: `upsert` com `status: 'error'`, `errorMessage` com a mensagem do erro capturado — nunca relançar.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Chamar triggerFiscalInvoice dos dois handlers existentes",
+      "details": "Em `handleInvoicePaymentSucceeded`, chamar com `stripeInvoiceId: invoice.id` depois da lógica existente. Em `handleCheckoutSessionCompleted`, no branch `mode !== 'payment'` (assinatura), chamar com `stripeSessionId: session.id` depois da lógica existente de ativação. Não tocar nos branches de compra avulsa/bundle (`mode === 'payment'`) — fora de escopo desta rodada (ver TASK-212).",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Testar com stripe trigger",
+      "details": "Com `stripe listen --forward-to localhost:3000/api/webhooks/stripe` ativo, disparar `stripe trigger invoice.payment_succeeded` e `checkout.session.completed` para um usuário de teste sem dados fiscais (confirmar `pending_data`) e para um com dados fiscais completos no Sandbox do Asaas (confirmar `scheduled`).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-210", "TASK-211", "TASK-212", "TASK-213"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Mesma armadilha de API version já documentada em AGENTS.md: `current_period_start`/`end` ficam em `subscription.items.data[0]`, e o ID da subscription em invoices vem de `invoice.parent.subscription_details` — relevante se este gatilho precisar ler o valor cobrado a partir da invoice/subscription.",
+    "Decisão pendente (seção 0 de docs/fase4-planejamento.md): emissão por cobrança individual (este desenho) vs. lote mensal. Este gatilho assume cobrança individual — se o contador confirmar lote mensal, esta task precisa de redesenho antes de ir para produção (não bloqueia o teste em Sandbox).",
+    "`value` recebido por `triggerFiscalInvoice` deve vir em reais (não centavos) — confirmar a unidade exigida pela API do Asaas em `scheduleInvoice` (TASK-211) antes de converter."
+  ]
+}

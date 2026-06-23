@@ -1,0 +1,50 @@
+{
+  "id": "TASK-233",
+  "title": "Lembrete automático de renovação de certificado",
+  "category": "integration",
+  "description": "Diferencial #2 de docs/wiki/b2b-diferenciais.md: enviar e-mail de lembrete quando um certificado com `expiresAt` (TASK-231) estiver próximo de vencer — relevante para treinamentos obrigatórios recorrentes em contexto corporativo. Esta é a PRIMEIRA tarefa agendada (cron) do projeto — não há nenhum padrão existente para replicar, `CRON_SECRET` já está reservado em `.env.local` mas nunca foi usado.",
+  "acceptanceCriteria": [
+    "Rota `POST /api/cron/certificate-renewal` que verifica certificados com `expiresAt` entre hoje e os próximos 30 dias e ainda não notificados (campo novo `renewalReminderSentAt DateTime?` em `Certificate`, evita reenvio)",
+    "Rota exige `Authorization: Bearer ${CRON_SECRET}` — requisição sem o token correto retorna 401",
+    "Envia e-mail de lembrete ao aluno (template novo em `src/lib/email-templates.ts`, mesmo padrão de `trialEndingEmailHtml`) e marca `renewalReminderSentAt`",
+    "Configuração do agendamento (diário) documentada — `vercel.ts` (configuração atual recomendada pela Vercel) ou `vercel.json`, conforme o que o time decidir adotar; nenhum dos dois arquivos existe ainda no projeto, então esta é a primeira vez que o projeto configura um cron job"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar renewalReminderSentAt a Certificate",
+      "details": "Adicionar `renewalReminderSentAt DateTime?` ao `model Certificate` e rodar a migration correspondente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar a rota de cron",
+      "details": "Criar `src/app/api/cron/certificate-renewal/route.ts` com `POST`, verificando o header `Authorization` contra `process.env.CRON_SECRET` antes de qualquer outra lógica.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar a query e o envio",
+      "details": "Buscar `Certificate` com `expiresAt` nos próximos 30 dias e `renewalReminderSentAt: null`. Para cada um, enviar e-mail (template novo) e marcar `renewalReminderSentAt: new Date()`.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Configurar o agendamento",
+      "details": "Criar `vercel.ts` com um cron diário apontando para `/api/cron/certificate-renewal` (ver exemplo de `crons` na configuração atual da Vercel) — ou `vercel.json` se o time preferir o formato mais simples. Esta decisão é nova para o projeto, não há convenção anterior a seguir.",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Testar manualmente",
+      "details": "Criar um certificado de teste com `expiresAt` em 15 dias, chamar a rota manualmente com o `CRON_SECRET` correto via `curl`/Postman, confirmar o e-mail recebido e que uma segunda chamada não reenvia (idempotente).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-231"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "`CRON_SECRET` já está reservado em `.env.local` desde antes desta Fase, mas nunca foi usado em código — esta é a primeira implementação real que consome essa variável.",
+    "Vercel Cron Jobs têm timeout e frequência mínima próprios — confirmar limites do plano atual antes de definir a frequência exata (diário é o ponto de partida razoável para uma janela de 30 dias)."
+  ]
+}

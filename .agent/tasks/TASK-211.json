@@ -1,0 +1,52 @@
+{
+  "id": "TASK-211",
+  "title": "Cliente Asaas (src/lib/asaas.ts)",
+  "category": "integration",
+  "description": "Criar o wrapper da API do Asaas, no mesmo espírito de `src/lib/bunny.ts` — encapsula autenticação (chave de API) e as chamadas necessárias para nota fiscal avulsa: criar/reaproveitar cliente, criar (agendar) nota fiscal, consultar nota fiscal, cancelar nota fiscal. Todo o desenvolvimento e teste usa `api-sandbox.asaas.com` até a confirmação da TASK-82 (ver seção 0 de docs/fase4-planejamento.md).",
+  "acceptanceCriteria": [
+    "`src/lib/asaas.ts` exporta `createOrGetCustomer(params: { name: string; cpfCnpj: string; email: string; address: ... }): Promise<{ id: string }>`",
+    "Exporta `scheduleInvoice(params: { customerId: string; serviceDescription: string; value: number; municipalServiceCode: string; effectiveDate: string }): Promise<{ id: string; status: string }>`",
+    "Exporta `getInvoice(invoiceId: string): Promise<AsaasInvoice>` e `cancelInvoice(invoiceId: string): Promise<void>`",
+    "Todas as chamadas usam `process.env.ASAAS_API_BASE_URL` como base e `process.env.ASAAS_API_KEY` no header de autenticação — confirmar na documentação oficial do Asaas (docs.asaas.com) o nome exato do header durante a implementação (não assumir `Authorization: Bearer`)",
+    "Erros de resposta não-2xx lançam `Error` com status e corpo da resposta na mensagem, no mesmo padrão de `src/lib/bunny.ts`",
+    "Nenhuma chamada usa a chave de API de produção — `ASAAS_API_BASE_URL` aponta para `api-sandbox.asaas.com` em todos os ambientes até a TASK-82 ser confirmada"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o arquivo e a base de autenticação",
+      "details": "Criar `src/lib/asaas.ts`. Ler `ASAAS_API_KEY` e `ASAAS_API_BASE_URL` de `process.env`. Confirmar na documentação oficial do Asaas (referenciada em docs/wiki/nota-fiscal-nfse.md) o header de autenticação correto antes de implementar — não assumir.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar createOrGetCustomer",
+      "details": "POST para o endpoint de clientes do Asaas com nome, CPF/CNPJ, e-mail e endereço. Este é o `Customer` que recebe a nota avulsa — não envolve processar pagamento pelo Asaas (Stripe continua sendo o gateway, ver docs/wiki/asaas-vs-stripe.md). Não definir `notificationDisabled: true` — manter notificação nativa habilitada (ver TASK-220).",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar scheduleInvoice",
+      "details": "POST para o endpoint de criação/agendamento de nota fiscal (`/v3/invoices` ou equivalente confirmado na doc oficial), vinculando ao `customerId`, com `effectiveDate` igual à data atual (emissão por cobrança individual, ver decisão pendente na TASK-210).",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Implementar getInvoice e cancelInvoice",
+      "details": "GET e endpoint de cancelamento da nota fiscal por `id`, seguindo a referência oficial (`docs.asaas.com/reference/recuperar-uma-nota-fiscal`).",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Testar no Sandbox",
+      "details": "Com a chave de Sandbox preenchida em `.env.local` (TASK-202), testar manualmente o ciclo completo: criar cliente, agendar nota, consultar, cancelar — confirmando que o Sandbox aceita todas as chamadas sem custo.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-202"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Mesmo princípio de `src/lib/bunny.ts`: a chave de API nunca é exposta ao cliente, todas as chamadas acontecem no servidor.",
+    "Confirmar o schema completo de resposta de `GET /v3/invoices/{id}` durante a implementação — a pesquisa em docs/fase4-planejamento.md não conseguiu confirmar publicamente o campo exato que devolve a URL do PDF; usar o que for confirmado para popular `FiscalInvoice.pdfUrl` na TASK-215."
+  ]
+}

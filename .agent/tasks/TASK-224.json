@@ -1,0 +1,32 @@
+{
+  "id": "TASK-224",
+  "title": "Formulário de dados fiscais no painel /organizacao",
+  "category": "ui-ux",
+  "description": "Adicionar ao painel `/organizacao` (TASK-164) uma seção, visível só para o `owner`, com CNPJ/razão social/endereço da organização — mesmo papel da TASK-207 para o aluno individual.",
+  "acceptanceCriteria": [
+    "Seção visível só quando `myRole === 'owner'`, com campos para CNPJ, razão social e os 7 campos de endereço",
+    "CEP reaproveita `fetchAddressByCep` (TASK-205) para autofill, mesmo comportamento da TASK-207",
+    "Salvar chama `PATCH /api/organizations/me` (TASK-223); erro de CNPJ inválido exibe mensagem inline",
+    "Member (não-owner) não vê esta seção, nem em modo leitura — dado fiscal de cobrança não é relevante para member",
+    "Verificado em browser: owner preenche e salva CNPJ válido; tentativa com CNPJ inválido mostra erro; member não vê a seção"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o componente OrganizationFiscalDataForm",
+      "details": "Criar `src/components/organization/OrganizationFiscalDataForm.tsx`, seguindo o mesmo padrão de `FiscalDataForm` (TASK-207) — lui-input + leitura via shadowRoot, autofill por CEP.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Renderizar condicionalmente no painel",
+      "details": "Em `src/app/organizacao/page.tsx`, renderizar `<OrganizationFiscalDataForm />` apenas quando `myRole === 'owner'`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-223", "TASK-164", "TASK-207"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Reaproveitar a maior parte da implementação de `FiscalDataForm` (TASK-207) é esperado — os campos são quase idênticos, só troca `cpfCnpj` por `cnpj`+`legalName` e o endpoint de destino."
+  ]
+}

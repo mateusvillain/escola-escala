@@ -1,0 +1,34 @@
+{
+  "id": "TASK-232",
+  "title": "GET /api/organizations/me/certificates/export exportação em lote",
+  "category": "api-endpoint",
+  "description": "Diferencial #2 de docs/wiki/b2b-diferenciais.md: exportação em lote dos certificados de todos os colaboradores de uma organização, útil para auditorias de compliance (NRs, LGPD, políticas internas). Restrito a `owner`.",
+  "acceptanceCriteria": [
+    "`GET /api/organizations/me/certificates/export` restrito a `owner`",
+    "Retorna um CSV (mesmo padrão de `GET /api/admin/users/export`) com uma linha por certificado de membro: nome do membro, curso, data de conclusão, data de emissão do certificado, validade (`expiresAt`, se houver), link de download",
+    "Inclui apenas certificados de membros ATUAIS da organização — membro removido não aparece mais na exportação (decisão de escopo: este export reflete o estado atual, não um histórico de quem já foi membro)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/certificates/export/route.ts`, restrito a `owner`, seguindo o padrão de geração de CSV já usado em `src/app/api/admin/users/export/route.ts`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Buscar certificados dos membros atuais",
+      "details": "Buscar `OrganizationMember` da organização, depois `Certificate` de cada `userId` correspondente, com `include` do curso.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Montar o CSV",
+      "details": "Gerar o CSV com as colunas do acceptanceCriteria, mesmo formato/encoding já usado no export de usuários existente.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-157"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": []
+}

@@ -1,0 +1,38 @@
+{
+  "id": "TASK-212",
+  "title": "Mapeamento priceId → código de serviço municipal",
+  "category": "functional",
+  "description": "Criar a função de mapeamento de `priceId`/produto Stripe para o código de serviço municipal da LC 116/2003, análoga a `buildPriceMap()` (`src/lib/stripe-handlers.ts`). O código de serviço aplicável a 'acesso a plataforma de cursos online por assinatura' precisa ser confirmado com o contador (pré-requisito da seção 0 de docs/fase4-planejamento.md) — esta task cria a estrutura com placeholder até essa confirmação.",
+  "acceptanceCriteria": [
+    "`src/lib/asaas-service-map.ts` exporta `getMunicipalServiceCode(priceId: string): string`",
+    "Mapeia os 4 `STRIPE_PRICE_ID_*` de assinatura (`BASIC_MONTHLY`, `BASIC_ANNUAL`, `PREMIUM_MONTHLY`, `PREMIUM_ANNUAL`) para o mesmo código de serviço (é o mesmo serviço — acesso à plataforma — independente do plano/ciclo)",
+    "Lança erro claro se `priceId` não estiver mapeado, em vez de devolver um código incorreto silenciosamente",
+    "Código de serviço fica numa única constante, fácil de trocar quando o contador confirmar o valor real"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o arquivo com a constante placeholder",
+      "details": "Criar `src/lib/asaas-service-map.ts`. Definir `const PLATFORM_ACCESS_SERVICE_CODE = 'TODO_CONFIRMAR_COM_CONTADOR'` com comentário explicando que precisa ser substituído pelo código real da LC 116/2003 antes da emissão real (TASK-202/seção 0).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar getMunicipalServiceCode",
+      "details": "Mapear os 4 `process.env.STRIPE_PRICE_ID_*` de assinatura para `PLATFORM_ACCESS_SERVICE_CODE`. Lançar `Error` se o `priceId` recebido não estiver em nenhuma das 4 variáveis.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Teste unitário",
+      "details": "Cobrir: cada um dos 4 priceIds retorna o código esperado; priceId desconhecido lança erro.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Diferente de `buildPriceMap()` (que mapeia para `{ type, billingCycle }`, valores distintos por plano), aqui o mapeamento de TODOS os priceIds de assinatura aponta para o MESMO código de serviço — é o mesmo serviço fiscal, o que muda é só o valor cobrado, já disponível no evento da Stripe.",
+    "Compra avulsa de curso/trilha (mode: 'payment') não está no escopo desta task — se entrar na emissão de nota fiscal depois, vai precisar de um código de serviço próprio (venda de conteúdo digital pode ter classificação fiscal diferente de assinatura de acesso); confirmar com o contador antes de estender."
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "TASK-221",
+  "title": "FiscalInvoice ganha organizationId (cobrança B2B)",
+  "category": "data-model",
+  "description": "Estender `FiscalInvoice` (TASK-210) para suportar nota fiscal de cobrança B2B, emitida para o CNPJ da `Organization` em vez do CPF do `User` owner. Relaxa `userId` para opcional e adiciona `organizationId` opcional, com uma constraint garantindo que exatamente um dos dois esteja preenchido por registro. Só executar esta task se o item 3 (B2B) for retomado — depende de `Organization` existir no schema (TASK-151 reativada).",
+  "acceptanceCriteria": [
+    "`FiscalInvoice.userId` passa de obrigatório para `String?`",
+    "`FiscalInvoice` ganha `organizationId String?` com relação para `Organization`",
+    "Constraint (check constraint via `@@check` se o Prisma/Postgres suportar nesta versão, ou validação na camada de aplicação se não suportar nativamente) garantindo que exatamente um entre `userId`/`organizationId` esteja preenchido — nunca os dois, nunca nenhum",
+    "Migration aplicada sem alterar nenhum `FiscalInvoice` existente (todos já têm `userId` preenchido, `organizationId` fica `null` para eles)",
+    "`npx tsc --noEmit` confirma que nenhum código existente que lê `FiscalInvoice.userId` como obrigatório quebra silenciosamente — ajustar os usos da TASK-214/216/218/219 para tratar `userId` como possivelmente nulo onde fizer sentido"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Alterar o schema",
+      "details": "Em `prisma/schema.prisma`, mudar `userId String` para `userId String?` em `FiscalInvoice`, ajustando a relação para opcional. Adicionar `organizationId String?` e `organization Organization? @relation(fields: [organizationId], references: [id])`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar a constraint de exclusividade",
+      "details": "Se o Postgres/Prisma suportar `@@check` nesta versão, adicionar `@@check([... XOR de userId/organizationId ...])`. Se não suportar nativamente em Prisma, documentar a regra em comentário no schema e validar na camada de aplicação (toda escrita de `FiscalInvoice` passa por uma função central que garante a exclusividade) em vez de confiar só no banco.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Rodar a migration e corrigir usos existentes",
+      "details": "Rodar `npx prisma migrate dev --name fiscal_invoice_organization` e `npx prisma generate`. Rodar `npx tsc --noEmit` e corrigir qualquer lugar que assumia `userId` não-nulo (TASK-216 listagem admin, TASK-218 download, TASK-219 UI do aluno).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-210", "TASK-151"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Esta é a migration de correção que docs/fase4-planejamento.md recomendava evitar fazendo o campo certo desde a origem — mas como o item 2 (TASK-210) precisa poder ser implementado e testado independentemente do item 3 (B2B, ainda não confirmado), não dava para adicionar `organizationId` apontando para um model `Organization` que pode não existir no schema. Esta task só executa quando B2B for de fato retomado."
+    ]
+}

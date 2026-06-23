@@ -1,0 +1,36 @@
+{
+  "id": "TASK-213",
+  "title": "Helper isFiscalDataComplete",
+  "category": "functional",
+  "description": "Criar um helper que verifica se um usuário tem todos os dados fiscais necessários para emitir nota fiscal (CPF/CNPJ válido + endereço completo), usado pelo gatilho de emissão (TASK-214) para decidir entre emitir ou marcar como `pending_data`.",
+  "acceptanceCriteria": [
+    "`src/lib/fiscal-data.ts` exporta `isFiscalDataComplete(user: { cpfCnpj: string | null; addressStreet: string | null; addressNumber: string | null; addressNeighborhood: string | null; addressCity: string | null; addressState: string | null; addressZipCode: string | null }): boolean`",
+    "Retorna `true` somente se `cpfCnpj` estiver preenchido E passar em `validateCpf`/`validateCnpj` (TASK-204) E todos os campos de endereço exceto `addressComplement` (opcional por natureza) estiverem preenchidos",
+    "Retorna `false` (nunca lança exceção) para qualquer combinação incompleta ou documento inválido"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o arquivo e a assinatura do helper",
+      "details": "Criar `src/lib/fiscal-data.ts`, importando `detectDocumentType`, `validateCpf`, `validateCnpj` de `@/lib/utils/document` (TASK-204).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Implementar a verificação",
+      "details": "Checar presença de todos os campos obrigatórios (todos exceto `addressComplement`), depois validar `cpfCnpj` com a função correspondente ao tipo detectado. Retornar `false` em qualquer etapa que falhar.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Teste unitário",
+      "details": "Cobrir: todos os campos completos e válidos (true), CPF inválido (false), endereço incompleto (false), só `addressComplement` faltando com resto completo (true).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-204", "TASK-203"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Este helper é reaproveitado tal qual pela TASK-225 (gatilho de emissão B2B), só trocando o objeto `user` por `organization` com os mesmos nomes de campo — por isso a TASK-222 (campos fiscais de Organization) usa os mesmos nomes de campo do User."
+  ]
+}

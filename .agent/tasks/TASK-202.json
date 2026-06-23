@@ -1,0 +1,52 @@
+{
+  "id": "TASK-202",
+  "title": "Verificar pré-requisitos da Fase 4",
+  "category": "setup",
+  "description": "Confirmar o status dos pré-requisitos não-técnicos da Fase 4 (seção 0 de docs/fase4-planejamento.md) antes de iniciar a implementação: deploy de produção (TASK-82), abertura de conta Asaas (Sandbox e PJ de produção) e validação de demanda B2B com o cliente. Nenhum desses três se resolve só com código — esta task documenta o status de cada um e adiciona os placeholders de variável de ambiente que os itens 2 e 3 vão precisar.",
+  "acceptanceCriteria": [
+    "`.env.local` contém placeholders para `ASAAS_API_KEY`, `ASAAS_API_BASE_URL` e `ASAAS_WEBHOOK_TOKEN`",
+    "Status de `TASK-82` (deploy de produção) confirmado e registrado — não bloqueia o início do item 1 nem do item 2 em Sandbox, só a emissão real de nota fiscal",
+    "Conta Asaas Sandbox (`api-sandbox.asaas.com`) criada e chave de API de teste preenchida em `.env.local`, ou status registrado como pendente sem bloquear o item 1",
+    "Status da abertura de conta Asaas PJ de produção e da confirmação com o contador (regime tributário, município de incidência do ISS, código de serviço da LC 116/2003) registrado — pendência documentada não bloqueia o item 2 em Sandbox",
+    "Status da validação de demanda de clientes corporativos (B2B, item 3) registrado explicitamente como confirmado ou pendente — se pendente, todas as tasks de B2B (TASK-151 a 166, 219+) devem ser tratadas como não autorizadas para implementação real até essa confirmação"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Revisar a seção 0 de docs/fase4-planejamento.md",
+      "details": "Ler a tabela de pré-requisitos não-técnicos e a nota de que `TASK-82` não bloqueia desenvolvimento/teste do item 2 (só a emissão real). Listar os 3 itens e seu status atual.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Adicionar placeholders de ambiente para o item 2",
+      "details": "Adicionar ao `.env.local`: `ASAAS_API_KEY=TODO_FILL_MANUALLY`, `ASAAS_API_BASE_URL=https://api-sandbox.asaas.com/v3`, `ASAAS_WEBHOOK_TOKEN=TODO_FILL_MANUALLY`. Não preencher a chave real de API nesta task — apenas confirmar que o nome da variável existe.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Confirmar status da conta Asaas Sandbox",
+      "details": "Verificar (ou pedir ao usuário para confirmar) se já existe cadastro em `api-sandbox.asaas.com`. Se sim, o usuário deve preencher `ASAAS_API_KEY` manualmente. Se não, documentar como pendente — isso bloqueia apenas o teste end-to-end das tasks do item 2 (TASK-211 em diante), não o item 1.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Confirmar status de TASK-82 e da conta Asaas PJ de produção",
+      "details": "Confirmar se `TASK-82` (deploy de produção na Vercel) já foi concluída e se a conta Asaas PJ de produção + confirmação com o contador (regime tributário, município do ISS, código de serviço LC 116/2003) já foram resolvidas. Registrar o status — pendência aqui não bloqueia nenhuma task de implementação/teste em Sandbox, só a troca da chave de API para produção.",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Confirmar status da validação de demanda B2B",
+      "details": "Perguntar explicitamente ao cliente do projeto se a demanda de clientes corporativos já foi validada (registrado em `.agent/prd/PRD.md` seção 14.6). Se NÃO confirmada, registrar isso com destaque — todas as tasks de B2B (TASK-151 a 166 e TASK-219 a 234) ficam geradas e prontas, mas não autorizadas para implementação até essa confirmação explícita.",
+      "pass": false
+    }
+  ],
+  "dependencies": [],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Nenhum valor real de secret deve ser escrito no PRD, nas tasks, em logs ou no chat — apenas placeholders em `.env.local`.",
+    "Diferente de TASK-146 (Fase 3), aqui a pendência de TASK-82 é parcial: ela não bloqueia nenhuma task de implementação ou teste do item 2 em Sandbox, só o corte de produção. Não generalizar o bloqueio.",
+    "A pendência de validação de demanda B2B é a única pendência desta task que bloqueia execução de código (não documentação/planejamento) — todas as tasks de B2B dependem implicitamente desta confirmação, mesmo quando não listada explicitamente em `dependencies`."
+  ]
+}

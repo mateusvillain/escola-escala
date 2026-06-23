@@ -1,0 +1,37 @@
+{
+  "id": "TASK-223",
+  "title": "PATCH /api/organizations/me aceita campos fiscais",
+  "category": "api-endpoint",
+  "description": "Endpoint para o owner da organização preencher CNPJ/razão social/endereço (TASK-222), análogo ao papel da TASK-206 para `User`. Restrito a `owner` (reaproveitando `requireOrgOwner` da TASK-166).",
+  "acceptanceCriteria": [
+    "`PATCH /api/organizations/me` aceita `cnpj`, `legalName` e os 7 campos de endereço, todos opcionais",
+    "Só o `owner` da organização pode chamar este endpoint — `member` recebe 403 (reaproveitando `requireOrgOwner`, TASK-166)",
+    "`cnpj`, se enviado, validado com `validateCnpj` (TASK-204) via `.refine()` — 400 com mensagem clara se inválido",
+    "Resposta inclui os campos fiscais atualizados"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `PATCH` em `src/app/api/organizations/me/route.ts` (criar o arquivo se ainda não existir um handler de PATCH ali — confirmar se `GET /api/organizations/me`, TASK-157, já está no mesmo arquivo).",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Aplicar requireOrgOwner e o schema Zod",
+      "details": "Usar `requireOrgOwner` (TASK-166) para restringir a `owner`. Validar `cnpj` com `validateCnpj` via `.refine()`, mesmo padrão da TASK-206.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Atualizar e retornar",
+      "details": "`prisma.organization.update` com os campos condicionais (mesmo padrão `...(campo !== undefined && { campo })` já usado em outros PATCHs do projeto).",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-222", "TASK-166", "TASK-204"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Mesma decisão de produto do item 1: estes campos não bloqueiam nada do uso da organização (membros, acesso ao catálogo) — só a emissão de nota fiscal da cobrança B2B (TASK-225) fica pendente sem eles."
+  ]
+}

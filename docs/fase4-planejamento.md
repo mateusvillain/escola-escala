@@ -183,9 +183,21 @@ positiva.
 
 ### Escopo proposto
 
-**Parte A — reaproveitar o que já está especificado:** os 4 sub-grupos (`TASK-151` a `166`) não precisam ser
-re-especificados — basta mover os arquivos de volta para `.agent/tasks/` e seguir os prompts já existentes
-em `docs/fase3-grupos-de-trabalho.md`. Nenhum trabalho de planejamento novo aqui.
+**Parte A — reaproveitar o que já está especificado, com uma lacuna confirmada:** verificação feita
+diretamente nos JSONs de `TASK-151` a `166` (não só no resumo de `docs/fase3-grupos-de-trabalho.md`) confirma
+que a maior parte do spec continua válida sem alteração e pode ser movida de volta para `.agent/tasks/` sem
+mudança: `TASK-152`/`153` (membros/convites), `TASK-155`/`157`–`161`/`166` (acesso e autorização), `TASK-154`
+(modelo de assinatura por seat) e `TASK-165` (página pública) — nenhuma toca dado fiscal. Mas **não é só mover
+os arquivos**:
+- `TASK-151` (model `Organization`) hoje só tem `id, name, slug, stripeCustomerId, seatLimit, createdAt,
+  updatedAt` — confirmado, nenhum campo fiscal. Nem `TASK-156` (`POST /api/organizations`, criação) nem
+  `TASK-164` (painel `/organizacao`) coletam CNPJ/razão social/endereço da organização — não existe hoje
+  nenhuma task que colete esse dado. Falta uma task nova para isso (ver "Numeração de tasks reservada").
+- `TASK-162`/`163` (checkout e webhook de cobrança por seat) **não precisam ser reescritas** — já diferenciam
+  corretamente `organizationId` vs `userId` via metadata, design que já antecipava múltiplos tipos de
+  assinatura. `TASK-163` só precisa GANHAR um passo adicional: disparar a emissão de nota fiscal pela
+  `Organization.cnpj`/endereço em vez do `User` do owner, análogo ao gatilho que o item 2 cria para `User` —
+  ver detalhe em "Interação com os itens 1 e 2" abaixo.
 
 **Parte B — diferenciais de produto, ainda sem task:** `docs/wiki/b2b-diferenciais.md` lista o que falta
 para o B2B ser mais do que "a mesma assinatura individual paga em lote" — nenhum desses itens tem task
@@ -201,15 +213,23 @@ Esta Fase 4 cobre, no mínimo, a Parte A (retomar TASK-151 a 166). Se a Parte B 
 quanto da demanda validada já aponta para diferenciais específicos — não dá pra priorizar a Parte B sem
 saber o que o cliente corporativo concreto está pedindo.
 
-### Interação com os itens 1 e 2 (importante)
+### Interação com os itens 1 e 2 (importante, confirmado nos specs reais)
 
 Se a cobrança B2B por seat (`TASK-162`/`163`, Stripe Billing com `OrganizationSubscription`) for retomada,
 ela cria uma nova origem de receita que também precisa de nota fiscal — mas para o **CNPJ da organização
-compradora**, não para o CPF do usuário individual que é `owner`. Isso significa:
-- O `model Organization` (`TASK-151`) precisaria ganhar os mesmos campos fiscais do item 1 (CNPJ, endereço),
-  não só o `User`.
-- O gatilho de emissão do item 2 precisa decidir, na cobrança B2B, emitir a nota fiscal pelo
-  `Organization.cnpj`/endereço em vez do `User` do owner.
+compradora**, não para o CPF do usuário individual que é `owner`. Confirmado lendo os JSONs de `TASK-151`,
+`156` e `164` (não é só uma suposição de design): nenhum dos três cobre dado fiscal de organização. Isso
+significa:
+- Task nova, dependência de `TASK-151`, antes de `TASK-162`/`163`: adiciona CNPJ, razão social e endereço ao
+  `model Organization` (mesmos campos do item 1, mas como entidade própria — a organização é quem emite a
+  nota, não o `owner` individual) e um ponto de coleta (provável: formulário no painel `TASK-164`, mesmo
+  espírito da Opção B do item 1 — opcional até bloquear a emissão de nota, nunca o acesso).
+- O gatilho de emissão do item 2 precisa de um branch a mais: na cobrança B2B (`metadata.organizationId`,
+  já diferenciado em `TASK-163`), emitir pelo `Organization.cnpj`/endereço em vez do `User` do owner. Isso é
+  um passo adicional dentro de `TASK-163`, não uma reescrita do que já está especificado lá.
+- Essa dependência só é bloqueante na prática se o item 2 (NFS-e) já estiver implementado quando B2B for
+  retomado — se B2B for retomado primeiro, a emissão B2B fica pendente pelo mesmo motivo e com o mesmo
+  tratamento (não bloqueia acesso) que o item 2 já prevê para `User` sem CPF/endereço.
 
 Essa dependência cruzada é o principal motivo para a ordem proposta abaixo.
 
@@ -246,7 +266,9 @@ Próximo número livre: `TASK-202`. Proposta de faixas (a confirmar na geração
 |---|---|
 | 1. Complemento de cadastro | `TASK-202` a `TASK-20X` |
 | 2. NFS-e via Asaas | `TASK-2XX` em diante, após o item 1 |
-| 3. B2B — Parte A | reaproveita `TASK-151` a `166` (mover de `deprecated/` para `tasks/`, sem renumerar) |
+| 3. B2B — Parte A (reaproveitada sem mudança) | reaproveita `TASK-152`–`154`, `155`, `157`–`161`, `165`, `166` (mover de `deprecated/` para `tasks/`, sem renumerar) |
+| 3. B2B — Parte A (campos fiscais em `Organization`) | numeração nova (`TASK-2XX`, faixa do item 3), depende de `TASK-151`, bloqueia `TASK-162`/`163` — ver "Interação com os itens 1 e 2" |
+| 3. B2B — Parte A (`TASK-151`, `156`, `163`) | reaproveitadas com adendo: `TASK-151` ganha os campos fiscais da task nova acima, `TASK-156`/`164` ganham o ponto de coleta, `TASK-163` ganha o passo de emissão pela `Organization` |
 | 3. B2B — Parte B (diferenciais) | numeração nova, só quando essa frente for priorizada com escopo confirmado |
 
 ## Próximos passos

@@ -1,0 +1,36 @@
+{
+  "id": "TASK-226",
+  "title": "Campo organizationId opcional em Course (conteúdo próprio da organização)",
+  "category": "data-model",
+  "description": "Primeira parte do diferencial #1 de docs/wiki/b2b-diferenciais.md (conteúdo próprio da organização): permitir que um curso pertença a uma `Organization`, visível só para os membros dela, reaproveitando a estrutura `Course → Module → Lesson` já existente. Decisão de escopo desta rodada: a autoria continua sendo feita pelo admin da plataforma (mesma tela `/admin/cursos`), só com um seletor de organização — não é self-service para o owner da organização nesta rodada (ver nota em technicalNotes).",
+  "acceptanceCriteria": [
+    "`Course` ganha `organizationId String?` (nullable — cursos existentes e novos cursos do catálogo público continuam com `organizationId: null`, sem nenhuma mudança de comportamento)",
+    "Migration aplicada sem alterar nenhum curso existente",
+    "Cursos com `organizationId` preenchido NÃO aparecem no catálogo público (`/cursos`) nem na API pública (`GET /api/courses`) — filtro adicionado explicitamente, não por omissão"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Adicionar o campo ao schema",
+      "details": "Em `prisma/schema.prisma`, `model Course`, adicionar `organizationId String?` e a relação `organization Organization? @relation(fields: [organizationId], references: [id])`. Adicionar `courses Course[]` à lista de relações de `Organization`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Rodar a migration",
+      "details": "Rodar `npx prisma migrate dev --name add_course_organization` e `npx prisma generate`.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Filtrar o catálogo público",
+      "details": "Em `GET /api/courses` (catálogo público) e na página `/cursos`, adicionar `where: { organizationId: null }` explicitamente aos cursos já filtrados por `status: 'published'`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-151"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "Decisão de escopo (assumida, não validada com demanda específica de cliente): autoria de curso de organização continua restrita a `role: admin` da plataforma — não criar um novo nível de permissão para o owner de organização autorar conteúdo nesta rodada. Self-service ficaria para uma iteração futura, só se a demanda concreta de um cliente corporativo justificar o investimento adicional em um sistema de permissões novo."
+  ]
+}

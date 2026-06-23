@@ -1,0 +1,37 @@
+{
+  "id": "TASK-225",
+  "title": "Emissão de NFS-e para cobrança B2B pelo CNPJ da organização",
+  "category": "integration",
+  "description": "Estender `handleCheckoutSessionCompleted`/`handleInvoicePaymentSucceeded` (já tratando `OrganizationSubscription` desde a TASK-163) para também disparar a emissão de nota fiscal — pelo `Organization.cnpj`/endereço, não pelo `User` do owner. É um passo adicional dentro da lógica já existente da TASK-163, não uma reescrita: a diferenciação por `metadata.organizationId` vs `metadata.userId` já está implementada lá.",
+  "acceptanceCriteria": [
+    "No branch de `OrganizationSubscription` de `handleCheckoutSessionCompleted`/`handleInvoicePaymentSucceeded`, chama uma variante de `triggerFiscalInvoice` (TASK-214) que recebe `organizationId` em vez de `userId`",
+    "Usa `isOrganizationFiscalDataComplete` (variante de TASK-213/222) para decidir entre `pending_data` e emissão — nunca bloqueia a ativação/renovação da `OrganizationSubscription` já implementada pela TASK-163",
+    "`FiscalInvoice` criado/atualizado tem `organizationId` preenchido e `userId` nulo (TASK-221) — `createOrGetCustomer` (TASK-211) usa `Organization.legalName`/`cnpj`/endereço em vez dos dados do `User` owner",
+    "Nenhuma regressão no fluxo de emissão de nota fiscal individual (item 2) nem no fluxo de ativação de `OrganizationSubscription` (TASK-163) já existente"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Generalizar triggerFiscalInvoice para aceitar organização",
+      "details": "Ajustar a assinatura de `triggerFiscalInvoice` (TASK-214) para aceitar `{ userId: string } | { organizationId: string }` em vez de só `userId`. Buscar `Organization` com os campos fiscais quando for o caso, usando `isOrganizationFiscalDataComplete`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Chamar a partir do branch de organização",
+      "details": "No branch de `metadata.organizationId` já existente em `handleCheckoutSessionCompleted`/`handleInvoicePaymentSucceeded` (TASK-163), chamar `triggerFiscalInvoice({ organizationId, stripeInvoiceId/stripeSessionId, value })` depois da lógica de sincronização de `OrganizationSubscription` já implementada.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Testar com stripe trigger",
+      "details": "Com uma `Organization` de teste com CNPJ/endereço preenchidos (TASK-223/224), disparar `stripe trigger invoice.payment_succeeded` para a subscription B2B e confirmar que o `FiscalInvoice` correto é criado com `organizationId`, e que uma organização SEM CNPJ preenchido gera `pending_data` sem bloquear a renovação da assinatura.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-163", "TASK-221", "TASK-222", "TASK-214"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Confirmado na verificação dos specs de B2B (docs/fase4-planejamento.md): esta é uma extensão pontual da TASK-163, não uma reescrita — a diferenciação organizationId/userId já está pronta lá."
+  ]
+}

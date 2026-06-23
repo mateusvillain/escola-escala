@@ -1,0 +1,52 @@
+{
+  "id": "TASK-207",
+  "title": "Formulário de dados fiscais em /perfil",
+  "category": "ui-ux",
+  "description": "Adicionar uma seção de dados fiscais (CPF/CNPJ + endereço) à página `/perfil`, opcional e separada da edição de perfil existente — Opção B do item 1 do plano (coleta tardia, não no cadastro), já que esses dados só passam a ser exigidos no momento de emitir a primeira nota fiscal (item 2), nunca para liberar acesso à plataforma.",
+  "acceptanceCriteria": [
+    "Nova seção em `/perfil`, abaixo de `EditProfileForm`, com campos para CPF/CNPJ e os 7 campos de endereço",
+    "Ao perder o foco do campo de CEP (preenchido e com 8 dígitos), chama `fetchAddressByCep` (TASK-205) e, se retornar endereço, preenche automaticamente rua/bairro/cidade/UF sem sobrescrever o que o usuário já tiver digitado manualmente nesses campos depois do autofill",
+    "Falha do ViaCEP (retorno `null`) não bloqueia nem exibe erro bloqueante — campos seguem editáveis manualmente, só sem o autofill",
+    "Salvar envia `PATCH /api/users/me` (TASK-206) só com os campos fiscais preenchidos; erro de validação (ex. CPF inválido) exibe mensagem inline no campo correspondente",
+    "Campos já preenchidos anteriormente aparecem pré-carregados ao abrir a página",
+    "Verificado em browser: preencher CEP válido e confirmar autofill; preencher CPF inválido e confirmar mensagem de erro; salvar com sucesso e recarregar a página confirmando persistência"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Buscar os campos fiscais do usuário na page",
+      "details": "Em `src/app/(app)/perfil/page.tsx`, adicionar os 8 campos fiscais ao `select` da query Prisma existente e passar como props para o novo componente.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Criar o componente FiscalDataForm",
+      "details": "Criar `src/components/profile/FiscalDataForm.tsx`, seguindo EXATAMENTE o padrão de `EditProfileForm.tsx` (lui-input + leitura via `shadowRoot` em vez de react-hook-form, conforme AGENTS.md — formulário público simples). Campos: CPF/CNPJ, CEP, rua, número, complemento, bairro, cidade, UF.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Implementar o autofill por CEP",
+      "details": "No `onBlur` do input de CEP (acessar via `shadowRoot` igual ao padrão de leitura), chamar `fetchAddressByCep`. Se retornar endereço, setar os valores dos inputs de rua/bairro/cidade/UF diretamente no `<input>` do shadow DOM (`el.shadowRoot.querySelector('input').value = ...` e disparar evento `input` para refletir no componente) apenas se esses campos estiverem vazios.",
+      "pass": false
+    },
+    {
+      "step": 4,
+      "description": "Implementar o submit",
+      "details": "No submit, montar o body só com os campos preenchidos (mesmo padrão de `EditProfileForm`) e chamar `PATCH /api/users/me`. Exibir `Alert` de sucesso/erro igual ao padrão existente. Em caso de 400 com `issues` do Zod, mapear a mensagem do campo `cpfCnpj` para erro inline.",
+      "pass": false
+    },
+    {
+      "step": 5,
+      "description": "Renderizar na página de perfil",
+      "details": "Importar e renderizar `<FiscalDataForm />` em `src/app/(app)/perfil/page.tsx`, abaixo de `EditProfileForm`, dentro do mesmo `<div className=\"mt-6 space-y-8\">`.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-203", "TASK-205", "TASK-206"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Não usar react-hook-form com `lui-input` — incompatibilidade de shadow DOM já documentada em AGENTS.md. Seguir o padrão de leitura/escrita manual via `shadowRoot` já usado em `EditProfileForm`/`ChangePasswordForm`.",
+    "Verificar em browser usando Playwright ou manualmente, conforme guideline de UI deste projeto."
+  ]
+}

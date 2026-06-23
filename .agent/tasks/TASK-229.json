@@ -1,0 +1,37 @@
+{
+  "id": "TASK-229",
+  "title": "GET /api/organizations/me/engagement agregação de progresso por membro",
+  "category": "api-endpoint",
+  "description": "Diferencial #1 de docs/wiki/b2b-diferenciais.md (dashboard de engajamento): endpoint que agrega progresso de cada membro da organização (cursos concluídos, em andamento, atrasados, tempo de estudo) — visão que hoje só existe para o próprio aluno (`/dashboard`), nunca para um terceiro. Restrito a `owner`.",
+  "acceptanceCriteria": [
+    "`GET /api/organizations/me/engagement` restrito a `owner` (reaproveitando `requireOrgOwner`, TASK-166)",
+    "Retorna, por membro: nome, e-mail, número de cursos concluídos, número de cursos em andamento, e uma lista de cursos 'atrasados' (matriculado há mais de N dias sem progresso recente — definir N=14 dias sem nenhum `LessonProgress` atualizado como proxy simples de atraso, mesmo espírito da proxy de drop-off já usada em TASK-194)",
+    "Métrica de 'tempo de estudo' é a soma de segundos assistidos já registrada em `LessonProgress` (confirmar campo exato na implementação — mesmo dado já usado pelo player de aula)",
+    "Só considera cursos aos quais o membro tem acesso pela organização (matrícula/CourseEnrollment vinculada ao acesso de organização, TASK-227) — não mistura com progresso em cursos que o membro acessa por conta própria fora da organização"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar o route handler",
+      "details": "Criar `src/app/api/organizations/me/engagement/route.ts` com `GET`, restrito a `owner`.",
+      "pass": false
+    },
+    {
+      "step": 2,
+      "description": "Agregar por membro",
+      "details": "Para cada `OrganizationMember`, buscar `CourseEnrollment`/`LessonProgress` relacionados aos cursos acessíveis pela organização (catálogo geral + cursos próprios da organização, TASK-226) e calcular as métricas do acceptanceCriteria.",
+      "pass": false
+    },
+    {
+      "step": 3,
+      "description": "Definir o critério de 'atrasado'",
+      "details": "Curso matriculado há mais de 14 dias sem nenhuma atualização de `LessonProgress` nesse período, e ainda não concluído — proxy simples, sem necessidade de um campo dedicado.",
+      "pass": false
+    }
+  ],
+  "dependencies": ["TASK-157"],
+  "estimatedComplexity": "high",
+  "technicalNotes": [
+    "Não criar um sistema de alertas automáticos ('colaborador X não iniciou Y') nesta rodada — isso é um diferencial separado de docs/wiki/b2b-diferenciais.md, fora do escopo dos 2 itens priorizados para esta Fase 4."
+  ]
+}
