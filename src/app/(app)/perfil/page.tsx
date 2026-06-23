@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { EditProfileForm } from '@/components/profile/EditProfileForm'
 import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm'
 import { ReferralCodeCard } from '@/components/profile/ReferralCodeCard'
+import { FiscalDataForm } from '@/components/profile/FiscalDataForm'
 
 export default async function PerfilPage() {
   const cookieStore = await cookies()
@@ -20,7 +21,20 @@ export default async function PerfilPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: auth.userId },
-    select: { id: true, name: true, email: true, avatarUrl: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatarUrl: true,
+      cpfCnpj: true,
+      addressStreet: true,
+      addressNumber: true,
+      addressComplement: true,
+      addressNeighborhood: true,
+      addressCity: true,
+      addressState: true,
+      addressZipCode: true,
+    },
   })
 
   if (!user) redirect('/login')
@@ -59,6 +73,19 @@ export default async function PerfilPage() {
         <hr className="border-gray-200" />
 
         <EditProfileForm name={user.name} avatarUrl={user.avatarUrl} />
+
+        <hr className="border-gray-200" />
+
+        <FiscalDataForm
+          cpfCnpj={user.cpfCnpj}
+          addressStreet={user.addressStreet}
+          addressNumber={user.addressNumber}
+          addressComplement={user.addressComplement}
+          addressNeighborhood={user.addressNeighborhood}
+          addressCity={user.addressCity}
+          addressState={user.addressState}
+          addressZipCode={user.addressZipCode}
+        />
 
         <hr className="border-gray-200" />
 

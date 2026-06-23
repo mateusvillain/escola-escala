@@ -14,22 +14,24 @@
       "step": 1,
       "description": "Implementar o handler GET",
       "details": "Em `src/app/api/admin/users/[id]/route.ts`, adicionar `export async function GET(request: NextRequest, ctx: RouteContext<'/api/admin/users/[id]'>)`. Seguir o padrão de auth de `PATCH` já existente no mesmo arquivo (`requireRole(request, ['admin'])`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar e retornar o usuário com dados fiscais",
       "details": "`prisma.user.findUnique` com `select` incluindo `id, name, email, role, isActive, freeTrialEligible, createdAt, cpfCnpj, addressStreet, addressNumber, addressComplement, addressNeighborhood, addressCity, addressState, addressZipCode`. Retornar 404 se não encontrado.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Confirmar isolamento da listagem",
       "details": "Abrir `src/app/api/admin/users/route.ts` (listagem) e confirmar que o `select` usado ali NÃO inclui nenhum dos 8 campos fiscais. Se a listagem usar `select: undefined` (retorno completo do Prisma), adicionar um `select` explícito para garantir que CPF/CNPJ nunca vaze na listagem.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-203"],
+  "dependencies": [
+    "TASK-203"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Correção de premissa: docs/fase4-planejamento.md citava este endpoint e a página `/admin/usuarios/[id]` como já existentes — confirmado durante a geração das tasks que nenhum dos dois existe. Esta task e a TASK-209 cobrem o gap real.",

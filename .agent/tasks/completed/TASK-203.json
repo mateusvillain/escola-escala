@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Adicionar os campos ao schema",
       "details": "Em `prisma/schema.prisma`, dentro de `model User`, adicionar após `avatarUrl`:\n```prisma\ncpfCnpj             String?\naddressStreet        String?\naddressNumber        String?\naddressComplement    String?\naddressNeighborhood  String?\naddressCity          String?\naddressState         String?\naddressZipCode       String?\n```\nNão usar `@unique` em `cpfCnpj` — não há decisão de impedir documentos duplicados nesta rodada.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
       "details": "Rodar `npx prisma migrate dev --name add_user_fiscal_fields` e `npx prisma generate`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Confirmar que nada quebrou",
       "details": "Rodar `npx tsc --noEmit` e `npx vitest run` — nenhum erro novo deve aparecer, já que todos os campos são opcionais.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],

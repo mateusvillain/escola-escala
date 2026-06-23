@@ -15,22 +15,24 @@
       "step": 1,
       "description": "Adicionar estado e fetch do detalhe fiscal",
       "details": "Em `UserTable.tsx`, adicionar estado `fiscalModal: { userId: string; data: FiscalData | null; loading: boolean } | null`. Ao clicar no novo botão, abrir o modal em estado loading e chamar `fetch(\\`/api/admin/users/${userId}\\`)`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar o botão de ação na tabela",
       "details": "Na célula de ações de cada linha, adicionar um botão 'Ver dados fiscais' com o mesmo estilo dos botões secundários já existentes (`bg-gray-50 border-gray-200`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Renderizar o modal de dados fiscais",
       "details": "Reaproveitar a estrutura visual do modal de confirmação existente (backdrop + card branco). Mostrar CPF/CNPJ formatado e o endereço em linhas, ou o estado vazio se todos os campos fiscais forem `null`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-208"],
+  "dependencies": [
+    "TASK-208"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "Não criar `/admin/usuarios/[id]` como página nova — ver nota de correção de premissa na TASK-208. O modal na própria listagem é suficiente para o caso de uso de suporte.",

@@ -3,6 +3,18 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
+import { detectDocumentType, validateCpf, validateCnpj } from "@/lib/utils/document";
+
+const fiscalSelect = {
+  cpfCnpj: true,
+  addressStreet: true,
+  addressNumber: true,
+  addressComplement: true,
+  addressNeighborhood: true,
+  addressCity: true,
+  addressState: true,
+  addressZipCode: true,
+} as const;
 
 export async function GET(request: NextRequest) {
   const auth = getAuthUser(request);
@@ -12,7 +24,15 @@ export async function GET(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: auth.userId },
-    select: { id: true, name: true, email: true, role: true, avatarUrl: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      avatarUrl: true,
+      createdAt: true,
+      ...fiscalSelect,
+    },
   });
 
   if (!user) {
@@ -27,12 +47,29 @@ const patchSchema = z.object({
   avatarUrl: z.string().url().nullable().optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(8).max(100).optional(),
+  cpfCnpj: z.string().optional(),
+  addressStreet: z.string().optional(),
+  addressNumber: z.string().optional(),
+  addressComplement: z.string().optional(),
+  addressNeighborhood: z.string().optional(),
+  addressCity: z.string().optional(),
+  addressState: z.string().length(2).regex(/^[A-Z]{2}$/).optional(),
+  addressZipCode: z.string().optional(),
 }).refine(
   (data) => {
     if (data.newPassword) return !!data.currentPassword;
     return true;
   },
   { message: "currentPassword é obrigatório para trocar a senha", path: ["currentPassword"] }
+).refine(
+  (data) => {
+    if (!data.cpfCnpj) return true;
+    const type = detectDocumentType(data.cpfCnpj);
+    if (type === "cpf") return validateCpf(data.cpfCnpj);
+    if (type === "cnpj") return validateCnpj(data.cpfCnpj);
+    return false;
+  },
+  { message: "CPF/CNPJ inválido", path: ["cpfCnpj"] }
 );
 
 export async function PATCH(request: NextRequest) {
@@ -56,7 +93,20 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const { name, avatarUrl, currentPassword, newPassword } = parsed.data;
+  const {
+    name,
+    avatarUrl,
+    currentPassword,
+    newPassword,
+    cpfCnpj,
+    addressStreet,
+    addressNumber,
+    addressComplement,
+    addressNeighborhood,
+    addressCity,
+    addressState,
+    addressZipCode,
+  } = parsed.data;
 
   let passwordHash: string | undefined;
 
@@ -84,8 +134,24 @@ export async function PATCH(request: NextRequest) {
       ...(name !== undefined && { name }),
       ...(avatarUrl !== undefined && { avatarUrl }),
       ...(passwordHash !== undefined && { passwordHash }),
+      ...(cpfCnpj !== undefined && { cpfCnpj }),
+      ...(addressStreet !== undefined && { addressStreet }),
+      ...(addressNumber !== undefined && { addressNumber }),
+      ...(addressComplement !== undefined && { addressComplement }),
+      ...(addressNeighborhood !== undefined && { addressNeighborhood }),
+      ...(addressCity !== undefined && { addressCity }),
+      ...(addressState !== undefined && { addressState }),
+      ...(addressZipCode !== undefined && { addressZipCode }),
     },
-    select: { id: true, name: true, email: true, role: true, avatarUrl: true, createdAt: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      avatarUrl: true,
+      createdAt: true,
+      ...fiscalSelect,
+    },
   });
 
   return NextResponse.json({ user: updated });

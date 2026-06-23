@@ -49,6 +49,14 @@ model User {
   passwordHash String
   role         Role     @default(student)
   avatarUrl    String?
+  cpfCnpj             String?
+  addressStreet       String?
+  addressNumber       String?
+  addressComplement   String?
+  addressNeighborhood String?
+  addressCity         String?
+  addressState        String?
+  addressZipCode      String?
   stripeCustomerId  String?
   isActive          Boolean   @default(true)
   freeTrialEligible Boolean   @default(false)

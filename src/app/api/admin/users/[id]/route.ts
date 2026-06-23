@@ -10,6 +10,43 @@ const patchSchema = z.object({
   freeTrialEligible: z.boolean().optional(),
 });
 
+export async function GET(
+  request: NextRequest,
+  ctx: RouteContext<"/api/admin/users/[id]">
+) {
+  const auth = requireRole(request, ["admin"]);
+  if (auth instanceof NextResponse) return auth;
+
+  const { id } = await ctx.params;
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      freeTrialEligible: true,
+      createdAt: true,
+      cpfCnpj: true,
+      addressStreet: true,
+      addressNumber: true,
+      addressComplement: true,
+      addressNeighborhood: true,
+      addressCity: true,
+      addressState: true,
+      addressZipCode: true,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+  }
+
+  return NextResponse.json({ user });
+}
+
 export async function PATCH(
   request: NextRequest,
   ctx: RouteContext<"/api/admin/users/[id]">

@@ -1417,50 +1417,50 @@
     "id": "TASK-203",
     "title": "Campos de CPF/CNPJ e endereço no model User",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-203.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-203.json",
+    "passes": true
   },
   {
     "id": "TASK-204",
     "title": "Utilitário de validação de CPF/CNPJ",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-204.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-204.json",
+    "passes": true
   },
   {
     "id": "TASK-205",
     "title": "Integração ViaCEP para autofill de endereço",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-205.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-205.json",
+    "passes": true
   },
   {
     "id": "TASK-206",
     "title": "PATCH /api/users/me aceita campos fiscais",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-206.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-206.json",
+    "passes": true
   },
   {
     "id": "TASK-207",
     "title": "Formulário de dados fiscais em /perfil",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-207.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-207.json",
+    "passes": true
   },
   {
     "id": "TASK-208",
     "title": "GET /api/admin/users/[id] retorna detalhe com dados fiscais",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-208.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-208.json",
+    "passes": true
   },
   {
     "id": "TASK-209",
     "title": "UI admin para visualizar dados fiscais do usuário",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-209.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-209.json",
+    "passes": true
   },
   {
     "id": "TASK-210",
