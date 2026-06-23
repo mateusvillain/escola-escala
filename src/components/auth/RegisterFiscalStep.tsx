@@ -75,6 +75,26 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
+  function handleCpfBlur() {
+    const form = formRef.current
+    if (!form) return
+
+    const cpf = readShadowValue(form, 'cpfCnpj').trim()
+
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      if (!cpf) {
+        delete next.cpfCnpj
+        return next
+      }
+      const type = detectDocumentType(cpf)
+      const valid = type === 'cpf' ? validateCpf(cpf) : type === 'cnpj' ? validateCnpj(cpf) : false
+      if (valid) delete next.cpfCnpj
+      else next.cpfCnpj = 'CPF/CNPJ inválido'
+      return next
+    })
+  }
+
   async function handleCepBlur() {
     const form = formRef.current
     if (!form) return
@@ -195,6 +215,7 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
             required
             error={!!fieldErrors.cpfCnpj}
             error-text={fieldErrors.cpfCnpj ?? ''}
+            onBlur={handleCpfBlur}
           />
           <lui-input
             label="CEP"

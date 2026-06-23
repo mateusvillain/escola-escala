@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Alert } from '@/components/ui'
 import { fetchAddressByCep, validateCep } from '@/lib/viacep'
+import { detectDocumentType, validateCpf, validateCnpj } from '@/lib/utils/document'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 
 interface FiscalDataFormProps {
@@ -66,6 +67,21 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
   const [cpfError, setCpfError] = useState<string | null>(null)
   const [cepError, setCepError] = useState<string | null>(null)
 
+  function handleCpfBlur() {
+    const form = formRef.current
+    if (!form) return
+
+    const cpf = readShadowValue(form, 'cpfCnpj').trim()
+    if (!cpf) {
+      setCpfError(null)
+      return
+    }
+
+    const type = detectDocumentType(cpf)
+    const valid = type === 'cpf' ? validateCpf(cpf) : type === 'cnpj' ? validateCnpj(cpf) : false
+    setCpfError(valid ? null : 'CPF/CNPJ inválido')
+  }
+
   async function handleCepBlur() {
     const form = formRef.current
     if (!form) return
@@ -119,6 +135,15 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
       addressNeighborhood: readShadowValue(form, 'addressNeighborhood').trim(),
       addressCity: readShadowValue(form, 'addressCity').trim(),
       addressState: readStateValue(form),
+    }
+
+    if (values.cpfCnpj) {
+      const type = detectDocumentType(values.cpfCnpj)
+      const valid = type === 'cpf' ? validateCpf(values.cpfCnpj) : type === 'cnpj' ? validateCnpj(values.cpfCnpj) : false
+      if (!valid) {
+        setCpfError('CPF/CNPJ inválido')
+        return
+      }
     }
 
     if (values.addressZipCode && !validateCep(values.addressZipCode)) {
@@ -188,6 +213,7 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               optional
               error={!!cpfError}
               error-text={cpfError ?? ''}
+              onBlur={handleCpfBlur}
             />
             <lui-input
               label="CEP"
