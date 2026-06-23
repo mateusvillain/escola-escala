@@ -257,8 +257,14 @@ npx tsc --noEmit
 npx prisma migrate dev --name nome
 npx prisma generate
 
-# Testes (apenas unitário — Playwright ainda não tem config nem specs)
+# Testes unitários
 npx vitest run
+
+# Testes E2E (Playwright) — checkout.spec.ts exige `stripe listen` rodando em
+# paralelo (ver docs/wiki/testes-e2e.md)
+npx playwright test
+# ou
+npm run test:e2e
 ```
 
 ## Armadilhas conhecidas

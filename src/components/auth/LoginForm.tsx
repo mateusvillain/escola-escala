@@ -112,7 +112,6 @@ function LoginFormInner() {
               loadingText="Entrando..."
               disabled={loading}
               block
-              onClick={() => formRef.current?.requestSubmit()}
             />
           </lui-stack>
         </form>

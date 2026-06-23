@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Garantir Stripe CLI/webhook ativo durante o teste",
       "details": "Documentar no spec (comentário) que o teste requer `stripe listen --forward-to localhost:3000/api/webhooks/stripe` rodando localmente, ou rodar via `stripe trigger` integrado ao setup do teste.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Escrever o teste de checkout completo",
       "details": "Em `e2e/checkout.spec.ts`: login, navegar para `/planos`, clicar em assinar um plano, preencher o formulário hospedado do Stripe Checkout com o cartão de teste, confirmar pagamento, validar retorno a `/dashboard?checkout=success`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Validar a ativação da assinatura",
       "details": "Após o retorno, fazer polling (com timeout, ex.: 10s) na UI do dashboard até o plano ativo aparecer, confirmando que o webhook processou a ativação.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-180"],

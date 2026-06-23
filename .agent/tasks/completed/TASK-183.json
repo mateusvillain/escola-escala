@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Completar todas as aulas do curso de teste",
       "details": "Usando o curso de teste da TASK-182 (ou um curso de teste dedicado, mais simples, com poucas aulas), chamar `POST /api/progress/[lessonId]` para cada aula simulando conclusão (`watchPercentage: 100` ou conclusão manual).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar a geração do certificado",
       "details": "Acessar `/dashboard`, confirmar que o curso aparece em \"Concluídos\" com botão de certificado, e validar via `request.get` que `GET /api/certificates/[courseId]/download` retorna PDF válido.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-182"],

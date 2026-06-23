@@ -285,7 +285,6 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
               loadingText="Criando conta..."
               disabled={!isFormValid || loading}
               block
-              onClick={() => formRef.current?.requestSubmit()}
             />
           </lui-stack>
         </form>

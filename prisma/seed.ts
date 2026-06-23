@@ -2,7 +2,7 @@ import { config } from 'dotenv'
 config({ path: '.env.local' })
 
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient, Role, PlanType, BillingCycle, SubscriptionStatus } from '../src/generated/prisma/client'
+import { PrismaClient, Role, PlanType, BillingCycle, CourseStatus, SubscriptionStatus } from '../src/generated/prisma/client'
 import bcrypt from 'bcryptjs'
 import { stripe } from '../src/lib/stripe'
 
@@ -50,6 +50,46 @@ async function seedSubscriber({
       currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
   })
+}
+
+// Mantido em sincronia com E2E_COURSE_SLUG / E2E_LESSON_TITLES em e2e/helpers.ts —
+// os specs de player e certificado (TASK-182/183) navegam por esse curso fixo.
+const E2E_COURSE_SLUG = 'curso-e2e-playwright'
+const E2E_LESSON_TITLES = ['Aula 1', 'Aula 2', 'Aula 3']
+
+async function seedE2ECourse(instructorId: string) {
+  const course = await prisma.course.upsert({
+    where: { slug: E2E_COURSE_SLUG },
+    update: {},
+    create: {
+      title: 'Curso E2E Playwright',
+      slug: E2E_COURSE_SLUG,
+      description: 'Curso fixo usado pelos specs E2E de player e certificado. Não editar manualmente.',
+      instructorId,
+      planAccess: PlanType.premium,
+      status: CourseStatus.published,
+    },
+  })
+
+  const existingModule = await prisma.module.findFirst({
+    where: { courseId: course.id, title: 'Introdução' },
+  })
+  if (existingModule) return
+
+  const module_ = await prisma.module.create({
+    data: { courseId: course.id, title: 'Introdução', order: 1 },
+  })
+
+  for (const [index, title] of E2E_LESSON_TITLES.entries()) {
+    await prisma.lesson.create({
+      data: {
+        moduleId: module_.id,
+        title,
+        order: index + 1,
+        videoId: `e2e-test-video-${index + 1}`,
+      },
+    })
+  }
 }
 
 async function main() {
@@ -105,7 +145,7 @@ async function main() {
     },
   })
 
-  await prisma.instructor.upsert({
+  const instructor = await prisma.instructor.upsert({
     where: { userId: instructorUser.id },
     update: {},
     create: {
@@ -114,6 +154,8 @@ async function main() {
       slug: 'instrutor-teste',
     },
   })
+
+  await seedE2ECourse(instructor.id)
 
   await seedSubscriber({
     email: 'aluno.basico@test.com',

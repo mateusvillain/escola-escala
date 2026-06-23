@@ -51,7 +51,12 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ user }, { status: 201 });
   response.cookies.set("auth-token", token, {
     httpOnly: true,
-    sameSite: "strict",
+    // 'lax' (não 'strict'): o redirect de retorno do Stripe Checkout hospedado
+    // (checkout.stripe.com -> /dashboard?checkout=success) é uma navegação de
+    // topo cross-site — 'strict' bloqueia o cookie nesse caso e desloga o aluno
+    // que acabou de pagar. 'lax' ainda bloqueia em requisições de mutação
+    // cross-site (POST/PATCH/DELETE), preservando a proteção contra CSRF.
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
   });

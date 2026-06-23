@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Preparar dados de teste",
       "details": "Garantir, via seed (`prisma/seed.ts`) ou setup do teste, um usuário com assinatura ativa e um curso publicado com pelo menos duas aulas.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Escrever o teste de navegação",
       "details": "Em `e2e/player.spec.ts`: login, acessar a primeira aula do curso de teste, validar que o player carrega (presença do iframe/elemento do Bunny Stream) e que o botão \"próxima aula\" navega corretamente.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Escrever o teste de conclusão automática",
       "details": "Chamar `POST /api/progress/[lessonId]` via `request.post` do Playwright simulando `watchPercentage: 85`, recarregar a página da aula/sidebar e validar que a aula aparece com indicador de concluída.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-180"],
