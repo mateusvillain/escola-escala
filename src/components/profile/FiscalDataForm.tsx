@@ -33,12 +33,28 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-function getSelectElement(form: HTMLFormElement, name: string): HTMLSelectElement | null {
-  return form.querySelector(`select[name="${name}"]`)
+// lui-select não aceita `value` direto — sua API é por índice (`selected`)
+// sobre uma lista de opções vinda da prop `options` (string separada por
+// vírgula). Para LER o valor escolhido, basta o <select> nativo dentro do
+// shadow DOM (sempre reflete a opção realmente selecionada). Para ESCREVER
+// um valor programaticamente (autofill por CEP), é preciso setar a
+// propriedade `selected` do host — setar o <select> interno direto
+// desincroniza o estado interno do componente (ele guarda o índice, não a
+// string), e um re-render do Lit reverteria a mudança.
+function getStateSelectHost(form: HTMLFormElement): (HTMLElement & { selected: number }) | null {
+  return form.querySelector('lui-select') as (HTMLElement & { selected: number }) | null
 }
 
-function readSelectValue(form: HTMLFormElement, name: string): string {
-  return getSelectElement(form, name)?.value ?? ''
+function readStateValue(form: HTMLFormElement): string {
+  return getStateSelectHost(form)?.shadowRoot?.querySelector('select')?.value ?? ''
+}
+
+function writeStateValue(form: HTMLFormElement, value: string) {
+  const host = getStateSelectHost(form)
+  if (!host) return
+  const idx = BRAZILIAN_STATES.indexOf(value as (typeof BRAZILIAN_STATES)[number])
+  if (idx === -1) return
+  host.selected = idx + 1
 }
 
 export function FiscalDataForm(props: FiscalDataFormProps) {
@@ -79,9 +95,8 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
     if (!readShadowValue(form, 'addressCity').trim()) {
       writeShadowValue(form, 'addressCity', address.city)
     }
-    const stateSelect = getSelectElement(form, 'addressState')
-    if (stateSelect && !stateSelect.value) {
-      stateSelect.value = address.state
+    if (!readStateValue(form)) {
+      writeStateValue(form, address.state)
     }
   }
 
@@ -103,7 +118,7 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
       addressComplement: readShadowValue(form, 'addressComplement').trim(),
       addressNeighborhood: readShadowValue(form, 'addressNeighborhood').trim(),
       addressCity: readShadowValue(form, 'addressCity').trim(),
-      addressState: readSelectValue(form, 'addressState'),
+      addressState: readStateValue(form),
     }
 
     if (values.addressZipCode && !validateCep(values.addressZipCode)) {
@@ -219,22 +234,14 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               value={props.addressCity ?? ''}
               optional
             />
-            <div>
-              <label htmlFor="addressState" className="block text-sm text-gray-700 mb-1">
-                Estado <span className="text-gray-400">(opcional)</span>
-              </label>
-              <select
-                id="addressState"
-                name="addressState"
-                defaultValue={props.addressState ?? ''}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Selecione</option>
-                {BRAZILIAN_STATES.map((uf) => (
-                  <option key={uf} value={uf}>{uf}</option>
-                ))}
-              </select>
-            </div>
+            <lui-select
+              label="Estado"
+              name="addressState"
+              options={BRAZILIAN_STATES.join(',')}
+              placeholder="Selecione"
+              selected={props.addressState ? BRAZILIAN_STATES.indexOf(props.addressState as (typeof BRAZILIAN_STATES)[number]) + 1 : 0}
+              optional
+            />
             <Button
               label="Salvar dados fiscais"
               type="submit"

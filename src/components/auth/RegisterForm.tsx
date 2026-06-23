@@ -117,6 +117,11 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
     setStep('fiscal')
   }
 
+  function handleBackToPlans() {
+    setCheckoutErrorMsg(null)
+    setStep('plans')
+  }
+
   async function handleFiscalContinue() {
     if (!pendingPlan || !pendingBilling) return
     setCheckoutStarting(true)
@@ -200,7 +205,9 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
   if (step === 'plans') {
     return (
       <lui-card aria-label="Escolha seu plano">
-        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 2 de 2</lui-body>
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 2 de 3' : 'Etapa 2 de 2'}
+        </lui-body>
         <lui-heading level="2">Sua conta foi criada. Escolha um plano</lui-heading>
         <lui-stack space="md">
           <PlanPicker onSelectFree={handleSelectFree} onSelectPaid={handleSelectPaid} loadingPlan={null} />
@@ -212,6 +219,13 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
   if (step === 'fiscal') {
     return (
       <lui-card aria-label="Dados fiscais">
+        <button
+          type="button"
+          onClick={handleBackToPlans}
+          className="block text-left text-sm text-gray-500 hover:text-gray-700 mb-2"
+        >
+          ← Voltar para os planos
+        </button>
         <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
           {wantsSubscription ? 'Etapa 2 de 3' : 'Etapa 3 de 4'}
         </lui-body>
@@ -254,7 +268,9 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
 
   return (
     <lui-card aria-label="Criar conta">
-      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>Etapa 1 de 2</lui-body>
+      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+        {wantsSubscription ? 'Etapa 1 de 3' : 'Etapa 1 de 2'}
+      </lui-body>
       <lui-heading level="2">Criar conta</lui-heading>
 
       <lui-stack space="md">

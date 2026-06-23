@@ -44,15 +44,29 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-// `<select>` nativo: diferente do lui-input, `name` é um atributo padrão do
-// DOM em elementos de formulário, sempre refletido pelo React independente
-// de SSR/CSR — não precisa do mesmo workaround acima.
-function getSelectElement(form: HTMLFormElement, name: string): HTMLSelectElement | null {
-  return form.querySelector(`select[name="${name}"]`)
+// lui-select não aceita `value` direto — sua API é por índice (`selected`)
+// sobre a lista de opções da prop `options` (string separada por vírgula).
+// Para LER o valor escolhido, o <select> nativo dentro do shadow DOM sempre
+// reflete a opção realmente selecionada (busca por tag, não por atributo —
+// não tem o problema de reflexão do `name` em elementos CSR-only). Para
+// ESCREVER um valor programaticamente (autofill por CEP), é preciso setar a
+// propriedade `selected` do host — setar o <select> interno direto
+// desincroniza o estado interno do componente (ele guarda o índice, não a
+// string), e um re-render do Lit reverteria a mudança.
+function getStateSelectHost(form: HTMLFormElement): (HTMLElement & { selected: number }) | null {
+  return form.querySelector('lui-select') as (HTMLElement & { selected: number }) | null
 }
 
-function readSelectValue(form: HTMLFormElement, name: string): string {
-  return getSelectElement(form, name)?.value ?? ''
+function readStateValue(form: HTMLFormElement): string {
+  return getStateSelectHost(form)?.shadowRoot?.querySelector('select')?.value ?? ''
+}
+
+function writeStateValue(form: HTMLFormElement, value: string) {
+  const host = getStateSelectHost(form)
+  if (!host) return
+  const idx = BRAZILIAN_STATES.indexOf(value as (typeof BRAZILIAN_STATES)[number])
+  if (idx === -1) return
+  host.selected = idx + 1
 }
 
 export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
@@ -91,9 +105,8 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
     if (!readShadowValue(form, 'addressCity').trim()) {
       writeShadowValue(form, 'addressCity', address.city)
     }
-    const stateSelect = getSelectElement(form, 'addressState')
-    if (stateSelect && !stateSelect.value) {
-      stateSelect.value = address.state
+    if (!readStateValue(form)) {
+      writeStateValue(form, address.state)
     }
   }
 
@@ -113,7 +126,7 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
       addressComplement: readShadowValue(form, 'addressComplement').trim(),
       addressNeighborhood: readShadowValue(form, 'addressNeighborhood').trim(),
       addressCity: readShadowValue(form, 'addressCity').trim(),
-      addressState: readSelectValue(form, 'addressState'),
+      addressState: readStateValue(form),
     }
 
     const errors: Record<string, string> = {}
@@ -230,29 +243,15 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
             error={!!fieldErrors.addressCity}
             error-text={fieldErrors.addressCity ?? ''}
           />
-          <div>
-            <label htmlFor="addressState" className="block text-sm text-gray-700 mb-1">
-              Estado
-            </label>
-            <select
-              id="addressState"
-              name="addressState"
-              defaultValue=""
-              required
-              className={[
-                'w-full px-4 py-2.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500',
-                fieldErrors.addressState ? 'border-red-500' : 'border-gray-300',
-              ].join(' ')}
-            >
-              <option value="" disabled>Selecione</option>
-              {BRAZILIAN_STATES.map((uf) => (
-                <option key={uf} value={uf}>{uf}</option>
-              ))}
-            </select>
-            {fieldErrors.addressState && (
-              <p className="text-xs text-red-600 mt-1">{fieldErrors.addressState}</p>
-            )}
-          </div>
+          <lui-select
+            label="Estado"
+            name="addressState"
+            options={BRAZILIAN_STATES.join(',')}
+            placeholder="Selecione"
+            required
+            error={!!fieldErrors.addressState}
+            error-text={fieldErrors.addressState ?? ''}
+          />
           <Button
             label="Continuar para pagamento"
             type="submit"
