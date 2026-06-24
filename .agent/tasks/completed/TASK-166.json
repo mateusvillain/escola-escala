@@ -14,21 +14,26 @@
       "step": 1,
       "description": "Criar helper requireOrgOwner",
       "details": "Criar `requireOrgOwner(userId: string)` em `src/lib/access.ts` (ou novo `src/lib/organization.ts`), que busca o `OrganizationMember` do usuário e retorna a organização se `role === 'owner'`, ou lança/retorna um erro 403 padronizado caso contrário.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Aplicar o helper nos endpoints de gestão",
-      "details": "Usar `requireOrgOwner` em `src/app/api/organizations/me/invites/route.ts` (TASK-158), `src/app/api/organizations/me/members/[userId]/route.ts` (TASK-161), `src/app/api/organizations/me/checkout/route.ts` (TASK-162) e `src/app/api/organizations/me/portal/route.ts` (TASK-164), seguindo o mesmo padrão `instanceof NextResponse` usado por `requireRole`.",
-      "pass": false
+      "details": "Usar `requireOrgOwner` em `src/app/api/organizations/me/invites/route.ts` (TASK-158) e `src/app/api/organizations/me/members/[userId]/route.ts` (TASK-161), seguindo o mesmo padrão `instanceof NextResponse` usado por `requireRole`. `src/app/api/organizations/me/checkout/route.ts` (TASK-162) e `src/app/api/organizations/me/portal/route.ts` (TASK-164) ainda não existem neste grupo (Grupos 6/7 da Fase 4) — quando forem criados, devem usar este mesmo helper desde o início, em vez de duplicar a checagem de papel.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Escrever testes de autorização",
-      "details": "Em `src/lib/__tests__/`, escrever testes (Vitest) que simulam um `member` chamando cada um dos quatro endpoints e confirmam resposta 403, e um cenário sem organização confirmando 404 em `GET /api/organizations/me`.",
-      "pass": false
+      "details": "Em `src/lib/__tests__/organization.test.ts`, testes (Vitest) cobrindo `requireOrgOwner` para owner, member e usuário sem organização — como os endpoints de invites/remoção chamam esse helper antes de qualquer ação, cobre os dois endpoints existentes (e os futuros de checkout/portal igualmente). 404 em `GET /api/organizations/me` sem organização já estava implementado na TASK-157 e foi validado manualmente.",
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-152", "TASK-158", "TASK-161", "TASK-162"],
+  "dependencies": [
+    "TASK-152",
+    "TASK-158",
+    "TASK-161",
+    "TASK-162"
+  ],
   "estimatedComplexity": "low"
 }

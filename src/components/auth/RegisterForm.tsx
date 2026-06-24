@@ -16,6 +16,8 @@ interface Props {
   billingCycle?: PlanBillingCycle
   referralCode?: string
   checkoutError?: boolean
+  next?: string
+  prefillEmail?: string
 }
 
 function readShadowValue(form: HTMLFormElement, name: string): string {
@@ -42,7 +44,7 @@ function validate(values: Record<string, string>): Record<string, string> {
   return errors
 }
 
-export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError }: Props) {
+export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError, next, prefillEmail }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
@@ -157,6 +159,10 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
       })
 
       if (res.status === 201) {
+        if (next) {
+          router.push(next)
+          return
+        }
         if (wantsSubscription) {
           setStep('fiscal')
         } else {
@@ -294,6 +300,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
               type="email"
               name="email"
               placeholder="email@exemplo.com"
+              value={prefillEmail}
               required
               error={!!fieldErrors.email}
               error-text={fieldErrors.email}
@@ -321,7 +328,10 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
         </form>
 
         <lui-flex justify="center">
-          <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+          <Link
+            href={next ? `/login?redirect=${encodeURIComponent(next)}` : '/login'}
+            style={{ fontSize: '0.875rem', textDecoration: 'underline' }}
+          >
             Já tem conta? Faça login
           </Link>
         </lui-flex>

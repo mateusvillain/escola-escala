@@ -14,22 +14,25 @@
       "step": 1,
       "description": "Adicionar checagem de organização em checkLessonAccess",
       "details": "Em `src/lib/access.ts`, antes de retornar `no_subscription`, buscar `prisma.organizationMember.findUnique({ where: { userId }, include: { organization: { include: { subscription: true } } } })`. Se existir membro com `organization.subscription.status` em `('active', 'trialing')`, retornar `{ allowed: true }` (equivalente a premium).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Replicar a mesma checagem em checkCourseAccess",
       "details": "Aplicar a mesma lógica do passo 1 em `checkCourseAccess`, mantendo as duas funções consistentes entre si (mesmo padrão hoje usado para assinatura individual).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Adicionar testes unitários",
       "details": "Em `src/lib/__tests__/`, adicionar casos cobrindo: membro de organização ativa acessa curso `premium`; membro de organização com assinatura `past_due`/`canceled` não acessa; usuário sem organização e sem assinatura individual continua bloqueado.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-152", "TASK-154"],
+  "dependencies": [
+    "TASK-152",
+    "TASK-154"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "Esta função é chamada em todo acesso a aula/curso — evitar N+1 queries; uma única consulta com `include` aninhado (como no passo 1) é suficiente, sem round-trips adicionais."

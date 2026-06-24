@@ -15,27 +15,30 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/me/invites/route.ts` com `POST`. Validar `{ email: z.string().email() }` via Zod.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Verificar papel de owner e limite de seats",
       "details": "Buscar o membership do usuário autenticado; se `role !== 'owner'`, retornar 403. Contar `members.length + invites com status 'pending'` e comparar com `organization.seatLimit`; retornar 409 se atingido o limite.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar o convite",
       "details": "Gerar `token` com `crypto.randomBytes(32).toString('hex')`, `expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)`, criar `OrganizationInvite` com `status: 'pending'`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Disparar e-mail de convite",
       "details": "Chamar a função de envio de e-mail criada na TASK-159 com o link `${NEXT_PUBLIC_APP_URL}/convite/${token}`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-153", "TASK-157"],
+  "dependencies": [
+    "TASK-153",
+    "TASK-157"
+  ],
   "estimatedComplexity": "medium"
 }

@@ -13,21 +13,23 @@
       "step": 1,
       "description": "Criar o template HTML",
       "details": "Em `src/lib/email-templates.ts`, adicionar `organizationInviteEmailHtml(inviterName: string, organizationName: string, inviteUrl: string): string`, reaproveitando o estilo dos templates existentes (`welcomeEmailHtml`, `trialEndingEmailHtml`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar a função de envio",
       "details": "Em `src/lib/email.ts`, adicionar `sendOrganizationInviteEmail(to: string, inviterName: string, organizationName: string, inviteUrl: string)` chamando `sendEmail` com o template do passo 1.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Chamar a função no endpoint de convite",
       "details": "Em `src/app/api/organizations/me/invites/route.ts` (TASK-158), envolver a chamada em try/catch — falha no envio de e-mail não deve impedir a criação do convite, apenas logar o erro.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-153"],
+  "dependencies": [
+    "TASK-153"
+  ],
   "estimatedComplexity": "low"
 }
