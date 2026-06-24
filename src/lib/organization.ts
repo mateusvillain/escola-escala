@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import type { Organization } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export async function isOrganizationOwner(userId: string): Promise<boolean> {
+export async function getOrganizationRole(userId: string): Promise<"owner" | "member" | null> {
   const membership = await prisma.organizationMember.findUnique({
     where: { userId },
     select: { role: true },
   });
-  return membership?.role === "owner";
+  return membership?.role ?? null;
+}
+
+export async function isOrganizationOwner(userId: string): Promise<boolean> {
+  return (await getOrganizationRole(userId)) === "owner";
 }
 
 export async function requireOrgOwner(

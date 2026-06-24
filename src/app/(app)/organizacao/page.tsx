@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifyToken } from '@/lib/jwt'
+import { getOrganizationRole } from '@/lib/organization'
 import { OrganizationPanel } from '@/components/organization/OrganizationPanel'
 
 export const metadata = { title: 'Minha Organização' }
@@ -16,6 +17,9 @@ export default async function OrganizacaoPage() {
   } catch {
     redirect('/login')
   }
+
+  const role = await getOrganizationRole(userId)
+  if (role === 'member') redirect('/dashboard')
 
   return (
     <div className="max-w-2xl">
