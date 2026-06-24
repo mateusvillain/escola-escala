@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { verifyToken } from '@/lib/jwt'
 import { Header } from '@/components/layout/Header'
 import { hasReviewActivity } from '@/lib/reviews'
-import { isOrganizationMember } from '@/lib/organization'
+import { isOrganizationOwner } from '@/lib/organization'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect('/login')
 
   const showReviewsLink = await hasReviewActivity(user.userId)
-  const showOrganizationLink = await isOrganizationMember(user.userId)
+  const showOrganizationLink = await isOrganizationOwner(user.userId)
 
   return (
     <div className="min-h-screen flex flex-col">

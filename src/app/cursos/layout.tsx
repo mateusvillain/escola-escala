@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/jwt'
 import { CursosHeader } from '@/components/cursos/CursosHeader'
 import { hasReviewActivity } from '@/lib/reviews'
-import { isOrganizationMember } from '@/lib/organization'
+import { isOrganizationOwner } from '@/lib/organization'
 
 export default async function CursosLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
@@ -16,7 +16,7 @@ export default async function CursosLayout({ children }: { children: React.React
   }
 
   const showReviewsLink = user ? await hasReviewActivity(user.userId) : false
-  const showOrganizationLink = user ? await isOrganizationMember(user.userId) : false
+  const showOrganizationLink = user ? await isOrganizationOwner(user.userId) : false
 
   return (
     <div className="min-h-screen flex flex-col">
