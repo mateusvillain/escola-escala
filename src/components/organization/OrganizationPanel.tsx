@@ -69,8 +69,19 @@ export function OrganizationPanel({ userId }: { userId: string }) {
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
   const [tab, setTab] = useState<Tab>('organizacao')
-  const [confirmRemove, setConfirmRemove] = useState<{ userId: string; name: string } | null>(null)
+  const [confirmRemove, setConfirmRemove] = useState<{ userId: string; name: string }[] | null>(null)
   const [promoteLoading, setPromoteLoading] = useState<string | null>(null)
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
+  const [cancelInviteLoading, setCancelInviteLoading] = useState<string | null>(null)
+
+  function toggleMemberSelection(memberUserId: string) {
+    setSelectedMembers((prev) => {
+      const next = new Set(prev)
+      if (next.has(memberUserId)) next.delete(memberUserId)
+      else next.add(memberUserId)
+      return next
+    })
+  }
 
   async function loadOrganization() {
     setLoading(true)
@@ -156,22 +167,46 @@ export function OrganizationPanel({ userId }: { userId: string }) {
 
   async function handleConfirmRemove() {
     if (!confirmRemove) return
-    const memberUserId = confirmRemove.userId
+    const targets = confirmRemove
     setConfirmRemove(null)
     setActionError(null)
     setActionLoading(true)
     try {
-      const res = await fetch(`/api/organizations/me/members/${memberUserId}`, { method: 'DELETE' })
+      const results = await Promise.all(
+        targets.map((target) => fetch(`/api/organizations/me/members/${target.userId}`, { method: 'DELETE' }))
+      )
+      const failed = results.filter((res) => !res.ok)
+      if (failed.length > 0) {
+        setActionError(
+          failed.length === results.length
+            ? 'Erro ao remover membro(s).'
+            : `${results.length - failed.length} de ${results.length} membro(s) removido(s). Alguns falharam.`
+        )
+      }
+      setSelectedMembers(new Set())
+      await loadOrganization()
+    } catch {
+      setActionError('Erro de conexão. Tente novamente.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleCancelInvite(inviteId: string) {
+    setActionError(null)
+    setCancelInviteLoading(inviteId)
+    try {
+      const res = await fetch(`/api/organizations/me/invites/${inviteId}`, { method: 'DELETE' })
       if (!res.ok) {
         const body = await res.json()
-        setActionError(body.error ?? 'Erro ao remover membro.')
+        setActionError(body.error ?? 'Erro ao cancelar convite.')
         return
       }
       await loadOrganization()
     } catch {
       setActionError('Erro de conexão. Tente novamente.')
     } finally {
-      setActionLoading(false)
+      setCancelInviteLoading(null)
     }
   }
 
@@ -340,15 +375,43 @@ export function OrganizationPanel({ userId }: { userId: string }) {
       {tab === 'membros' && (
         <div className="space-y-6">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-900">Membros</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-gray-900">Membros</h2>
+              {isOwner && selectedMembers.size > 0 && (
+                <button
+                  onClick={() =>
+                    setConfirmRemove(
+                      members
+                        .filter((m) => selectedMembers.has(m.userId))
+                        .map((m) => ({ userId: m.userId, name: m.name }))
+                    )
+                  }
+                  disabled={actionLoading}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                >
+                  Remover selecionados ({selectedMembers.size})
+                </button>
+              )}
+            </div>
 
             <ul className="divide-y divide-gray-100">
               {members.map((member) => (
                 <li key={member.userId} className="py-3 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                    <p className="text-xs text-gray-500">{member.email}</p>
-                    <p className="text-xs text-gray-400">Entrou em {formatDate(member.joinedAt)}</p>
+                  <div className="flex items-center gap-3">
+                    {isOwner && member.userId !== userId && (
+                      <input
+                        type="checkbox"
+                        checked={selectedMembers.has(member.userId)}
+                        onChange={() => toggleMemberSelection(member.userId)}
+                        aria-label={`Selecionar ${member.name}`}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                      <p className="text-xs text-gray-500">{member.email}</p>
+                      <p className="text-xs text-gray-400">Entrou em {formatDate(member.joinedAt)}</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${ROLE_STYLES[member.role]}`}>
@@ -365,7 +428,7 @@ export function OrganizationPanel({ userId }: { userId: string }) {
                     )}
                     {isOwner && member.userId !== userId && (
                       <button
-                        onClick={() => setConfirmRemove({ userId: member.userId, name: member.name })}
+                        onClick={() => setConfirmRemove([{ userId: member.userId, name: member.name }])}
                         disabled={actionLoading}
                         className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
                       >
@@ -407,13 +470,24 @@ export function OrganizationPanel({ userId }: { userId: string }) {
                       <p className="text-sm font-medium text-gray-900">{invite.email}</p>
                       <p className="text-xs text-gray-400">Convidado em {formatDate(invite.createdAt)}</p>
                     </div>
-                    <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                        invite.expired ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-800'
-                      }`}
-                    >
-                      {invite.expired ? 'Expirado' : 'Aguardando cadastro'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                          invite.expired ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {invite.expired ? 'Expirado' : 'Aguardando cadastro'}
+                      </span>
+                      {isOwner && (
+                        <button
+                          onClick={() => handleCancelInvite(invite.id)}
+                          disabled={cancelInviteLoading === invite.id}
+                          className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                        >
+                          {cancelInviteLoading === invite.id ? 'Cancelando...' : 'Cancelar'}
+                        </button>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -443,10 +517,23 @@ export function OrganizationPanel({ userId }: { userId: string }) {
             onClick={() => setConfirmRemove(null)}
           />
           <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-base font-semibold text-gray-900 mb-2">Remover membro</h3>
+            <h3 className="text-base font-semibold text-gray-900 mb-2">
+              {confirmRemove.length === 1 ? 'Remover membro' : `Remover ${confirmRemove.length} membros`}
+            </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Tem certeza que deseja remover <span className="font-medium">&quot;{confirmRemove.name}&quot;</span>{' '}
-              da organização? O acesso aos cursos via assinatura da organização será revogado imediatamente.
+              {confirmRemove.length === 1 ? (
+                <>
+                  Tem certeza que deseja remover{' '}
+                  <span className="font-medium">&quot;{confirmRemove[0].name}&quot;</span> da organização?
+                </>
+              ) : (
+                <>
+                  Tem certeza que deseja remover{' '}
+                  <span className="font-medium">{confirmRemove.map((m) => m.name).join(', ')}</span> da
+                  organização?
+                </>
+              )}{' '}
+              O acesso aos cursos via assinatura da organização será revogado imediatamente.
             </p>
             <div className="flex justify-end gap-3">
               <button

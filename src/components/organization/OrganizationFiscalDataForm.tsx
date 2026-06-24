@@ -19,6 +19,7 @@ export function OrganizationFiscalDataForm(props: OrganizationFiscalDataFormProp
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const locked = !!props.cnpj
 
   function handleCnpjInput() {
     const form = formRef.current
@@ -108,7 +109,9 @@ export function OrganizationFiscalDataForm(props: OrganizationFiscalDataFormProp
     <section>
       <lui-heading level="3">Dados fiscais da organização</lui-heading>
       <p className="text-sm text-gray-500 mt-1 mb-4">
-        Necessário apenas para a emissão de nota fiscal da cobrança por seat.
+        {locked
+          ? 'CNPJ e razão social não podem ser alterados depois de definidos — são dados da empresa que não costumam mudar. Para corrigir um erro de cadastro, contate o suporte.'
+          : 'Necessário apenas para a emissão de nota fiscal da cobrança por seat.'}
       </p>
 
       <lui-stack space="md">
@@ -127,6 +130,7 @@ export function OrganizationFiscalDataForm(props: OrganizationFiscalDataFormProp
               placeholder="00.000.000/0000-00"
               value={props.cnpj ?? ''}
               optional
+              disabled={locked}
               error={!!fieldErrors.cnpj}
               error-text={fieldErrors.cnpj ?? ''}
               onInput={handleCnpjInput}
@@ -138,13 +142,16 @@ export function OrganizationFiscalDataForm(props: OrganizationFiscalDataFormProp
               placeholder="Razão social da empresa"
               value={props.legalName ?? ''}
               optional
+              disabled={locked}
             />
-            <Button
-              label="Salvar dados fiscais"
-              type="submit"
-              loading={loading}
-              loadingText="Salvando..."
-            />
+            {!locked && (
+              <Button
+                label="Salvar dados fiscais"
+                type="submit"
+                loading={loading}
+                loadingText="Salvando..."
+              />
+            )}
           </lui-stack>
         </form>
       </lui-stack>

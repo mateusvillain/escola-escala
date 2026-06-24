@@ -138,6 +138,13 @@ export async function PATCH(request: NextRequest) {
   const ownerCheck = await requireOrgOwner(auth.userId);
   if (ownerCheck instanceof NextResponse) return ownerCheck;
 
+  if (ownerCheck.organization.cnpj && (parsed.data.cnpj !== undefined || parsed.data.legalName !== undefined)) {
+    return NextResponse.json(
+      { error: "CNPJ e razão social não podem ser alterados após definidos. Contate o suporte." },
+      { status: 400 }
+    );
+  }
+
   const {
     cnpj,
     legalName,
