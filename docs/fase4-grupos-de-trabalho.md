@@ -46,7 +46,7 @@ Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 | 2   | NFS-e: modelo, cliente Asaas e gatilho de emissão            | TASK-210 a 214                 | Grupo 0, Grupo 1         | `feat/fase4-nfse-emissao`                 | ⏳ Pendente |
 | 3   | NFS-e: webhook, painel de pendências e entrega ao aluno      | TASK-215 a 220                 | Grupo 2                  | `feat/fase4-nfse-webhook-entrega`         | ⏳ Pendente |
 | 4   | B2B Parte A: Modelos de dados + campos fiscais               | TASK-151 a 154, 222            | Grupo 0, Grupo 1         | `feat/fase4-b2b-modelos`                  | ✅ Concluído (PR #25) |
-| 5   | B2B Parte A: Membros, convites e acesso                      | TASK-155 a 161, 166            | Grupo 4                  | `feat/fase4-b2b-membros`                  | ⏳ Pendente |
+| 5   | B2B Parte A: Membros, convites e acesso                      | TASK-155 a 161, 166            | Grupo 4                  | `feat/fase4-b2b-membros`                  | ✅ Concluído (PR #26) |
 | 6   | B2B Parte A: Cobrança por seat + NFS-e B2B                   | TASK-162, 163, 221, 225        | Grupo 5, Grupo 2/3       | `feat/fase4-b2b-cobranca-nfse`            | ⏳ Pendente |
 | 7   | B2B Parte A: Painel da organização + dados fiscais            | TASK-164, 165, 223, 224        | Grupo 5, Grupo 4         | `feat/fase4-b2b-painel`                   | ⏳ Pendente |
 | 8   | B2B diferencial: Conteúdo próprio + dashboard de engajamento  | TASK-226 a 230                 | Grupo 4, Grupo 5         | `feat/fase4-b2b-conteudo-engajamento`     | ⏳ Pendente |
