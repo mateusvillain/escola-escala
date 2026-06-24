@@ -3,8 +3,9 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Alert } from '@/components/ui'
-import { fetchAddressByCep, validateCep } from '@/lib/viacep'
-import { detectDocumentType, validateCpf, validateCnpj } from '@/lib/utils/document'
+import { fetchAddressByCep, validateCep, maskCepInput } from '@/lib/viacep'
+import { detectDocumentType, validateCpf, validateCnpj, maskCpfCnpjInput } from '@/lib/utils/document'
+import { applyMaskOnInput } from '@/lib/utils/masked-input'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 
 interface FiscalDataFormProps {
@@ -18,8 +19,17 @@ interface FiscalDataFormProps {
   addressZipCode: string | null
 }
 
+// Busca pela propriedade JS `name`, não pelo seletor de atributo
+// `lui-input[name="..."]`: o atributo só existe no HTML quando a página é
+// renderizada no servidor (hard load/refresh). Em navegação client-side do
+// Next.js (ex.: clicar em "Perfil" no menu do usuário, o caminho normal até
+// esta página), o React monta a árvore inteiramente no cliente e seta
+// propriedades reconhecidas de custom elements só como propriedade JS, nunca
+// como atributo — sem isso, a máscara e a validação desta tela ficam
+// quebradas sempre que se chega aqui por um link interno, não só num refresh.
 function getShadowInput(form: HTMLFormElement, name: string): HTMLInputElement | null {
-  const el = form.querySelector(`lui-input[name="${name}"]`)
+  const inputs = Array.from(form.querySelectorAll('lui-input')) as (HTMLElement & { name?: string })[]
+  const el = inputs.find((node) => node.name === name)
   return el?.shadowRoot?.querySelector('input') ?? null
 }
 
@@ -32,6 +42,22 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   if (!input) return
   input.value = value
   input.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+// O lui-input zera seu próprio `error` interno a cada tecla digitada
+// (_handleInput, fora do controle do React). Isso faz o React "pular" o
+// re-render quando o novo valor de `error`/`error-text` é igual ao último
+// que ele mesmo aplicou (ex. inválido -> inválido de novo, sem passar por um
+// estado válido no meio) — o prop nunca volta a ser reaplicado no host, e o
+// erro fica preso escondido. Setar a propriedade direto no host, fora do
+// fluxo declarativo do React, garante que o estado visual sempre reflita a
+// validação atual.
+function syncHostError(input: HTMLInputElement | null, message: string) {
+  const root = input?.getRootNode()
+  const host = root instanceof ShadowRoot ? (root.host as HTMLElement & { error: boolean; errorText: string }) : null
+  if (!host) return
+  host.error = !!message
+  host.errorText = message
 }
 
 // lui-select não aceita `value` direto — sua API é por índice (`selected`)
@@ -64,40 +90,87 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [cpfError, setCpfError] = useState<string | null>(null)
-  const [cepError, setCepError] = useState<string | null>(null)
+  // Objeto (não strings soltas) de propósito: o lui-input limpa seu próprio
+  // estado interno de erro a cada tecla digitada, fora do controle do React.
+  // Setar a mesma mensagem de erro duas vezes em sequência (ex. inválido →
+  // inválido, sem passar por um estado válido/vazio no meio) com um state
+  // `string | null` faz o React pular o re-render (mesmo valor, via
+  // Object.is) e o erro nunca volta a aparecer. Espalhar `{...prev}` sempre
+  // cria uma referência nova, então o React nunca pula o re-render.
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  function handleCpfCnpjInput() {
+    const form = formRef.current
+    if (!form) return
+
+    const input = getShadowInput(form, 'cpfCnpj')
+    if (!input) return
+
+    applyMaskOnInput(input, maskCpfCnpjInput)
+  }
+
+  function handleCepInput() {
+    const form = formRef.current
+    if (!form) return
+
+    const input = getShadowInput(form, 'addressZipCode')
+    if (!input) return
+
+    applyMaskOnInput(input, maskCepInput)
+  }
 
   function handleCpfBlur() {
     const form = formRef.current
     if (!form) return
 
-    const cpf = readShadowValue(form, 'cpfCnpj').trim()
-    if (!cpf) {
-      setCpfError(null)
-      return
+    const input = getShadowInput(form, 'cpfCnpj')
+    const cpf = (input?.value ?? '').trim()
+
+    let message = ''
+    if (cpf) {
+      const type = detectDocumentType(cpf)
+      const valid = type === 'cpf' ? validateCpf(cpf) : type === 'cnpj' ? validateCnpj(cpf) : false
+      if (!valid) message = 'CPF/CNPJ inválido'
     }
 
-    const type = detectDocumentType(cpf)
-    const valid = type === 'cpf' ? validateCpf(cpf) : type === 'cnpj' ? validateCnpj(cpf) : false
-    setCpfError(valid ? null : 'CPF/CNPJ inválido')
+    syncHostError(input, message)
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      if (message) next.cpfCnpj = message
+      else delete next.cpfCnpj
+      return next
+    })
   }
 
   async function handleCepBlur() {
     const form = formRef.current
     if (!form) return
 
-    const cep = readShadowValue(form, 'addressZipCode').trim()
+    const input = getShadowInput(form, 'addressZipCode')
+    const cep = (input?.value ?? '').trim()
+
     if (!cep) {
-      setCepError(null)
+      syncHostError(input, '')
+      setFieldErrors((prev) => {
+        const next = { ...prev }
+        delete next.addressZipCode
+        return next
+      })
       return
     }
 
     if (!validateCep(cep)) {
-      setCepError('CEP inválido')
+      syncHostError(input, 'CEP inválido')
+      setFieldErrors((prev) => ({ ...prev, addressZipCode: 'CEP inválido' }))
       return
     }
 
-    setCepError(null)
+    syncHostError(input, '')
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next.addressZipCode
+      return next
+    })
 
     const address = await fetchAddressByCep(cep)
     if (!address) return
@@ -120,8 +193,7 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
     e.preventDefault()
     setStatus('idle')
     setErrorMsg(null)
-    setCpfError(null)
-    setCepError(null)
+    setFieldErrors({})
 
     const form = formRef.current
     if (!form) return
@@ -141,13 +213,15 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
       const type = detectDocumentType(values.cpfCnpj)
       const valid = type === 'cpf' ? validateCpf(values.cpfCnpj) : type === 'cnpj' ? validateCnpj(values.cpfCnpj) : false
       if (!valid) {
-        setCpfError('CPF/CNPJ inválido')
+        syncHostError(getShadowInput(form, 'cpfCnpj'), 'CPF/CNPJ inválido')
+        setFieldErrors((prev) => ({ ...prev, cpfCnpj: 'CPF/CNPJ inválido' }))
         return
       }
     }
 
     if (values.addressZipCode && !validateCep(values.addressZipCode)) {
-      setCepError('CEP inválido')
+      syncHostError(getShadowInput(form, 'addressZipCode'), 'CEP inválido')
+      setFieldErrors((prev) => ({ ...prev, addressZipCode: 'CEP inválido' }))
       return
     }
 
@@ -173,8 +247,13 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
         const cpfIssue = issues?.find((issue) => issue.path[0] === 'cpfCnpj')
         const cepIssue = issues?.find((issue) => issue.path[0] === 'addressZipCode')
         if (cpfIssue || cepIssue) {
-          if (cpfIssue) setCpfError(cpfIssue.message)
-          if (cepIssue) setCepError(cepIssue.message)
+          if (cpfIssue) syncHostError(getShadowInput(form, 'cpfCnpj'), cpfIssue.message)
+          if (cepIssue) syncHostError(getShadowInput(form, 'addressZipCode'), cepIssue.message)
+          setFieldErrors((prev) => ({
+            ...prev,
+            ...(cpfIssue && { cpfCnpj: cpfIssue.message }),
+            ...(cepIssue && { addressZipCode: cepIssue.message }),
+          }))
         } else {
           setErrorMsg(data.error ?? 'Erro ao salvar.')
           setStatus('error')
@@ -211,8 +290,9 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               placeholder="000.000.000-00"
               value={props.cpfCnpj ?? ''}
               optional
-              error={!!cpfError}
-              error-text={cpfError ?? ''}
+              error={!!fieldErrors.cpfCnpj}
+              error-text={fieldErrors.cpfCnpj ?? ''}
+              onInput={handleCpfCnpjInput}
               onBlur={handleCpfBlur}
             />
             <lui-input
@@ -221,8 +301,9 @@ export function FiscalDataForm(props: FiscalDataFormProps) {
               placeholder="00000-000"
               value={props.addressZipCode ?? ''}
               optional
-              error={!!cepError}
-              error-text={cepError ?? ''}
+              error={!!fieldErrors.addressZipCode}
+              error-text={fieldErrors.addressZipCode ?? ''}
+              onInput={handleCepInput}
               onBlur={handleCepBlur}
             />
             <lui-input

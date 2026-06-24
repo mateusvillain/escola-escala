@@ -2,8 +2,9 @@
 
 import { useRef, useState } from 'react'
 import { Alert, Button } from '@/components/ui'
-import { fetchAddressByCep, validateCep } from '@/lib/viacep'
-import { detectDocumentType, validateCpf, validateCnpj } from '@/lib/utils/document'
+import { fetchAddressByCep, validateCep, maskCepInput } from '@/lib/viacep'
+import { detectDocumentType, validateCpf, validateCnpj, maskCpfCnpjInput } from '@/lib/utils/document'
+import { applyMaskOnInput } from '@/lib/utils/masked-input'
 import { BRAZILIAN_STATES } from '@/lib/brazilian-states'
 
 interface Props {
@@ -44,6 +45,22 @@ function writeShadowValue(form: HTMLFormElement, name: string, value: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+// O lui-input zera seu próprio `error` interno a cada tecla digitada
+// (_handleInput, fora do controle do React). Isso faz o React "pular" o
+// re-render quando o novo valor de `error`/`error-text` é igual ao último
+// que ele mesmo aplicou (ex. inválido -> inválido de novo, sem passar por um
+// estado válido no meio) — o prop nunca volta a ser reaplicado no host, e o
+// erro fica preso escondido. Setar a propriedade direto no host, fora do
+// fluxo declarativo do React, garante que o estado visual sempre reflita a
+// validação atual.
+function syncHostError(input: HTMLInputElement | null, message: string) {
+  const root = input?.getRootNode()
+  const host = root instanceof ShadowRoot ? (root.host as HTMLElement & { error: boolean; errorText: string }) : null
+  if (!host) return
+  host.error = !!message
+  host.errorText = message
+}
+
 // lui-select não aceita `value` direto — sua API é por índice (`selected`)
 // sobre a lista de opções da prop `options` (string separada por vírgula).
 // Para LER o valor escolhido, o <select> nativo dentro do shadow DOM sempre
@@ -75,22 +92,45 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
+  function handleCpfCnpjInput() {
+    const form = formRef.current
+    if (!form) return
+
+    const input = getShadowInput(form, 'cpfCnpj')
+    if (!input) return
+
+    applyMaskOnInput(input, maskCpfCnpjInput)
+  }
+
+  function handleCepInput() {
+    const form = formRef.current
+    if (!form) return
+
+    const input = getShadowInput(form, 'addressZipCode')
+    if (!input) return
+
+    applyMaskOnInput(input, maskCepInput)
+  }
+
   function handleCpfBlur() {
     const form = formRef.current
     if (!form) return
 
-    const cpf = readShadowValue(form, 'cpfCnpj').trim()
+    const input = getShadowInput(form, 'cpfCnpj')
+    const cpf = (input?.value ?? '').trim()
 
-    setFieldErrors((prev) => {
-      const next = { ...prev }
-      if (!cpf) {
-        delete next.cpfCnpj
-        return next
-      }
+    let message = ''
+    if (cpf) {
       const type = detectDocumentType(cpf)
       const valid = type === 'cpf' ? validateCpf(cpf) : type === 'cnpj' ? validateCnpj(cpf) : false
-      if (valid) delete next.cpfCnpj
-      else next.cpfCnpj = 'CPF/CNPJ inválido'
+      if (!valid) message = 'CPF/CNPJ inválido'
+    }
+
+    syncHostError(input, message)
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      if (message) next.cpfCnpj = message
+      else delete next.cpfCnpj
       return next
     })
   }
@@ -99,14 +139,17 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
     const form = formRef.current
     if (!form) return
 
-    const cep = readShadowValue(form, 'addressZipCode').trim()
+    const input = getShadowInput(form, 'addressZipCode')
+    const cep = (input?.value ?? '').trim()
     if (!cep) return
 
     if (!validateCep(cep)) {
+      syncHostError(input, 'CEP inválido')
       setFieldErrors((prev) => ({ ...prev, addressZipCode: 'CEP inválido' }))
       return
     }
 
+    syncHostError(input, '')
     setFieldErrors((prev) => {
       const next = { ...prev }
       delete next.addressZipCode
@@ -165,6 +208,8 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
     }
 
     if (Object.keys(errors).length > 0) {
+      if (errors.cpfCnpj) syncHostError(getShadowInput(form, 'cpfCnpj'), errors.cpfCnpj)
+      if (errors.addressZipCode) syncHostError(getShadowInput(form, 'addressZipCode'), errors.addressZipCode)
       setFieldErrors(errors)
       return
     }
@@ -188,6 +233,8 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
       const cpfIssue = issues?.find((issue) => issue.path[0] === 'cpfCnpj')
       const cepIssue = issues?.find((issue) => issue.path[0] === 'addressZipCode')
       if (cpfIssue || cepIssue) {
+        if (cpfIssue) syncHostError(getShadowInput(form, 'cpfCnpj'), cpfIssue.message)
+        if (cepIssue) syncHostError(getShadowInput(form, 'addressZipCode'), cepIssue.message)
         setFieldErrors({
           ...(cpfIssue && { cpfCnpj: cpfIssue.message }),
           ...(cepIssue && { addressZipCode: cepIssue.message }),
@@ -215,6 +262,7 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
             required
             error={!!fieldErrors.cpfCnpj}
             error-text={fieldErrors.cpfCnpj ?? ''}
+            onInput={handleCpfCnpjInput}
             onBlur={handleCpfBlur}
           />
           <lui-input
@@ -224,6 +272,7 @@ export function RegisterFiscalStep({ onContinue, continueLoading }: Props) {
             required
             error={!!fieldErrors.addressZipCode}
             error-text={fieldErrors.addressZipCode ?? ''}
+            onInput={handleCepInput}
             onBlur={handleCepBlur}
           />
           <lui-input

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { fetchAddressByCep, validateCep } from "../viacep";
+import { fetchAddressByCep, validateCep, maskCepInput } from "../viacep";
 
 describe("validateCep", () => {
   it("aceita CEP com 8 dígitos, com ou sem máscara", () => {
@@ -14,6 +14,21 @@ describe("validateCep", () => {
 
   it("rejeita entrada vazia", () => {
     expect(validateCep("")).toBe(false);
+  });
+});
+
+describe("maskCepInput", () => {
+  it("formata progressivamente até 5 dígitos sem separador", () => {
+    expect(maskCepInput("01001")).toBe("01001");
+  });
+
+  it("insere o hífen ao passar do 5º dígito", () => {
+    expect(maskCepInput("010010")).toBe("01001-0");
+    expect(maskCepInput("01001000")).toBe("01001-000");
+  });
+
+  it("ignora caracteres não numéricos e trunca em 8 dígitos", () => {
+    expect(maskCepInput("01001-000999")).toBe("01001-000");
   });
 });
 

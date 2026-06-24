@@ -6,8 +6,17 @@ import Link from 'next/link'
 import { Button, Alert } from '@/components/ui'
 import { loginSchema } from '@/lib/schemas/auth'
 
+// Busca pela propriedade JS `name`, não pelo seletor de atributo
+// `lui-input[name="..."]`: o atributo só existe no HTML quando a página é
+// renderizada no servidor (hard load/refresh). Em qualquer navegação
+// client-side do Next.js (router.push, <Link>, inclusive chegar aqui depois
+// de um logout), o React monta a árvore inteiramente no cliente e seta
+// propriedades reconhecidas de custom elements só como propriedade JS, nunca
+// como atributo — a propriedade `.name` sempre reflete o valor certo, o
+// atributo não. Sem isso, o formulário lê email/senha vazios em silêncio.
 function readShadowValue(form: HTMLFormElement, name: string): string {
-  const el = form.querySelector(`lui-input[name="${name}"]`)
+  const inputs = Array.from(form.querySelectorAll('lui-input')) as (HTMLElement & { name?: string })[]
+  const el = inputs.find((node) => node.name === name)
   return el?.shadowRoot?.querySelector('input')?.value ?? ''
 }
 

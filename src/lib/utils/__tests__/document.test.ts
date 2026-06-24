@@ -1,8 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { validateCpf, validateCnpj, detectDocumentType, formatCpfCnpj } from "../document";
+import { validateCpf, validateCnpj, detectDocumentType, formatCpfCnpj, maskCpfCnpjInput } from "../document";
 
 const VALID_CPF = "123.456.789-09";
 const VALID_CNPJ = "11.222.333/0001-81";
+// CNPJ alfanumérico sintético (formato Receita Federal, IN RFB 2.229/2024,
+// vigência a partir de 07/2026) — gerado pelo próprio algoritmo de DV para
+// teste, não corresponde a uma empresa real.
+const VALID_CNPJ_ALFANUMERICO = "12.ABC.345/01DE-35";
 
 describe("validateCpf", () => {
   it("aceita CPF válido com máscara", () => {
@@ -54,6 +58,22 @@ describe("validateCnpj", () => {
   it("rejeita entrada null/vazia", () => {
     expect(validateCnpj("")).toBe(false);
   });
+
+  it("aceita CNPJ alfanumérico válido (formato Receita Federal a partir de 07/2026)", () => {
+    expect(validateCnpj(VALID_CNPJ_ALFANUMERICO)).toBe(true);
+  });
+
+  it("aceita CNPJ alfanumérico válido sem máscara, com letra minúscula", () => {
+    expect(validateCnpj("12abc34501de35")).toBe(true);
+  });
+
+  it("rejeita CNPJ alfanumérico com dígito verificador errado", () => {
+    expect(validateCnpj("12.ABC.345/01DE-36")).toBe(false);
+  });
+
+  it("rejeita CNPJ alfanumérico com letra na posição de dígito verificador", () => {
+    expect(validateCnpj("12.ABC.345/01DE-A5")).toBe(false);
+  });
 });
 
 describe("detectDocumentType", () => {
@@ -72,6 +92,10 @@ describe("detectDocumentType", () => {
   it("retorna null para entrada vazia", () => {
     expect(detectDocumentType("")).toBeNull();
   });
+
+  it("detecta CNPJ alfanumérico mesmo com letras", () => {
+    expect(detectDocumentType(VALID_CNPJ_ALFANUMERICO)).toBe("cnpj");
+  });
 });
 
 describe("formatCpfCnpj", () => {
@@ -85,5 +109,34 @@ describe("formatCpfCnpj", () => {
 
   it("mantém apenas os dígitos quando o tamanho não é CPF nem CNPJ", () => {
     expect(formatCpfCnpj("123")).toBe("123");
+  });
+
+  it("formata CNPJ alfanumérico sem máscara para 00.AAA.000/0000-00", () => {
+    expect(formatCpfCnpj("12ABC34501DE35")).toBe("12.ABC.345/01DE-35");
+  });
+});
+
+describe("maskCpfCnpjInput", () => {
+  it("formata progressivamente como CPF enquanto só houver dígitos e até 11 deles", () => {
+    expect(maskCpfCnpjInput("123")).toBe("123");
+    expect(maskCpfCnpjInput("1234")).toBe("123.4");
+    expect(maskCpfCnpjInput("123456789")).toBe("123.456.789");
+    expect(maskCpfCnpjInput("12345678909")).toBe("123.456.789-09");
+  });
+
+  it("muda para o formato de CNPJ ao passar de 11 dígitos numéricos", () => {
+    expect(maskCpfCnpjInput("112223330001")).toBe("11.222.333/0001");
+  });
+
+  it("muda para o formato de CNPJ assim que houver uma letra, mesmo com poucos caracteres", () => {
+    expect(maskCpfCnpjInput("12A")).toBe("12.A");
+  });
+
+  it("converte letras minúsculas para maiúsculas ao aplicar a máscara de CNPJ", () => {
+    expect(maskCpfCnpjInput("12abc34501de35")).toBe("12.ABC.345/01DE-35");
+  });
+
+  it("trunca em 14 caracteres no formato de CNPJ", () => {
+    expect(maskCpfCnpjInput("12ABC34501DE3599")).toBe("12.ABC.345/01DE-35");
   });
 });

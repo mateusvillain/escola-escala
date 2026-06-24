@@ -3,8 +3,15 @@
 import { useRef, useState } from 'react'
 import { Button, Alert } from '@/components/ui'
 
+// Busca pela propriedade JS `name`, não pelo seletor de atributo
+// `lui-input[name="..."]`: o atributo só existe no HTML quando a página é
+// renderizada no servidor (hard load/refresh). Em navegação client-side do
+// Next.js (ex.: clicar em "Perfil" no menu do usuário), o React monta a
+// árvore inteiramente no cliente e seta propriedades reconhecidas de custom
+// elements só como propriedade JS, nunca como atributo.
 function readShadowValue(form: HTMLFormElement, name: string): string {
-  const el = form.querySelector(`lui-input[name="${name}"]`)
+  const inputs = Array.from(form.querySelectorAll('lui-input')) as (HTMLElement & { name?: string })[]
+  const el = inputs.find((node) => node.name === name)
   return el?.shadowRoot?.querySelector('input')?.value ?? ''
 }
 
