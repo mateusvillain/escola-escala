@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { OrganizationFiscalDataForm } from './OrganizationFiscalDataForm'
+import { OrganizationAddressForm } from './OrganizationAddressForm'
 
 interface Member {
   userId: string
@@ -10,6 +11,14 @@ interface Member {
   email: string
   role: 'owner' | 'member'
   joinedAt: string
+}
+
+interface PendingInvite {
+  id: string
+  email: string
+  createdAt: string
+  expiresAt: string
+  expired: boolean
 }
 
 interface OrganizationData {
@@ -29,15 +38,18 @@ interface OrganizationData {
     addressZipCode: string | null
   }
   members: Member[]
+  pendingInvites: PendingInvite[]
   seatsUsed: number
   subscription: { status: string; billingCycle: string; currentPeriodEnd: string } | null
   myRole: 'owner' | 'member'
 }
 
-interface PendingInvite {
+interface MyPendingInvite {
   token: string
   organizationName: string
 }
+
+type Tab = 'organizacao' | 'membros' | 'endereco'
 
 const ROLE_LABELS: Record<string, string> = { owner: 'Owner', member: 'Membro' }
 const ROLE_STYLES: Record<string, string> = {
@@ -52,10 +64,13 @@ function formatDate(value: string) {
 export function OrganizationPanel({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<OrganizationData | null>(null)
-  const [pendingInvite, setPendingInvite] = useState<PendingInvite | null>(null)
+  const [myPendingInvite, setMyPendingInvite] = useState<MyPendingInvite | null>(null)
   const [hasOrg, setHasOrg] = useState<boolean | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [tab, setTab] = useState<Tab>('organizacao')
+  const [confirmRemove, setConfirmRemove] = useState<{ userId: string; name: string } | null>(null)
+  const [promoteLoading, setPromoteLoading] = useState<string | null>(null)
 
   async function loadOrganization() {
     setLoading(true)
@@ -64,7 +79,7 @@ export function OrganizationPanel({ userId }: { userId: string }) {
       if (res.status === 404) {
         const body = await res.json()
         setHasOrg(false)
-        setPendingInvite(body.pendingInvite ?? null)
+        setMyPendingInvite(body.pendingInvite ?? null)
         setData(null)
       } else if (res.ok) {
         const body = await res.json()
@@ -131,6 +146,7 @@ export function OrganizationPanel({ userId }: { userId: string }) {
         return
       }
       form.reset()
+      await loadOrganization()
     } catch {
       setActionError('Erro de conexão. Tente novamente.')
     } finally {
@@ -138,7 +154,10 @@ export function OrganizationPanel({ userId }: { userId: string }) {
     }
   }
 
-  async function handleRemoveMember(memberUserId: string) {
+  async function handleConfirmRemove() {
+    if (!confirmRemove) return
+    const memberUserId = confirmRemove.userId
+    setConfirmRemove(null)
     setActionError(null)
     setActionLoading(true)
     try {
@@ -153,6 +172,28 @@ export function OrganizationPanel({ userId }: { userId: string }) {
       setActionError('Erro de conexão. Tente novamente.')
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  async function handlePromote(memberUserId: string) {
+    setActionError(null)
+    setPromoteLoading(memberUserId)
+    try {
+      const res = await fetch(`/api/organizations/me/members/${memberUserId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'owner' }),
+      })
+      if (!res.ok) {
+        const body = await res.json()
+        setActionError(body.error ?? 'Erro ao promover membro.')
+        return
+      }
+      await loadOrganization()
+    } catch {
+      setActionError('Erro de conexão. Tente novamente.')
+    } finally {
+      setPromoteLoading(null)
     }
   }
 
@@ -187,10 +228,10 @@ export function OrganizationPanel({ userId }: { userId: string }) {
           </div>
         )}
 
-        {pendingInvite && (
+        {myPendingInvite && (
           <div className="bg-blue-50 border border-blue-300 rounded-xl px-4 py-3 text-sm text-blue-800">
-            Você tem um convite pendente para <strong>{pendingInvite.organizationName}</strong>.{' '}
-            <Link href={`/convite/${pendingInvite.token}`} className="underline font-medium">
+            Você tem um convite pendente para <strong>{myPendingInvite.organizationName}</strong>.{' '}
+            <Link href={`/convite/${myPendingInvite.token}`} className="underline font-medium">
               Ver convite
             </Link>
           </div>
@@ -229,9 +270,15 @@ export function OrganizationPanel({ userId }: { userId: string }) {
     )
   }
 
-  const { organization, members, seatsUsed, myRole } = data
+  const { organization, members, pendingInvites, seatsUsed, myRole } = data
   const seatsAvailable = Math.max(organization.seatLimit - seatsUsed, 0)
   const isOwner = myRole === 'owner'
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'organizacao', label: 'Organização' },
+    { key: 'membros', label: 'Membros' },
+    ...(isOwner ? ([{ key: 'endereco', label: 'Endereço' }] as const) : []),
+  ]
 
   return (
     <div className="space-y-6">
@@ -241,82 +288,143 @@ export function OrganizationPanel({ userId }: { userId: string }) {
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Organização</p>
-            <p className="text-xl font-bold text-gray-900">{organization.name}</p>
-          </div>
-          <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
-            {seatsUsed} de {organization.seatLimit} seats usados ({seatsAvailable} disponíveis)
-          </span>
-        </div>
-
-        {isOwner && (
+      <div className="border-b border-gray-200 flex gap-6">
+        {tabs.map((t) => (
           <button
-            onClick={handleManagePortal}
-            disabled={actionLoading}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={[
+              'pb-3 text-sm font-medium border-b-2 transition-colors -mb-px',
+              tab === t.key
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700',
+            ].join(' ')}
           >
-            Gerenciar assinatura →
+            {t.label}
           </button>
-        )}
+        ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-900">Membros</h2>
-
-        <ul className="divide-y divide-gray-100">
-          {members.map((member) => (
-            <li key={member.userId} className="py-3 flex items-center justify-between gap-3">
+      {tab === 'organizacao' && (
+        <div className="space-y-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                <p className="text-xs text-gray-500">{member.email}</p>
-                <p className="text-xs text-gray-400">Entrou em {formatDate(member.joinedAt)}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Organização</p>
+                <p className="text-xl font-bold text-gray-900">{organization.name}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${ROLE_STYLES[member.role]}`}>
-                  {ROLE_LABELS[member.role]}
-                </span>
-                {isOwner && member.userId !== userId && (
-                  <button
-                    onClick={() => handleRemoveMember(member.userId)}
-                    disabled={actionLoading}
-                    className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+              <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
+                {seatsUsed} de {organization.seatLimit} seats usados ({seatsAvailable} disponíveis)
+              </span>
+            </div>
 
-        {isOwner && (
-          <form onSubmit={handleInvite} className="flex gap-2 pt-2 border-t border-gray-100">
-            <input
-              type="email"
-              name="email"
-              placeholder="email@empresa.com"
-              required
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              disabled={actionLoading}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              Convidar
-            </button>
-          </form>
-        )}
-      </div>
+            {isOwner && (
+              <button
+                onClick={handleManagePortal}
+                disabled={actionLoading}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+              >
+                Gerenciar assinatura →
+              </button>
+            )}
+          </div>
 
-      {isOwner && (
+          {isOwner && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6">
+              <OrganizationFiscalDataForm cnpj={organization.cnpj} legalName={organization.legalName} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'membros' && (
+        <div className="space-y-6">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-900">Membros</h2>
+
+            <ul className="divide-y divide-gray-100">
+              {members.map((member) => (
+                <li key={member.userId} className="py-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                    <p className="text-xs text-gray-500">{member.email}</p>
+                    <p className="text-xs text-gray-400">Entrou em {formatDate(member.joinedAt)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${ROLE_STYLES[member.role]}`}>
+                      {ROLE_LABELS[member.role]}
+                    </span>
+                    {isOwner && member.role === 'member' && (
+                      <button
+                        onClick={() => handlePromote(member.userId)}
+                        disabled={promoteLoading === member.userId}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                      >
+                        {promoteLoading === member.userId ? 'Promovendo...' : 'Tornar owner'}
+                      </button>
+                    )}
+                    {isOwner && member.userId !== userId && (
+                      <button
+                        onClick={() => setConfirmRemove({ userId: member.userId, name: member.name })}
+                        disabled={actionLoading}
+                        className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                      >
+                        Remover
+                      </button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {isOwner && (
+              <form onSubmit={handleInvite} className="flex gap-2 pt-2 border-t border-gray-100">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="email@empresa.com"
+                  required
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  Convidar
+                </button>
+              </form>
+            )}
+          </div>
+
+          {pendingInvites.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-3">
+              <h2 className="text-sm font-semibold text-gray-900">Convites pendentes</h2>
+              <ul className="divide-y divide-gray-100">
+                {pendingInvites.map((invite) => (
+                  <li key={invite.id} className="py-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{invite.email}</p>
+                      <p className="text-xs text-gray-400">Convidado em {formatDate(invite.createdAt)}</p>
+                    </div>
+                    <span
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                        invite.expired ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {invite.expired ? 'Expirado' : 'Aguardando cadastro'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'endereco' && isOwner && (
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          <OrganizationFiscalDataForm
-            cnpj={organization.cnpj}
-            legalName={organization.legalName}
+          <OrganizationAddressForm
             addressStreet={organization.addressStreet}
             addressNumber={organization.addressNumber}
             addressComplement={organization.addressComplement}
@@ -325,6 +433,36 @@ export function OrganizationPanel({ userId }: { userId: string }) {
             addressState={organization.addressState}
             addressZipCode={organization.addressZipCode}
           />
+        </div>
+      )}
+
+      {confirmRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setConfirmRemove(null)}
+          />
+          <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">Remover membro</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Tem certeza que deseja remover <span className="font-medium">&quot;{confirmRemove.name}&quot;</span>{' '}
+              da organização? O acesso aos cursos via assinatura da organização será revogado imediatamente.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmRemove(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmRemove}
+                className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors bg-red-600 hover:bg-red-700"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

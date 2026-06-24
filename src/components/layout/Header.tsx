@@ -11,7 +11,15 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard' },
 ]
 
-export function Header({ user, showReviewsLink = false }: { user: JwtPayload; showReviewsLink?: boolean }) {
+export function Header({
+  user,
+  showReviewsLink = false,
+  showOrganizationLink = false,
+}: {
+  user: JwtPayload
+  showReviewsLink?: boolean
+  showOrganizationLink?: boolean
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -54,7 +62,7 @@ export function Header({ user, showReviewsLink = false }: { user: JwtPayload; sh
           {/* Right side */}
           <div className="flex items-center gap-3">
             <div className="hidden md:block">
-              <UserMenu user={user} showReviewsLink={showReviewsLink} />
+              <UserMenu user={user} showReviewsLink={showReviewsLink} showOrganizationLink={showOrganizationLink} />
             </div>
 
             {/* Hamburger */}
@@ -117,6 +125,15 @@ export function Header({ user, showReviewsLink = false }: { user: JwtPayload; sh
               >
                 Perfil
               </Link>
+              {showOrganizationLink && (
+                <Link
+                  href="/organizacao"
+                  onClick={() => setMobileOpen(false)}
+                  className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Organização
+                </Link>
+              )}
               {user.role === 'instructor' && (
                 <Link
                   href="/instrutor"

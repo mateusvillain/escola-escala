@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { JwtPayload } from '@/lib/jwt'
 
-export function UserMenu({ user, showReviewsLink = false }: { user: JwtPayload; showReviewsLink?: boolean }) {
+export function UserMenu({
+  user,
+  showReviewsLink = false,
+  showOrganizationLink = false,
+}: {
+  user: JwtPayload
+  showReviewsLink?: boolean
+  showOrganizationLink?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -60,6 +68,15 @@ export function UserMenu({ user, showReviewsLink = false }: { user: JwtPayload; 
             >
               Perfil
             </Link>
+            {showOrganizationLink && (
+              <Link
+                href="/organizacao"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Organização
+              </Link>
+            )}
             {user.role === 'instructor' && (
               <Link
                 href="/instrutor"

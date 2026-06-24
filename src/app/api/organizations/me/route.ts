@@ -21,6 +21,10 @@ export async function GET(request: NextRequest) {
           members: {
             include: { user: { select: { name: true, email: true } } },
           },
+          invites: {
+            where: { status: "pending" },
+            orderBy: { createdAt: "desc" },
+          },
           subscription: true,
         },
       },
@@ -69,6 +73,13 @@ export async function GET(request: NextRequest) {
       email: m.user.email,
       role: m.role,
       joinedAt: m.joinedAt,
+    })),
+    pendingInvites: organization.invites.map((invite) => ({
+      id: invite.id,
+      email: invite.email,
+      createdAt: invite.createdAt,
+      expiresAt: invite.expiresAt,
+      expired: invite.expiresAt < new Date(),
     })),
     seatsUsed: organization.members.length,
     subscription: organization.subscription
