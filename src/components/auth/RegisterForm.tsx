@@ -274,9 +274,11 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
 
   return (
     <lui-card aria-label="Criar conta">
-      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
-        {wantsSubscription ? 'Etapa 1 de 3' : 'Etapa 1 de 2'}
-      </lui-body>
+      {!next && (
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 1 de 3' : 'Etapa 1 de 2'}
+        </lui-body>
+      )}
       <lui-heading level="2">Criar conta</lui-heading>
 
       <lui-stack space="md">
@@ -301,6 +303,7 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
               name="email"
               placeholder="email@exemplo.com"
               value={prefillEmail}
+              disabled={!!prefillEmail}
               required
               error={!!fieldErrors.email}
               error-text={fieldErrors.email}
