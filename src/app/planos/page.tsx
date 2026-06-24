@@ -95,6 +95,23 @@ export default async function PlanosPage({
           activeSubscription={activeSubscription}
           referralCode={validReferralCode}
         />
+
+        <div className="max-w-3xl mx-auto px-4 pb-16 -mt-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">Contratando para uma equipe?</p>
+              <p className="text-sm text-gray-600 mt-0.5">
+                Conheça o plano Empresas, com gestão centralizada de membros e cobrança por seat.
+              </p>
+            </div>
+            <Link
+              href="/planos/empresas"
+              className="text-sm font-medium border border-gray-300 px-4 py-2 rounded-lg hover:bg-white transition-colors whitespace-nowrap"
+            >
+              Para empresas →
+            </Link>
+          </div>
+        </div>
       </main>
     </div>
   )

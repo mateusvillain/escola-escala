@@ -15,16 +15,20 @@
       "step": 1,
       "description": "Criar o componente OrganizationFiscalDataForm",
       "details": "Criar `src/components/organization/OrganizationFiscalDataForm.tsx`, seguindo o mesmo padrão de `FiscalDataForm` (TASK-207) — lui-input + leitura via shadowRoot, autofill por CEP.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Renderizar condicionalmente no painel",
       "details": "Em `src/app/organizacao/page.tsx`, renderizar `<OrganizationFiscalDataForm />` apenas quando `myRole === 'owner'`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-223", "TASK-164", "TASK-207"],
+  "dependencies": [
+    "TASK-223",
+    "TASK-164",
+    "TASK-207"
+  ],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "Reaproveitar a maior parte da implementação de `FiscalDataForm` (TASK-207) é esperado — os campos são quase idênticos, só troca `cpfCnpj` por `cnpj`+`legalName` e o endpoint de destino."

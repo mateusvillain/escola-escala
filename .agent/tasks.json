@@ -1144,15 +1144,15 @@
     "id": "TASK-164",
     "title": "Painel /organizacao para o owner gerenciar membros e assinatura",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-164.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-164.json",
+    "passes": true
   },
   {
     "id": "TASK-165",
     "title": "CTA \"Para empresas\" e página de planos B2B",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-165.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-165.json",
+    "passes": true
   },
   {
     "id": "TASK-166",
@@ -1557,15 +1557,15 @@
     "id": "TASK-223",
     "title": "PATCH /api/organizations/me aceita campos fiscais",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-223.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-223.json",
+    "passes": true
   },
   {
     "id": "TASK-224",
     "title": "Formulário de dados fiscais no painel /organizacao",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-224.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-224.json",
+    "passes": true
   },
   {
     "id": "TASK-225",
