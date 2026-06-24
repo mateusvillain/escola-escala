@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { OrganizationFiscalDataForm } from './OrganizationFiscalDataForm'
 import { OrganizationAddressForm } from './OrganizationAddressForm'
@@ -73,6 +73,19 @@ export function OrganizationPanel({ userId }: { userId: string }) {
   const [promoteLoading, setPromoteLoading] = useState<string | null>(null)
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
   const [cancelInviteLoading, setCancelInviteLoading] = useState<string | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!openMenuId) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [openMenuId])
 
   function toggleMemberSelection(memberUserId: string) {
     setSelectedMembers((prev) => {
@@ -308,6 +321,14 @@ export function OrganizationPanel({ userId }: { userId: string }) {
   const { organization, members, pendingInvites, seatsUsed, myRole } = data
   const seatsAvailable = Math.max(organization.seatLimit - seatsUsed, 0)
   const isOwner = myRole === 'owner'
+  const selectableMembers = members.filter((m) => m.userId !== userId)
+  const allSelected = selectableMembers.length > 0 && selectableMembers.every((m) => selectedMembers.has(m.userId))
+
+  function toggleSelectAll() {
+    setSelectedMembers((prev) =>
+      prev.size === selectableMembers.length ? new Set() : new Set(selectableMembers.map((m) => m.userId))
+    )
+  }
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'organizacao', label: 'Organização' },
@@ -394,6 +415,38 @@ export function OrganizationPanel({ userId }: { userId: string }) {
               )}
             </div>
 
+            {isOwner && (
+              <form onSubmit={handleInvite} className="flex gap-2 pb-2 border-b border-gray-100">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="email@empresa.com"
+                  required
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  Convidar
+                </button>
+              </form>
+            )}
+
+            {isOwner && selectableMembers.length > 0 && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Selecionar todos os membros"
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <span className="text-xs text-gray-500">Selecionar todos</span>
+              </div>
+            )}
+
             <ul className="divide-y divide-gray-100">
               {members.map((member) => (
                 <li key={member.userId} className="py-3 flex items-center justify-between gap-3">
@@ -417,47 +470,50 @@ export function OrganizationPanel({ userId }: { userId: string }) {
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${ROLE_STYLES[member.role]}`}>
                       {ROLE_LABELS[member.role]}
                     </span>
-                    {isOwner && member.role === 'member' && (
-                      <button
-                        onClick={() => handlePromote(member.userId)}
-                        disabled={promoteLoading === member.userId}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:opacity-50"
-                      >
-                        {promoteLoading === member.userId ? 'Promovendo...' : 'Tornar owner'}
-                      </button>
-                    )}
                     {isOwner && member.userId !== userId && (
-                      <button
-                        onClick={() => setConfirmRemove([{ userId: member.userId, name: member.name }])}
-                        disabled={actionLoading}
-                        className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
-                      >
-                        Remover
-                      </button>
+                      <div className="relative" ref={openMenuId === member.userId ? menuRef : null}>
+                        <button
+                          onClick={() => setOpenMenuId((prev) => (prev === member.userId ? null : member.userId))}
+                          disabled={promoteLoading === member.userId}
+                          aria-label="Mais ações"
+                          aria-expanded={openMenuId === member.userId}
+                          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                          </svg>
+                        </button>
+
+                        {openMenuId === member.userId && (
+                          <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-10 py-1">
+                            {member.role === 'member' && (
+                              <button
+                                onClick={() => {
+                                  setOpenMenuId(null)
+                                  handlePromote(member.userId)
+                                }}
+                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                              >
+                                Tornar owner
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                setOpenMenuId(null)
+                                setConfirmRemove([{ userId: member.userId, name: member.name }])
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              Remover
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </li>
               ))}
             </ul>
-
-            {isOwner && (
-              <form onSubmit={handleInvite} className="flex gap-2 pt-2 border-t border-gray-100">
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="email@empresa.com"
-                  required
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  disabled={actionLoading}
-                  className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  Convidar
-                </button>
-              </form>
-            )}
           </div>
 
           {pendingInvites.length > 0 && (
