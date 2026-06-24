@@ -115,6 +115,48 @@ export function paymentFailedEmailHtml(name: string, portalUrl: string): string 
 </html>`;
 }
 
+export function organizationInviteEmailHtml(inviterName: string, organizationName: string, inviteUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convite para organização</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px;max-width:560px;">
+          <tr>
+            <td>
+              <h2 style="margin:0 0 16px;color:#111827;font-size:22px;">Você foi convidado para ${organizationName}</h2>
+              <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">
+                <strong>${inviterName}</strong> convidou você para fazer parte da organização
+                <strong>${organizationName}</strong> na plataforma. Aceite o convite para ter acesso a todos os
+                cursos disponíveis.
+              </p>
+              <a href="${inviteUrl}"
+                 style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;">
+                Aceitar convite
+              </a>
+              <p style="margin:24px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+                Este convite expira em 7 dias. Se você não esperava este convite, pode ignorar este e-mail.
+              </p>
+              <p style="margin:12px 0 0;color:#6b7280;font-size:12px;">
+                Ou copie e cole este link no navegador:<br/>
+                <a href="${inviteUrl}" style="color:#2563eb;word-break:break-all;">${inviteUrl}</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export function trialEndingEmailHtml(name: string, formattedDate: string, formattedPrice: string): string {
   return `<!DOCTYPE html>
 <html lang="pt-BR">

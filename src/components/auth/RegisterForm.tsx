@@ -16,6 +16,8 @@ interface Props {
   billingCycle?: PlanBillingCycle
   referralCode?: string
   checkoutError?: boolean
+  next?: string
+  prefillEmail?: string
 }
 
 // Busca pela propriedade JS `name`, não pelo seletor de atributo
@@ -49,7 +51,7 @@ function validate(values: Record<string, string>): Record<string, string> {
   return errors
 }
 
-export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError }: Props) {
+export function RegisterForm({ priceIds, plan, billingCycle, referralCode, checkoutError, next, prefillEmail }: Props) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
@@ -164,6 +166,10 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
       })
 
       if (res.status === 201) {
+        if (next) {
+          router.push(next)
+          return
+        }
         if (wantsSubscription) {
           setStep('fiscal')
         } else {
@@ -275,9 +281,11 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
 
   return (
     <lui-card aria-label="Criar conta">
-      <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
-        {wantsSubscription ? 'Etapa 1 de 3' : 'Etapa 1 de 2'}
-      </lui-body>
+      {!next && (
+        <lui-body size="sm" weight="medium" style={{ color: '#6b7280' }}>
+          {wantsSubscription ? 'Etapa 1 de 3' : 'Etapa 1 de 2'}
+        </lui-body>
+      )}
       <lui-heading level="2">Criar conta</lui-heading>
 
       <lui-stack space="md">
@@ -301,6 +309,8 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
               type="email"
               name="email"
               placeholder="email@exemplo.com"
+              value={prefillEmail}
+              disabled={!!prefillEmail}
               required
               error={!!fieldErrors.email}
               error-text={fieldErrors.email}
@@ -328,7 +338,10 @@ export function RegisterForm({ priceIds, plan, billingCycle, referralCode, check
         </form>
 
         <lui-flex justify="center">
-          <Link href="/login" style={{ fontSize: '0.875rem', textDecoration: 'underline' }}>
+          <Link
+            href={next ? `/login?redirect=${encodeURIComponent(next)}` : '/login'}
+            style={{ fontSize: '0.875rem', textDecoration: 'underline' }}
+          >
             Já tem conta? Faça login
           </Link>
         </lui-flex>

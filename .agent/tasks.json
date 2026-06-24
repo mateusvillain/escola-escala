@@ -1081,50 +1081,50 @@
     "id": "TASK-155",
     "title": "Estender controle de acesso para organizações em access.ts",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-155.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-155.json",
+    "passes": true
   },
   {
     "id": "TASK-156",
     "title": "POST /api/organizations cria organização",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-156.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-156.json",
+    "passes": true
   },
   {
     "id": "TASK-157",
     "title": "GET /api/organizations/me retorna dados da organização do usuário",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-157.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-157.json",
+    "passes": true
   },
   {
     "id": "TASK-158",
     "title": "POST /api/organizations/me/invites convida membro por e-mail",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-158.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-158.json",
+    "passes": true
   },
   {
     "id": "TASK-159",
     "title": "E-mail transacional de convite para organização",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-159.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-159.json",
+    "passes": true
   },
   {
     "id": "TASK-160",
     "title": "Fluxo de aceite de convite de organização",
     "category": "functional",
-    "specFilePath": ".agent/tasks/TASK-160.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-160.json",
+    "passes": true
   },
   {
     "id": "TASK-161",
     "title": "DELETE /api/organizations/me/members/[userId] remove membro",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-161.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-161.json",
+    "passes": true
   },
   {
     "id": "TASK-162",
@@ -1158,8 +1158,8 @@
     "id": "TASK-166",
     "title": "Autorização por papel dentro da organização (owner vs member)",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-166.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-166.json",
+    "passes": true
   },
   {
     "id": "TASK-167",

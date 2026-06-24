@@ -36,3 +36,17 @@ export async function getUniqueTrackSlug(title: string, prisma: PrismaClient): P
     counter++;
   }
 }
+
+export async function getUniqueOrganizationSlug(title: string, prisma: PrismaClient): Promise<string> {
+  const base = generateSlug(title);
+  const existing = await prisma.organization.findUnique({ where: { slug: base } });
+  if (!existing) return base;
+
+  let counter = 2;
+  while (true) {
+    const candidate = `${base}-${counter}`;
+    const conflict = await prisma.organization.findUnique({ where: { slug: candidate } });
+    if (!conflict) return candidate;
+    counter++;
+  }
+}

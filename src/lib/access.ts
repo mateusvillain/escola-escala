@@ -1,6 +1,20 @@
 import { prisma } from '@/lib/prisma'
 import { isModuleReleased } from '@/lib/drip-content'
 
+/**
+ * Membro de organização com OrganizationSubscription ativa/trialing equivale a
+ * assinante premium individual — uma única consulta com include aninhado, sem
+ * round-trip adicional (chamada em todo acesso a aula/curso).
+ */
+async function hasActiveOrganizationAccess(userId: string): Promise<boolean> {
+  const membership = await prisma.organizationMember.findUnique({
+    where: { userId },
+    include: { organization: { include: { subscription: true } } },
+  })
+  const status = membership?.organization.subscription?.status
+  return status === 'active' || status === 'trialing'
+}
+
 export type AccessReason =
   | 'not_authenticated'
   | 'no_subscription'
@@ -60,6 +74,10 @@ export async function checkLessonAccess(
   let coursePlanAllowed = enrollment !== null
 
   if (!coursePlanAllowed) {
+    coursePlanAllowed = await hasActiveOrganizationAccess(userId)
+  }
+
+  if (!coursePlanAllowed) {
     const subscription = await prisma.userSubscription.findFirst({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -106,6 +124,8 @@ export async function checkCourseAccess(
     select: { planAccess: true },
   })
   if (!course) return { allowed: false }
+
+  if (await hasActiveOrganizationAccess(userId)) return { allowed: true }
 
   const subscription = await prisma.userSubscription.findFirst({
     where: { userId },

@@ -14,21 +14,23 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/route.ts` com `POST` seguindo o padrão estabelecido (`getAuthUser`, parse com Zod, `z.object({ name: z.string().min(2).max(255) })`).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar que o usuário não pertence a outra organização",
       "details": "Consultar `prisma.organizationMember.findUnique({ where: { userId } })`; se existir, retornar 409 com mensagem clara.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar organização e membership em transação",
       "details": "Usar `prisma.$transaction` para criar `Organization` (com slug único via `getUniqueSlug` de `src/lib/utils/slug.ts`) e `OrganizationMember` (`role: 'owner'`) atomicamente.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-152"],
+  "dependencies": [
+    "TASK-152"
+  ],
   "estimatedComplexity": "low"
 }

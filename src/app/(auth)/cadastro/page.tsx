@@ -4,13 +4,21 @@ import type { PlanBillingCycle, PlanType } from '@/lib/plans'
 export default async function CadastroPage({
   searchParams,
 }: {
-  searchParams: Promise<{ plan?: string; billing?: string; ref?: string; checkoutError?: string }>
+  searchParams: Promise<{
+    plan?: string
+    billing?: string
+    ref?: string
+    checkoutError?: string
+    next?: string
+    email?: string
+  }>
 }) {
-  const { plan, billing, ref, checkoutError } = await searchParams
+  const { plan, billing, ref, checkoutError, next, email } = await searchParams
 
   const validPlan: PlanType | undefined = plan === 'basic' || plan === 'premium' ? plan : undefined
   const validBilling: PlanBillingCycle | undefined =
     billing === 'monthly' || billing === 'annual' ? billing : undefined
+  const validNext = next && next.startsWith('/') ? next : undefined
 
   const priceIds = {
     basicMonthly: process.env.STRIPE_PRICE_ID_BASIC_MONTHLY!,
@@ -26,6 +34,8 @@ export default async function CadastroPage({
       billingCycle={validBilling}
       referralCode={ref}
       checkoutError={checkoutError === '1'}
+      next={validNext}
+      prefillEmail={email}
     />
   )
 }

@@ -14,21 +14,24 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/me/members/[userId]/route.ts` com `DELETE`, usando `RouteContext<'/api/organizations/me/members/[userId]'>` para o `ctx.params`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Validar papel e impedir auto-remoção",
       "details": "Verificar que o usuário autenticado é `owner`; se o `userId` do path for o próprio usuário autenticado, retornar 400.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Remover o membership",
       "details": "Deletar o `OrganizationMember` com `where: { userId, organizationId }` (escopado à organização do owner autenticado, nunca a outra organização).",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-152", "TASK-157"],
+  "dependencies": [
+    "TASK-152",
+    "TASK-157"
+  ],
   "estimatedComplexity": "low"
 }

@@ -4,6 +4,7 @@ import {
   welcomeEmailHtml,
   trialEndingEmailHtml,
   paymentFailedEmailHtml,
+  organizationInviteEmailHtml,
 } from "./email-templates";
 
 let transporter: nodemailer.Transporter | null = null;
@@ -101,5 +102,18 @@ export async function sendPaymentFailedEmail(email: string, name: string, portal
     to: email,
     subject: "Não conseguimos processar seu pagamento",
     html: paymentFailedEmailHtml(name, portalUrl),
+  });
+}
+
+export async function sendOrganizationInviteEmail(
+  to: string,
+  inviterName: string,
+  organizationName: string,
+  inviteUrl: string
+) {
+  await sendEmail({
+    to,
+    subject: `Convite para ${organizationName}`,
+    html: organizationInviteEmailHtml(inviterName, organizationName, inviteUrl),
   });
 }

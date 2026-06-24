@@ -4,6 +4,8 @@ const mocks = vi.hoisted(() => ({
   lessonFindUnique: vi.fn(),
   enrollmentFindUnique: vi.fn(),
   subscriptionFindFirst: vi.fn(),
+  organizationMemberFindUnique: vi.fn(),
+  courseFindUnique: vi.fn(),
 }))
 
 vi.mock('@/lib/prisma', () => ({
@@ -11,10 +13,20 @@ vi.mock('@/lib/prisma', () => ({
     lesson: { findUnique: mocks.lessonFindUnique },
     courseEnrollment: { findUnique: mocks.enrollmentFindUnique },
     userSubscription: { findFirst: mocks.subscriptionFindFirst },
+    organizationMember: { findUnique: mocks.organizationMemberFindUnique },
+    course: { findUnique: mocks.courseFindUnique },
   },
 }))
 
-const { checkLessonAccess } = await import('../access')
+const { checkLessonAccess, checkCourseAccess } = await import('../access')
+
+function orgMembership(subscriptionStatus: string | null) {
+  return {
+    organization: {
+      subscription: subscriptionStatus ? { status: subscriptionStatus } : null,
+    },
+  }
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -49,6 +61,8 @@ beforeEach(() => {
   mocks.lessonFindUnique.mockReset()
   mocks.enrollmentFindUnique.mockReset()
   mocks.subscriptionFindFirst.mockReset()
+  mocks.organizationMemberFindUnique.mockReset()
+  mocks.courseFindUnique.mockReset()
 })
 
 describe('checkLessonAccess', () => {
@@ -189,5 +203,105 @@ describe('checkLessonAccess', () => {
       const result = await checkLessonAccess('user-1', 'lesson-1')
       expect(result).toEqual({ allowed: false, reason: 'module_not_released' })
     })
+  })
+
+  describe('acesso via organização', () => {
+    it('libera curso premium para membro de organização com assinatura active', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ planAccess: 'premium' }))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('active'))
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: true })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('libera curso premium para membro de organização com assinatura trialing', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ planAccess: 'premium' }))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('trialing'))
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: true })
+    })
+
+    it('bloqueia membro de organização com assinatura past_due, sem assinatura individual', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ planAccess: 'premium' }))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('past_due'))
+      mocks.subscriptionFindFirst.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
+    })
+
+    it('bloqueia membro de organização sem assinatura (canceled), sem assinatura individual', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ planAccess: 'premium' }))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('canceled'))
+      mocks.subscriptionFindFirst.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
+    })
+
+    it('usuário sem organização e sem assinatura individual continua bloqueado', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson())
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+      mocks.organizationMemberFindUnique.mockResolvedValue(null)
+      mocks.subscriptionFindFirst.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
+    })
+  })
+})
+
+describe('checkCourseAccess', () => {
+  it('bloqueia usuário não autenticado', async () => {
+    const result = await checkCourseAccess(null, 'course-1')
+    expect(result).toEqual({ allowed: false, reason: 'not_authenticated' })
+  })
+
+  it('admin sempre tem acesso', async () => {
+    const result = await checkCourseAccess('user-1', 'course-1', 'admin')
+    expect(result).toEqual({ allowed: true })
+    expect(mocks.courseFindUnique).not.toHaveBeenCalled()
+  })
+
+  it('libera curso premium para membro de organização com assinatura active', async () => {
+    mocks.courseFindUnique.mockResolvedValue({ planAccess: 'premium' })
+    mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('active'))
+
+    const result = await checkCourseAccess('user-1', 'course-1')
+    expect(result).toEqual({ allowed: true })
+    expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+  })
+
+  it('bloqueia membro de organização com assinatura canceled, sem assinatura individual', async () => {
+    mocks.courseFindUnique.mockResolvedValue({ planAccess: 'premium' })
+    mocks.organizationMemberFindUnique.mockResolvedValue(orgMembership('canceled'))
+    mocks.subscriptionFindFirst.mockResolvedValue(null)
+
+    const result = await checkCourseAccess('user-1', 'course-1')
+    expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
+  })
+
+  it('usuário sem organização e sem assinatura individual continua bloqueado', async () => {
+    mocks.courseFindUnique.mockResolvedValue({ planAccess: 'basic' })
+    mocks.organizationMemberFindUnique.mockResolvedValue(null)
+    mocks.subscriptionFindFirst.mockResolvedValue(null)
+
+    const result = await checkCourseAccess('user-1', 'course-1')
+    expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
+  })
+
+  it('lógica de assinatura individual permanece inalterada para quem não pertence a organização', async () => {
+    mocks.courseFindUnique.mockResolvedValue({ planAccess: 'premium' })
+    mocks.organizationMemberFindUnique.mockResolvedValue(null)
+    mocks.subscriptionFindFirst.mockResolvedValue(premiumSubscription())
+
+    const result = await checkCourseAccess('user-1', 'course-1')
+    expect(result).toEqual({ allowed: true })
   })
 })
