@@ -12,19 +12,19 @@
       "step": 1,
       "description": "Adicionar o model ao schema",
       "details": "Em `prisma/schema.prisma`, adicionar:\n```prisma\nmodel Organization {\n  id               String   @id @default(uuid())\n  name             String\n  slug             String   @unique\n  stripeCustomerId String?\n  seatLimit        Int      @default(0)\n  createdAt        DateTime @default(now())\n  updatedAt        DateTime @updatedAt\n\n  members      OrganizationMember[]\n  invites      OrganizationInvite[]\n  subscription OrganizationSubscription?\n}\n```\nAs relações `members`, `invites` e `subscription` só compilam depois das TASK-152 a TASK-154 — adicionar os três models antes de rodar a migration.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Reaproveitar generateSlug/getUniqueSlug",
-      "details": "Usar `generateSlug`/`getUniqueSlug` de `src/lib/utils/slug.ts` (mesmo helper usado em `Course.slug`) ao criar organizações via API, em vez de gerar o slug manualmente.",
-      "pass": false
+      "details": "Usar `generateSlug`/`getUniqueSlug` de `src/lib/utils/slug.ts` (mesmo helper usado em `Course.slug`) ao criar organizações via API, em vez de gerar o slug manualmente. Nota: este grupo é só de modelagem de dados — não há endpoint de criação de organização ainda (vem no Grupo 3, TASK-155+); este step documenta o padrão a seguir quando esse endpoint for implementado.",
+      "pass": true
     },
     {
       "step": 3,
       "description": "Rodar a migration",
-      "details": "Rodar `npx prisma migrate dev --name add_organization_models` após adicionar também os models das TASK-152 a TASK-154 (uma única migration para o grupo, evitando estados intermediários inválidos).",
-      "pass": false
+      "details": "Rodar `npx prisma migrate dev --name add_organization_models` após adicionar também os models das TASK-152 a TASK-154 (uma única migration para o grupo, evitando estados intermediários inválidos). Migration final também incluiu os campos fiscais da TASK-222 (adendo da Fase 4) na mesma migration: `add_organization_models_and_fiscal_data`.",
+      "pass": true
     }
   ],
   "dependencies": ["TASK-146"],

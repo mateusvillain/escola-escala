@@ -1053,29 +1053,29 @@
     "id": "TASK-151",
     "title": "Modelo Organization",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-151.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-151.json",
+    "passes": true
   },
   {
     "id": "TASK-152",
     "title": "Modelo OrganizationMember",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-152.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-152.json",
+    "passes": true
   },
   {
     "id": "TASK-153",
     "title": "Modelo OrganizationInvite",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-153.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-153.json",
+    "passes": true
   },
   {
     "id": "TASK-154",
     "title": "Modelo OrganizationSubscription",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-154.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-154.json",
+    "passes": true
   },
   {
     "id": "TASK-155",
@@ -1550,8 +1550,8 @@
     "id": "TASK-222",
     "title": "Campos fiscais (CNPJ, razão social, endereço) em Organization",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-222.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-222.json",
+    "passes": true
   },
   {
     "id": "TASK-223",
