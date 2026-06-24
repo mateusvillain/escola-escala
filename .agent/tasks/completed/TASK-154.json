@@ -12,13 +12,13 @@
       "step": 1,
       "description": "Adicionar o model ao schema",
       "details": "Em `prisma/schema.prisma`:\n```prisma\nmodel OrganizationSubscription {\n  id                   String             @id @default(uuid())\n  organizationId       String             @unique\n  organization         Organization       @relation(fields: [organizationId], references: [id])\n  stripeSubscriptionId String             @unique\n  stripeCustomerId     String\n  status               SubscriptionStatus\n  billingCycle         BillingCycle\n  seats                Int\n  currentPeriodStart   DateTime\n  currentPeriodEnd     DateTime\n  createdAt            DateTime           @default(now())\n  updatedAt            DateTime           @updatedAt\n}\n```",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Incluir na migration do grupo",
       "details": "Incluir este model na mesma migration da TASK-151 a TASK-153 (`npx prisma migrate dev --name add_organization_models`).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-151"],

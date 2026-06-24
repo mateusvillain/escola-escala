@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Adicionar enum e model ao schema",
       "details": "Em `prisma/schema.prisma`:\n```prisma\nenum OrgRole {\n  owner\n  member\n}\n\nmodel OrganizationMember {\n  id             String       @id @default(uuid())\n  organizationId String\n  organization   Organization @relation(fields: [organizationId], references: [id])\n  userId         String       @unique\n  user           User         @relation(fields: [userId], references: [id])\n  role           OrgRole\n  joinedAt       DateTime     @default(now())\n}\n```",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar relação inversa em User",
       "details": "Adicionar `organizationMember OrganizationMember?` ao model `User` em `prisma/schema.prisma`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Incluir na migration do grupo",
       "details": "Incluir este model na mesma migration da TASK-151 (`npx prisma migrate dev --name add_organization_models`), já que os models são interdependentes.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-151"],
