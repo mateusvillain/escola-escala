@@ -13,22 +13,24 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/me/certificates/export/route.ts`, restrito a `owner`, seguindo o padrão de geração de CSV já usado em `src/app/api/admin/users/export/route.ts`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar certificados dos membros atuais",
       "details": "Buscar `OrganizationMember` da organização, depois `Certificate` de cada `userId` correspondente, com `include` do curso.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Montar o CSV",
       "details": "Gerar o CSV com as colunas do acceptanceCriteria, mesmo formato/encoding já usado no export de usuários existente.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-157"],
   "estimatedComplexity": "medium",
-  "technicalNotes": []
+  "technicalNotes": [
+    "O link de download não pode reaproveitar `GET /api/certificates/[courseId]/download` (escopado ao próprio usuário autenticado) — foi criada uma rota nova `GET /api/organizations/me/certificates/[certificateId]/download`, restrita a owner e validando que o certificado pertence a um membro atual da organização, reaproveitando a lógica de conversão de `fileUrl` extraída para `buildCertificateDownloadResponse` em `src/lib/certificate.ts`."
+  ]
 }

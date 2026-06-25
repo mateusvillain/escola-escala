@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { buildCertificateDownloadResponse } from '@/lib/certificate'
 
 export async function GET(
   request: NextRequest,
@@ -21,19 +22,5 @@ export async function GET(
     return NextResponse.json({ error: 'Certificado não encontrado' }, { status: 404 })
   }
 
-  const { fileUrl } = certificate
-
-  if (!fileUrl.startsWith('data:')) {
-    return NextResponse.redirect(fileUrl)
-  }
-
-  const base64 = fileUrl.slice(fileUrl.indexOf(',') + 1)
-  const buffer = Buffer.from(base64, 'base64')
-
-  return new NextResponse(buffer, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="certificado-${certificate.course.slug}.pdf"`,
-    },
-  })
+  return buildCertificateDownloadResponse(certificate.fileUrl, certificate.course.slug)
 }

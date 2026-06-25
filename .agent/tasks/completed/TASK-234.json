@@ -14,24 +14,25 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/me/compliance-log/route.ts`, restrito a `owner`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Buscar conclusões por membro",
       "details": "Buscar `CourseEnrollment`/progresso concluído (100% das aulas, mesmo critério já usado para gerar certificado automaticamente) de cada `OrganizationMember`, com o `Certificate` correspondente se existir.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Montar o CSV",
       "details": "Gerar o CSV com as colunas do acceptanceCriteria, mesmo formato/encoding já usado nos exports existentes.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-157"],
   "estimatedComplexity": "medium",
   "technicalNotes": [
-    "Não confundir com `AdminAuditLog` (`src/lib/audit.ts`) — este é um log de atividade do ALUNO (conclusão de curso), não de ação administrativa interna. São dados e propósitos diferentes, não reaproveitar a mesma tabela."
+    "Não confundir com `AdminAuditLog` (`src/lib/audit.ts`) — este é um log de atividade do ALUNO (conclusão de curso), não de ação administrativa interna. São dados e propósitos diferentes, não reaproveitar a mesma tabela.",
+    "TASK-226/227 (cursos próprios da organização) ainda não foram implementadas (Grupo 8, pendente) — `Course` não tem `organizationId` no schema atual. O escopo de dados desta rodada é, portanto, só o catálogo geral via `CourseEnrollment`, igual à TASK-232; quando o Grupo 8 existir, este endpoint deve passar a incluir também conclusões de cursos próprios da organização."
   ]
 }
