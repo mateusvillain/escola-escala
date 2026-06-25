@@ -18,10 +18,11 @@ Para um RH/L&D corporativo decidir comprar (e renovar) de uma plataforma de curs
 
 ### 2. Visibilidade e gestão para o gestor/RH
 
-- Dashboard de engajamento por colaborador: progresso, tempo de estudo, cursos concluídos e atrasados — visão que hoje só existe para o próprio aluno, nunca para um terceiro.
-- Visão agregada por equipe/departamento (sub-grupos dentro da organização), não só a lista plana de membros que as tasks atuais (TASK-156/157) preveem.
-- Alertas automáticos para o owner/gestor: "colaborador X ainda não iniciou o treinamento obrigatório Y".
-- Atribuição de trilhas obrigatórias por cargo ou departamento, com prazo de conclusão.
+- ✅ **Dashboard de engajamento por colaborador** (TASK-229/230, Grupo 8): progresso, tempo de estudo, cursos concluídos — visão que antes só existia para o próprio aluno.
+- ✅ **Visão de progresso por curso com prazo real** (TASK-235 a 238, Grupo 10): lista de cursos da organização com stats de concluídos/em andamento/atrasados, drill-down por curso mostrando o status individual de cada colaborador. `dueDate` por curso (definido pelo admin) substitui o proxy de 14 dias do Grupo 8. Pendente de implementação.
+- Visão agregada por equipe/departamento (sub-grupos dentro da organização) — sem task ainda.
+- Alertas automáticos para o owner/gestor: "colaborador X ainda não iniciou o treinamento obrigatório Y" — sem task ainda.
+- Atribuição de trilhas obrigatórias por cargo ou departamento, com prazo de conclusão — sem task ainda.
 
 ### 3. Compliance e auditoria
 

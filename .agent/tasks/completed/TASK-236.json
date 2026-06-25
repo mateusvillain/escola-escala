@@ -1,0 +1,35 @@
+{
+  "id": "TASK-236",
+  "title": "GET /api/organizations/me/courses — lista de cursos da org com stats de progresso",
+  "category": "api-endpoint",
+  "description": "Endpoint para o owner listar todos os cursos acessíveis pela organização (próprios com `organizationId` preenchido + catálogo público com `organizationId null`), com stats agregadas de progresso dos membros por curso. É o dado que alimenta a aba 'Cursos' do painel da organização (TASK-238). 'Atrasado' aqui é por curso: dueDate passou e o membro não concluiu — sem dueDate, o campo overdueCount não existe na resposta.",
+  "acceptanceCriteria": [
+    "Restrito a `owner` via `requireOrgOwner` — `member` recebe 403",
+    "Retorna array de cursos com: `courseId`, `title`, `slug`, `organizationId` (null ou preenchido), `dueDate` (null ou data), `enrolledCount` (membros ativos da org matriculados no curso), `completedCount`, `inProgressCount`, `overdueCount` (só quando `dueDate` está preenchido e já passou; caso contrário, omitido ou 0)",
+    "Considera APENAS membros ATIVOS da organização — membro removido não entra no cômputo",
+    "Cursos sem nenhum membro matriculado aparecem na lista com todos os contadores zerados (não são omitidos)",
+    "'Atrasado' = `dueDate` existe E `dueDate < now` E membro tem `CourseEnrollment` sem `completedAt`",
+    "'Em andamento' = matriculado, não concluído, não atrasado (ou seja: sem dueDate ou dueDate ainda não passou)",
+    "Cursos com status != 'published' ainda são incluídos se tiverem `organizationId` da org — owner pode ver conteúdo rascunho próprio"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler GET /api/organizations/me/courses",
+      "details": "Novo arquivo `src/app/api/organizations/me/courses/route.ts`. Busca todos os cursos acessíveis pela org (OR `organizationId: null, status: published` OR `organizationId: organization.id`). Para cada curso, agrega CourseEnrollment dos membros ativos.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Lógica de classificação por status",
+      "details": "Para cada par (membro ativo, curso): completedAt → 'completed'; dueDate existe e passou e sem completedAt → 'overdue'; demais casos com enrollment → 'in_progress'. Sem enrollment → não matriculado (não entra nos contadores).",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-235", "TASK-227"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Reutilizar `requireOrgOwner` de `src/lib/organization.ts` — mesmo padrão do endpoint de engajamento (TASK-229).",
+    "Não confundir com GET /api/admin/courses — este é restrito ao owner da organização e traz só os cursos dela, sem o escopo admin completo."
+  ]
+}

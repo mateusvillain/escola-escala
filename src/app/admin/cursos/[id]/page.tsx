@@ -60,6 +60,7 @@ export default async function EditCursoPage({ params }: EditCursoPageProps) {
             priceOneTime: course.priceOneTime?.toString() ?? '',
             stripePriceIdOneTime: course.stripePriceIdOneTime ?? '',
             organizationId: course.organizationId ?? '',
+            dueDate: course.dueDate ? course.dueDate.toISOString().slice(0, 10) : '',
           }}
         />
       </div>

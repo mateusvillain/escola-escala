@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { OrganizationFiscalDataForm } from './OrganizationFiscalDataForm'
 import { OrganizationAddressForm } from './OrganizationAddressForm'
+import { EngagementDashboard } from './EngagementDashboard'
+import { CourseProgressList } from './CourseProgressList'
 
 interface Member {
   userId: string
@@ -49,7 +51,7 @@ interface MyPendingInvite {
   organizationName: string
 }
 
-type Tab = 'organizacao' | 'membros' | 'endereco'
+type Tab = 'organizacao' | 'membros' | 'endereco' | 'cursos' | 'engajamento'
 
 const ROLE_LABELS: Record<string, string> = { owner: 'Owner', member: 'Membro' }
 const ROLE_STYLES: Record<string, string> = {
@@ -332,8 +334,10 @@ export function OrganizationPanel({ userId }: { userId: string }) {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'organizacao', label: 'Organização' },
-    { key: 'membros', label: 'Membros' },
     ...(isOwner ? ([{ key: 'endereco', label: 'Endereço' }] as const) : []),
+    { key: 'membros', label: 'Membros' },
+    ...(isOwner ? ([{ key: 'cursos', label: 'Cursos' }] as const) : []),
+    ...(isOwner ? ([{ key: 'engajamento', label: 'Engajamento' }] as const) : []),
   ]
 
   return (
@@ -550,6 +554,14 @@ export function OrganizationPanel({ userId }: { userId: string }) {
             </div>
           )}
         </div>
+      )}
+
+      {tab === 'cursos' && isOwner && (
+        <CourseProgressList />
+      )}
+
+      {tab === 'engajamento' && isOwner && (
+        <EngagementDashboard />
       )}
 
       {tab === 'endereco' && isOwner && (

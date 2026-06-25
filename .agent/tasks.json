@@ -1636,5 +1636,33 @@
     "category": "api-endpoint",
     "specFilePath": ".agent/tasks/completed/TASK-234.json",
     "passes": true
+  },
+  {
+    "id": "TASK-235",
+    "title": "Campo dueDate em Course (migration + CourseForm admin)",
+    "category": "schema",
+    "specFilePath": ".agent/tasks/completed/TASK-235.json",
+    "passes": true
+  },
+  {
+    "id": "TASK-236",
+    "title": "GET /api/organizations/me/courses — lista de cursos da org com stats de progresso",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/completed/TASK-236.json",
+    "passes": true
+  },
+  {
+    "id": "TASK-237",
+    "title": "GET /api/organizations/me/courses/[courseId]/members — status individual por curso",
+    "category": "api-endpoint",
+    "specFilePath": ".agent/tasks/completed/TASK-237.json",
+    "passes": true
+  },
+  {
+    "id": "TASK-238",
+    "title": "Aba 'Cursos' em /organizacao — lista de cursos com drill-down por colaborador",
+    "category": "ui",
+    "specFilePath": ".agent/tasks/completed/TASK-238.json",
+    "passes": true
   }
 ]

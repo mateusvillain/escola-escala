@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   // Cursos acessíveis pela organização: catálogo geral (organizationId null) + conteúdo
   // próprio dessa organização (TASK-226/227) — nunca cursos de OUTRA organização.
   const scopedCourses = await prisma.course.findMany({
-    where: { OR: [{ organizationId: null }, { organizationId: organization.id }] },
+    where: { status: 'published', OR: [{ organizationId: null }, { organizationId: organization.id }] },
     select: { id: true },
   });
   const scopedCourseIds = scopedCourses.map((c) => c.id);

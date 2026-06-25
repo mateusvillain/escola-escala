@@ -1,0 +1,35 @@
+{
+  "id": "TASK-237",
+  "title": "GET /api/organizations/me/courses/[courseId]/members — status individual por curso",
+  "category": "api-endpoint",
+  "description": "Endpoint de drill-down: dado um curso, retorna todos os membros ativos da organização com seu status individual naquele curso. É o dado que alimenta a visão interna de cada curso na aba 'Cursos' (TASK-238). Permite ao owner ver exatamente quem concluiu, quem está em andamento, quem está atrasado e quem sequer começou.",
+  "acceptanceCriteria": [
+    "Restrito a `owner` via `requireOrgOwner` — `member` recebe 403",
+    "Retorna 404 se `courseId` não pertence à organização (nem próprio nem público acessível)",
+    "Retorna array de membros com: `userId`, `name`, `email`, `status` ('completed' | 'in_progress' | 'overdue' | 'not_started'), `completedAt` (DateTime ou null), `daysOverdue` (número inteiro positivo, só presente quando status = 'overdue'), `lastActivity` (DateTime ou null — último `LessonProgress.lastWatchedAt` do membro nesse curso)",
+    "Status 'not_started' = membro ativo sem `CourseEnrollment` para o curso, OU com enrollment mas sem nenhum `LessonProgress`",
+    "Status 'overdue' = `dueDate` existe E `dueDate < now` E sem `completedAt`",
+    "Status 'in_progress' = com enrollment, sem completedAt, sem overdue",
+    "Considera APENAS membros ATIVOS da organização"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Criar route handler GET /api/organizations/me/courses/[courseId]/members",
+      "details": "Novo arquivo `src/app/api/organizations/me/courses/[courseId]/members/route.ts`. Verificar que o curso é acessível pela org antes de retornar dados.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Calcular status e daysOverdue por membro",
+      "details": "`daysOverdue` = Math.floor((now - dueDate.getTime()) / (24 * 60 * 60 * 1000)). Só calcular quando status = 'overdue'. `lastActivity` = max(lastWatchedAt) entre todos os LessonProgress do membro para lições do curso.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-236"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "params é uma Promise no Next.js 16 — usar `const { courseId } = await ctx.params` (AGENTS.md).",
+    "Cursos públicos (organizationId null) são válidos aqui também — a org pode querer ver o status dos membros num curso do catálogo geral."
+  ]
+}

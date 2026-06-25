@@ -26,6 +26,7 @@ type FormData = {
   priceOneTime: string
   stripePriceIdOneTime: string
   organizationId: string
+  dueDate: string
 }
 
 interface CourseFormProps {
@@ -69,12 +70,14 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
       priceOneTime: '',
       stripePriceIdOneTime: '',
       organizationId: '',
+      dueDate: '',
       ...defaultValues,
     },
   })
 
   const thumbnailUrl = watch('thumbnailUrl')
   const allowOneTimePurchase = watch('allowOneTimePurchase')
+  const organizationIdValue = watch('organizationId')
 
   useEffect(() => {
     fetch('/api/admin/users?role=instructor&limit=100')
@@ -109,6 +112,7 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
     payload.priceOneTime = data.priceOneTime.trim() ? Number(data.priceOneTime) : null
     payload.stripePriceIdOneTime = data.stripePriceIdOneTime.trim() || null
     payload.organizationId = data.organizationId || null
+    payload.dueDate = data.dueDate ? new Date(data.dueDate).toISOString() : null
 
     try {
       let res: Response
@@ -297,6 +301,24 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
             catálogo público.
           </p>
         </div>
+
+        {/* Due date — only for org courses */}
+        {organizationIdValue && (
+          <div>
+            <label className={LABEL_CLASS} htmlFor="dueDate">
+              Prazo de conclusão
+            </label>
+            <input
+              id="dueDate"
+              type="date"
+              className={INPUT_CLASS}
+              {...register('dueDate')}
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Prazo para os membros da organização concluírem este curso. Deixe em branco para sem prazo.
+            </p>
+          </div>
+        )}
 
         {/* One-time purchase */}
         <div>

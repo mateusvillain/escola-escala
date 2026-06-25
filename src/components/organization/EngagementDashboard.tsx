@@ -2,18 +2,12 @@
 
 import { useEffect, useState } from 'react'
 
-interface OverdueCourse {
-  courseId: string
-  title: string
-}
-
 interface MemberEngagement {
   userId: string
   name: string
   email: string
   completedCount: number
   inProgressCount: number
-  overdueCourses: OverdueCourse[]
   studySeconds: number
 }
 
@@ -42,7 +36,7 @@ export function EngagementDashboard() {
   }, [])
 
   const hasAnyProgress =
-    members?.some(m => m.completedCount > 0 || m.inProgressCount > 0 || m.overdueCourses.length > 0) ?? false
+    members?.some(m => m.completedCount > 0 || m.inProgressCount > 0) ?? false
 
   return (
     <lui-card aria-label="Engajamento da equipe">
@@ -79,9 +73,6 @@ export function EngagementDashboard() {
                     Em andamento
                   </th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Atrasados
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Tempo de estudo
                   </th>
                 </tr>
@@ -95,18 +86,6 @@ export function EngagementDashboard() {
                     </td>
                     <td className="px-3 py-3 text-gray-700">{member.completedCount}</td>
                     <td className="px-3 py-3 text-gray-700">{member.inProgressCount}</td>
-                    <td className="px-3 py-3">
-                      {member.overdueCourses.length > 0 ? (
-                        <lui-tag
-                          label={`${member.overdueCourses.length} atrasado${member.overdueCourses.length !== 1 ? 's' : ''}`}
-                          variant="caution"
-                          tag-style="subtle"
-                          size="sm"
-                        />
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </td>
                     <td className="px-3 py-3 text-gray-700">{formatStudyTime(member.studySeconds)}</td>
                   </tr>
                 ))}

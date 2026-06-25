@@ -15,6 +15,7 @@ const patchSchema = z.object({
   priceOneTime: z.number().positive().nullable().optional(),
   stripePriceIdOneTime: z.string().min(1).nullable().optional(),
   organizationId: z.string().uuid().nullable().optional(),
+  dueDate: z.string().datetime().nullable().optional(),
 });
 
 export async function GET(
