@@ -14,22 +14,26 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `PATCH` em `src/app/api/organizations/me/route.ts` (criar o arquivo se ainda não existir um handler de PATCH ali — confirmar se `GET /api/organizations/me`, TASK-157, já está no mesmo arquivo).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Aplicar requireOrgOwner e o schema Zod",
       "details": "Usar `requireOrgOwner` (TASK-166) para restringir a `owner`. Validar `cnpj` com `validateCnpj` via `.refine()`, mesmo padrão da TASK-206.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Atualizar e retornar",
       "details": "`prisma.organization.update` com os campos condicionais (mesmo padrão `...(campo !== undefined && { campo })` já usado em outros PATCHs do projeto).",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-222", "TASK-166", "TASK-204"],
+  "dependencies": [
+    "TASK-222",
+    "TASK-166",
+    "TASK-204"
+  ],
   "estimatedComplexity": "low",
   "technicalNotes": [
     "Mesma decisão de produto do item 1: estes campos não bloqueiam nada do uso da organização (membros, acesso ao catálogo) — só a emissão de nota fiscal da cobrança B2B (TASK-225) fica pendente sem eles."

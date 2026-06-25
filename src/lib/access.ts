@@ -6,7 +6,7 @@ import { isModuleReleased } from '@/lib/drip-content'
  * assinante premium individual — uma única consulta com include aninhado, sem
  * round-trip adicional (chamada em todo acesso a aula/curso).
  */
-async function hasActiveOrganizationAccess(userId: string): Promise<boolean> {
+export async function hasActiveOrganizationAccess(userId: string): Promise<boolean> {
   const membership = await prisma.organizationMember.findUnique({
     where: { userId },
     include: { organization: { include: { subscription: true } } },

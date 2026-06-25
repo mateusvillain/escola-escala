@@ -14,21 +14,24 @@
       "step": 1,
       "description": "Criar a página de planos B2B",
       "details": "Criar `src/app/planos/empresas/page.tsx`, com input numérico de seats e seleção de ciclo, reaproveitando componentes do design system já usados em `/planos`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Adicionar CTA em /planos",
       "details": "Em `src/app/planos/page.tsx`, adicionar um link/card \"Para empresas\" apontando para `/planos/empresas`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Encadear criação de organização + checkout",
       "details": "Ao confirmar, se o usuário não tiver organização, chamar `POST /api/organizations` (TASK-156) com um nome padrão editável e, em seguida, `POST /api/organizations/me/checkout` (TASK-162) com os seats/ciclo escolhidos, redirecionando para a `checkoutUrl` retornada.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-156", "TASK-162"],
+  "dependencies": [
+    "TASK-156",
+    "TASK-162"
+  ],
   "estimatedComplexity": "medium"
 }

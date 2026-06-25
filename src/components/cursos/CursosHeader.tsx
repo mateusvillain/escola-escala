@@ -6,7 +6,15 @@ import { useRouter } from 'next/navigation'
 import type { JwtPayload } from '@/lib/jwt'
 import { UserMenu } from '@/components/layout/UserMenu'
 
-export function CursosHeader({ user, showReviewsLink = false }: { user: JwtPayload | null; showReviewsLink?: boolean }) {
+export function CursosHeader({
+  user,
+  showReviewsLink = false,
+  showOrganizationLink = false,
+}: {
+  user: JwtPayload | null
+  showReviewsLink?: boolean
+  showOrganizationLink?: boolean
+}) {
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -51,7 +59,7 @@ export function CursosHeader({ user, showReviewsLink = false }: { user: JwtPaylo
           <div className="flex items-center gap-3">
             <div className="hidden md:block">
               {user ? (
-                <UserMenu user={user} showReviewsLink={showReviewsLink} />
+                <UserMenu user={user} showReviewsLink={showReviewsLink} showOrganizationLink={showOrganizationLink} />
               ) : (
                 <Link
                   href="/login"
@@ -132,6 +140,15 @@ export function CursosHeader({ user, showReviewsLink = false }: { user: JwtPaylo
                   >
                     Perfil
                   </Link>
+                  {showOrganizationLink && (
+                    <Link
+                      href="/organizacao"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Organização
+                    </Link>
+                  )}
                   {user.role === 'instructor' && (
                     <Link
                       href="/instrutor"

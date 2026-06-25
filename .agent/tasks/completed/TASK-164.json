@@ -16,27 +16,32 @@
       "step": 1,
       "description": "Criar a página e o layout",
       "details": "Criar `src/app/organizacao/page.tsx`, buscando dados via `GET /api/organizations/me` (TASK-157). Adicionar `/organizacao` ao matcher de `src/proxy.ts` para exigir autenticação.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Construir a lista de membros e o formulário de convite",
       "details": "Renderizar a lista de `members` com badge de papel (reaproveitar `<lui-tag>` do design system). Para `myRole === 'owner'`, exibir um formulário de e-mail que chama `POST /api/organizations/me/invites` (TASK-158) e um botão de remoção por membro que chama `DELETE /api/organizations/me/members/[userId]` (TASK-161).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Criar endpoint e botão de portal de organização",
       "details": "Criar `POST /api/organizations/me/portal` (análogo a `/api/subscriptions/portal`, mas usando `organization.stripeCustomerId`), restrito a `owner`. Adicionar botão na página que chama este endpoint e redireciona para a URL retornada.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Tratar o estado sem organização",
       "details": "Quando `GET /api/organizations/me` retornar 404, exibir CTA \"Criar organização\" (chama `POST /api/organizations`, TASK-156) e, se houver convite pendente identificável pelo e-mail do usuário, um aviso com link para `/convite/[token]`.",
-      "pass": false
+      "pass": true
     }
   ],
-  "dependencies": ["TASK-157", "TASK-158", "TASK-161", "TASK-166"],
+  "dependencies": [
+    "TASK-157",
+    "TASK-158",
+    "TASK-161",
+    "TASK-166"
+  ],
   "estimatedComplexity": "high"
 }

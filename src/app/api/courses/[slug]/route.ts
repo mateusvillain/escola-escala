@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { checkCourseAccess } from '@/lib/access'
 
 export async function GET(
   request: NextRequest,
@@ -59,19 +60,10 @@ export async function GET(
   const user = getAuthUser(request)
 
   let hasAccess = false
-  let userPlanType: 'basic' | 'premium' | null = null
 
   if (user) {
-    const subscription = await prisma.userSubscription.findFirst({
-      where: { userId: user.userId, status: 'active' },
-      include: { plan: true },
-    })
-    if (subscription) {
-      userPlanType = subscription.plan.type
-      hasAccess =
-        userPlanType === 'premium' ||
-        (userPlanType === 'basic' && course.planAccess === 'basic')
-    }
+    const access = await checkCourseAccess(user.userId, course.id, user.role)
+    hasAccess = access.allowed
   }
 
   // Fetch progress in one query if user has access

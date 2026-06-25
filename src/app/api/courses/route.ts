@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { hasActiveOrganizationAccess } from '@/lib/access'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -45,9 +46,11 @@ export async function GET(request: NextRequest) {
   const user = getAuthUser(request)
 
   let userPlanType: 'basic' | 'premium' | null = null
-  if (user) {
+  let orgAccess = false
+  if (user && user.role !== 'admin') {
+    orgAccess = await hasActiveOrganizationAccess(user.userId)
     const subscription = await prisma.userSubscription.findFirst({
-      where: { userId: user.userId, status: 'active' },
+      where: { userId: user.userId, status: { in: ['active', 'trialing'] } },
       include: { plan: true },
     })
     if (subscription) {
@@ -60,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     let hasAccess: boolean | undefined
     if (user !== null) {
-      if (userPlanType === 'premium') {
+      if (user.role === 'admin' || orgAccess || userPlanType === 'premium') {
         hasAccess = true
       } else if (userPlanType === 'basic') {
         hasAccess = course.planAccess === 'basic'
