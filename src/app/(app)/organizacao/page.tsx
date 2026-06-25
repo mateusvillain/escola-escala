@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { verifyToken } from '@/lib/jwt'
 import { getOrganizationRole } from '@/lib/organization'
 import { OrganizationPanel } from '@/components/organization/OrganizationPanel'
+import { EngagementDashboard } from '@/components/organization/EngagementDashboard'
 
 export const metadata = { title: 'Minha Organização' }
 
@@ -22,9 +23,14 @@ export default async function OrganizacaoPage() {
   if (role === 'member') redirect('/dashboard')
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Minha Organização</h1>
       <OrganizationPanel userId={userId} />
+      {role === 'owner' && (
+        <div className="mt-6">
+          <EngagementDashboard />
+        </div>
+      )}
     </div>
   )
 }

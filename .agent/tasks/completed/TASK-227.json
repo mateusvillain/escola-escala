@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Estender checkLessonAccess",
       "details": "Em `src/lib/access.ts`, adicionar uma checagem antes da lógica de plano/assinatura: se `lesson.module.course.organizationId` não for nulo, pular a checagem de `UserSubscription`/`CourseEnrollment` e checar membership ativo na organização (mesma query já usada pela extensão da TASK-155), retornando `plan_upgrade_required` (ou um novo `AccessReason` mais específico, ex. `organization_membership_required`) se não for membro.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Estender checkCourseAccess de forma simétrica",
       "details": "Aplicar a mesma lógica em `checkCourseAccess`, mantendo as duas funções consistentes (mesmo princípio já documentado em AGENTS.md).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Testar isolamento entre organizações",
       "details": "Com duas organizações de teste e um curso de organização em cada, confirmar que um membro da Organização A não acessa o curso da Organização B, mesmo autenticado e com assinatura B2B ativa na própria A.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-226", "TASK-155"],

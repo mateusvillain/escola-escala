@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const courses = await prisma.course.findMany({
     where: {
       status: 'published',
+      organizationId: null,
       ...(planAccess ? { planAccess: planAccess as 'basic' | 'premium' } : {}),
       ...(search ? { title: { contains: search, mode: 'insensitive' } } : {}),
     },

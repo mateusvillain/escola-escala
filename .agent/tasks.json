@@ -1578,36 +1578,36 @@
     "id": "TASK-226",
     "title": "Campo organizationId opcional em Course (conteúdo próprio da organização)",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-226.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-226.json",
+    "passes": true
   },
   {
     "id": "TASK-227",
     "title": "Controle de acesso a curso de organização",
     "category": "security",
-    "specFilePath": ".agent/tasks/TASK-227.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-227.json",
+    "passes": true
   },
   {
     "id": "TASK-228",
     "title": "Seletor de organização no CourseForm admin",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-228.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-228.json",
+    "passes": true
   },
   {
     "id": "TASK-229",
     "title": "GET /api/organizations/me/engagement agregação de progresso por membro",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-229.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-229.json",
+    "passes": true
   },
   {
     "id": "TASK-230",
     "title": "UI do dashboard de engajamento no painel /organizacao",
     "category": "ui-ux",
-    "specFilePath": ".agent/tasks/TASK-230.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-230.json",
+    "passes": true
   },
   {
     "id": "TASK-231",

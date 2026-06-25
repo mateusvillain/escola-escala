@@ -49,7 +49,7 @@ Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 | 5   | B2B Parte A: Membros, convites e acesso                      | TASK-155 a 161, 166            | Grupo 4                  | `feat/fase4-b2b-membros`                  | ✅ Concluído (PR #26) |
 | 6   | B2B Parte A: Cobrança por seat + NFS-e B2B                   | TASK-162, 163, 221, 225        | Grupo 5, Grupo 2/3       | `feat/fase4-b2b-cobranca-nfse`            | ⏳ Pendente |
 | 7   | B2B Parte A: Painel da organização + dados fiscais            | TASK-164, 165, 223, 224        | Grupo 5, Grupo 4         | `feat/fase4-b2b-painel`                   | ✅ Concluído (PR #27) |
-| 8   | B2B diferencial: Conteúdo próprio + dashboard de engajamento  | TASK-226 a 230                 | Grupo 4, Grupo 5         | `feat/fase4-b2b-conteudo-engajamento`     | ⏳ Pendente |
+| 8   | B2B diferencial: Conteúdo próprio + dashboard de engajamento  | TASK-226 a 230                 | Grupo 4, Grupo 5         | `feat/fase4-b2b-conteudo-engajamento`     | ✅ Concluído (PR #29) |
 | 9   | B2B diferencial: Compliance e auditoria                       | TASK-231 a 234                 | Grupo 5                  | `feat/fase4-b2b-compliance`               | ✅ Concluído (PR #28) |
 
 ---

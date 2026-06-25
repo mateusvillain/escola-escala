@@ -36,6 +36,7 @@ function makeLesson(overrides: {
   releaseType?: 'immediate' | 'fixed_date' | 'days_after_enrollment'
   releaseDate?: Date | null
   releaseAfterDays?: number | null
+  organizationId?: string | null
 } = {}) {
   return {
     isPreview: overrides.isPreview ?? false,
@@ -44,7 +45,16 @@ function makeLesson(overrides: {
       releaseType: overrides.releaseType ?? 'immediate',
       releaseDate: overrides.releaseDate ?? null,
       releaseAfterDays: overrides.releaseAfterDays ?? null,
-      course: { planAccess: overrides.planAccess ?? 'basic' },
+      course: { planAccess: overrides.planAccess ?? 'basic', organizationId: overrides.organizationId ?? null },
+    },
+  }
+}
+
+function orgMembershipFor(organizationId: string, subscriptionStatus: string | null) {
+  return {
+    organizationId,
+    organization: {
+      subscription: subscriptionStatus ? { status: subscriptionStatus } : null,
     },
   }
 }
@@ -255,6 +265,72 @@ describe('checkLessonAccess', () => {
       expect(result).toEqual({ allowed: false, reason: 'no_subscription' })
     })
   })
+
+  describe('curso de organização (conteúdo próprio)', () => {
+    it('libera membro ativo da MESMA organização do curso', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a' }))
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-a', 'active'))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: true })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('bloqueia membro de uma organização DIFERENTE da do curso, mesmo com assinatura B2B ativa na própria', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a' }))
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-b', 'active'))
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'organization_membership_required' })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('bloqueia assinante premium individual sem vínculo com a organização do curso', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a', planAccess: 'premium' }))
+      mocks.organizationMemberFindUnique.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'organization_membership_required' })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('ignora compra avulsa (enrollment direto) para curso de organização', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a' }))
+      mocks.organizationMemberFindUnique.mockResolvedValue(null)
+      mocks.enrollmentFindUnique.mockResolvedValue({ enrolledAt: new Date(Date.now() - 10 * DAY_MS) })
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'organization_membership_required' })
+    })
+
+    it('bloqueia membro ativo da organização correta com assinatura B2B past_due', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a' }))
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-a', 'past_due'))
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'organization_membership_required' })
+    })
+
+    it('admin continua tendo acesso a curso de organização', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(makeLesson({ organizationId: 'org-a' }))
+
+      const result = await checkLessonAccess('user-1', 'lesson-1', 'admin')
+      expect(result).toEqual({ allowed: true })
+      expect(mocks.organizationMemberFindUnique).not.toHaveBeenCalled()
+    })
+
+    it('respeita liberação programada (drip content) também para curso de organização', async () => {
+      mocks.lessonFindUnique.mockResolvedValue(
+        makeLesson({ organizationId: 'org-a', releaseType: 'fixed_date', releaseDate: new Date(Date.now() + DAY_MS) })
+      )
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-a', 'active'))
+      mocks.enrollmentFindUnique.mockResolvedValue(null)
+
+      const result = await checkLessonAccess('user-1', 'lesson-1')
+      expect(result).toEqual({ allowed: false, reason: 'module_not_released' })
+    })
+  })
 })
 
 describe('checkCourseAccess', () => {
@@ -303,5 +379,32 @@ describe('checkCourseAccess', () => {
 
     const result = await checkCourseAccess('user-1', 'course-1')
     expect(result).toEqual({ allowed: true })
+  })
+
+  describe('curso de organização (conteúdo próprio)', () => {
+    it('libera membro ativo da MESMA organização do curso', async () => {
+      mocks.courseFindUnique.mockResolvedValue({ planAccess: 'basic', organizationId: 'org-a' })
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-a', 'active'))
+
+      const result = await checkCourseAccess('user-1', 'course-1')
+      expect(result).toEqual({ allowed: true })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('bloqueia membro de uma organização DIFERENTE da do curso, mesmo com assinatura individual premium', async () => {
+      mocks.courseFindUnique.mockResolvedValue({ planAccess: 'basic', organizationId: 'org-a' })
+      mocks.organizationMemberFindUnique.mockResolvedValue(orgMembershipFor('org-b', 'active'))
+      mocks.subscriptionFindFirst.mockResolvedValue(premiumSubscription())
+
+      const result = await checkCourseAccess('user-1', 'course-1')
+      expect(result).toEqual({ allowed: false, reason: 'organization_membership_required' })
+      expect(mocks.subscriptionFindFirst).not.toHaveBeenCalled()
+    })
+
+    it('admin continua tendo acesso a curso de organização', async () => {
+      const result = await checkCourseAccess('user-1', 'course-1', 'admin')
+      expect(result).toEqual({ allowed: true })
+      expect(mocks.courseFindUnique).not.toHaveBeenCalled()
+    })
   })
 })

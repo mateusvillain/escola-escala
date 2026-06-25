@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { checkCourseAccess } from '@/lib/access'
+import { checkCourseAccess, hasActiveAccessToOrganization } from '@/lib/access'
 import { getCourseSidebarData } from '@/lib/course-sidebar'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { UpgradePrompt, type UpgradeReason } from '@/components/course/UpgradePrompt'
@@ -32,7 +32,7 @@ export default async function ModuleQuizPage({
     select: {
       id: true,
       title: true,
-      course: { select: { id: true, slug: true, status: true, thumbnailUrl: true } },
+      course: { select: { id: true, slug: true, status: true, thumbnailUrl: true, organizationId: true } },
       quiz: {
         select: {
           questions: {
@@ -49,6 +49,13 @@ export default async function ModuleQuizPage({
   }
   if (!moduleRecord.quiz || moduleRecord.quiz.questions.length === 0) {
     notFound()
+  }
+
+  // Curso de organização nunca aparece no catálogo público (TASK-226) — evita também o acesso
+  // direto via URL por quem não é membro dessa organização (nem admin).
+  if (moduleRecord.course.organizationId && user.role !== 'admin') {
+    const isOrgMember = await hasActiveAccessToOrganization(user.userId, moduleRecord.course.organizationId)
+    if (!isOrgMember) notFound()
   }
 
   const access = await checkCourseAccess(user.userId, moduleRecord.course.id, user.role)
