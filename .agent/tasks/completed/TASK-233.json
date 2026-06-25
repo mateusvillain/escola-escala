@@ -14,37 +14,39 @@
       "step": 1,
       "description": "Adicionar renewalReminderSentAt a Certificate",
       "details": "Adicionar `renewalReminderSentAt DateTime?` ao `model Certificate` e rodar a migration correspondente.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Criar a rota de cron",
       "details": "Criar `src/app/api/cron/certificate-renewal/route.ts` com `POST`, verificando o header `Authorization` contra `process.env.CRON_SECRET` antes de qualquer outra lógica.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Implementar a query e o envio",
       "details": "Buscar `Certificate` com `expiresAt` nos próximos 30 dias e `renewalReminderSentAt: null`. Para cada um, enviar e-mail (template novo) e marcar `renewalReminderSentAt: new Date()`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 4,
       "description": "Configurar o agendamento",
       "details": "Criar `vercel.ts` com um cron diário apontando para `/api/cron/certificate-renewal` (ver exemplo de `crons` na configuração atual da Vercel) — ou `vercel.json` se o time preferir o formato mais simples. Esta decisão é nova para o projeto, não há convenção anterior a seguir.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 5,
       "description": "Testar manualmente",
       "details": "Criar um certificado de teste com `expiresAt` em 15 dias, chamar a rota manualmente com o `CRON_SECRET` correto via `curl`/Postman, confirmar o e-mail recebido e que uma segunda chamada não reenvia (idempotente).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-231"],
   "estimatedComplexity": "medium",
   "technicalNotes": [
     "`CRON_SECRET` já está reservado em `.env.local` desde antes desta Fase, mas nunca foi usado em código — esta é a primeira implementação real que consome essa variável.",
-    "Vercel Cron Jobs têm timeout e frequência mínima próprios — confirmar limites do plano atual antes de definir a frequência exata (diário é o ponto de partida razoável para uma janela de 30 dias)."
+    "Vercel Cron Jobs têm timeout e frequência mínima próprios — confirmar limites do plano atual antes de definir a frequência exata (diário é o ponto de partida razoável para uma janela de 30 dias).",
+    "Decisão `vercel.json` vs `vercel.ts`: optou-se por `vercel.json`. A skill oficial `vercel:vercel-functions` documenta Cron Jobs via `vercel.json` com disparo por GET — não há menção a `vercel.ts`/`@vercel/config` nessa fonte. Embora o pacote `@vercel/config` exista de fato no registry, adicionar uma dependência nova (com `zod@^3` transitivo, conflitando em espírito com o `zod@^4` já usado no projeto) só para um cron job estático e sem lógica dinâmica não se justificava. Documentado também no PR.",
+    "A acceptanceCriteria pede rota `POST`, mas o disparo real do Vercel Cron é via GET (confirmado na skill oficial). A rota implementa GET e POST chamando a mesma lógica: GET garante o cron funcionar de fato em produção, POST atende ao teste manual via curl e à letra da acceptanceCriteria."
   ]
 }

@@ -5,6 +5,7 @@ import {
   trialEndingEmailHtml,
   paymentFailedEmailHtml,
   organizationInviteEmailHtml,
+  certificateRenewalEmailHtml,
 } from "./email-templates";
 
 let transporter: nodemailer.Transporter | null = null;
@@ -115,5 +116,19 @@ export async function sendOrganizationInviteEmail(
     to,
     subject: `Convite para ${organizationName}`,
     html: organizationInviteEmailHtml(inviterName, organizationName, inviteUrl),
+  });
+}
+
+export async function sendCertificateRenewalEmail(
+  email: string,
+  name: string,
+  courseName: string,
+  expiresAt: Date
+) {
+  const formattedDate = expiresAt.toLocaleDateString("pt-BR");
+  await sendEmail({
+    to: email,
+    subject: "Seu certificado está perto de vencer",
+    html: certificateRenewalEmailHtml(name, courseName, formattedDate),
   });
 }

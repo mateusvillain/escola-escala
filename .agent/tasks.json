@@ -1613,28 +1613,28 @@
     "id": "TASK-231",
     "title": "Campo de validade (expiresAt) em Certificate",
     "category": "data-model",
-    "specFilePath": ".agent/tasks/TASK-231.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-231.json",
+    "passes": true
   },
   {
     "id": "TASK-232",
     "title": "GET /api/organizations/me/certificates/export exportação em lote",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-232.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-232.json",
+    "passes": true
   },
   {
     "id": "TASK-233",
     "title": "Lembrete automático de renovação de certificado",
     "category": "integration",
-    "specFilePath": ".agent/tasks/TASK-233.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-233.json",
+    "passes": true
   },
   {
     "id": "TASK-234",
     "title": "GET /api/organizations/me/compliance-log exportação de conclusões",
     "category": "api-endpoint",
-    "specFilePath": ".agent/tasks/TASK-234.json",
-    "passes": false
+    "specFilePath": ".agent/tasks/completed/TASK-234.json",
+    "passes": true
   }
 ]

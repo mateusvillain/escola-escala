@@ -1,5 +1,6 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as Sentry from '@sentry/nextjs'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export interface CertificateData {
@@ -127,4 +128,25 @@ export async function generateAndStoreCertificate(
     Sentry.captureException(err, { extra: { userId, courseId } })
     throw err
   }
+}
+
+/**
+ * Converte o `fileUrl` armazenado (data URL base64 ou, futuramente, URL de
+ * blob storage) na resposta HTTP de download do PDF. Compartilhado entre o
+ * download do próprio aluno e o download pelo owner da organização.
+ */
+export function buildCertificateDownloadResponse(fileUrl: string, courseSlug: string): NextResponse {
+  if (!fileUrl.startsWith('data:')) {
+    return NextResponse.redirect(fileUrl)
+  }
+
+  const base64 = fileUrl.slice(fileUrl.indexOf(',') + 1)
+  const buffer = Buffer.from(base64, 'base64')
+
+  return new NextResponse(buffer, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="certificado-${courseSlug}.pdf"`,
+    },
+  })
 }

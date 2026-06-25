@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Adicionar o campo ao schema",
       "details": "Em `prisma/schema.prisma`, `model Certificate`, adicionar `expiresAt DateTime?`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
       "details": "Rodar `npx prisma migrate dev --name add_certificate_expiry` e `npx prisma generate`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": [],

@@ -194,3 +194,40 @@ export function trialEndingEmailHtml(name: string, formattedDate: string, format
 </body>
 </html>`;
 }
+
+export function certificateRenewalEmailHtml(name: string, courseName: string, formattedDate: string): string {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seu certificado está perto de vencer</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;padding:40px;max-width:560px;">
+          <tr>
+            <td>
+              <h2 style="margin:0 0 16px;color:#111827;font-size:22px;">Seu certificado vence em breve, ${name}</h2>
+              <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">
+                Seu certificado do curso <strong>${courseName}</strong> tem validade até <strong>${formattedDate}</strong>.
+                Para manter seu treinamento em dia, revise o conteúdo e conclua o curso novamente antes do vencimento.
+              </p>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/dashboard"
+                 style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;">
+                Acessar o curso
+              </a>
+              <p style="margin:24px 0 0;color:#6b7280;font-size:13px;line-height:1.6;">
+                Se você acredita ter recebido este e-mail por engano, entre em contato com nosso suporte.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
