@@ -15,6 +15,20 @@ export async function hasActiveOrganizationAccess(userId: string): Promise<boole
   return status === 'active' || status === 'trialing'
 }
 
+/**
+ * Verifica acesso a um curso de organização específico (`Course.organizationId`), nunca por
+ * assinatura individual ou organização diferente — isolamento entre organizações.
+ */
+export async function hasActiveAccessToOrganization(userId: string, organizationId: string): Promise<boolean> {
+  const membership = await prisma.organizationMember.findUnique({
+    where: { userId },
+    include: { organization: { include: { subscription: true } } },
+  })
+  if (!membership || membership.organizationId !== organizationId) return false
+  const status = membership.organization.subscription?.status
+  return status === 'active' || status === 'trialing'
+}
+
 export type AccessReason =
   | 'not_authenticated'
   | 'no_subscription'
@@ -22,6 +36,7 @@ export type AccessReason =
   | 'subscription_inactive'
   | 'preview'
   | 'module_not_released'
+  | 'organization_membership_required'
 
 export interface AccessResult {
   allowed: boolean
@@ -49,7 +64,7 @@ export async function checkLessonAccess(
           releaseDate: true,
           releaseAfterDays: true,
           course: {
-            select: { planAccess: true },
+            select: { planAccess: true, organizationId: true },
           },
         },
       },
@@ -65,41 +80,54 @@ export async function checkLessonAccess(
 
   if (!userId) return { allowed: false, reason: 'not_authenticated' }
 
-  // Compra avulsa: enrollment direto dá acesso ao curso inteiro, independente de assinatura.
+  const organizationId = lesson.module.course.organizationId
+
+  // Compra avulsa: enrollment direto dá acesso ao curso inteiro, independente de assinatura
+  // (irrelevante para conteúdo de organização, mas a busca também serve de referência temporal
+  // para liberação programada nos dois casos, ver isModuleReleased abaixo).
   const enrollment = await prisma.courseEnrollment.findUnique({
     where: { userId_courseId: { userId, courseId: lesson.module.courseId } },
     select: { enrolledAt: true },
   })
 
-  let coursePlanAllowed = enrollment !== null
+  let coursePlanAllowed: boolean
 
-  if (!coursePlanAllowed) {
-    coursePlanAllowed = await hasActiveOrganizationAccess(userId)
-  }
+  if (organizationId) {
+    // Conteúdo próprio de organização: ignora assinatura individual e compra avulsa por
+    // completo — só membro ativo dessa MESMA organização tem acesso (isolamento entre orgs).
+    coursePlanAllowed = await hasActiveAccessToOrganization(userId, organizationId)
+    if (!coursePlanAllowed) return { allowed: false, reason: 'organization_membership_required' }
+  } else {
+    coursePlanAllowed = enrollment !== null
 
-  if (!coursePlanAllowed) {
-    const subscription = await prisma.userSubscription.findFirst({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      include: { plan: true },
-    })
-
-    if (!subscription) return { allowed: false, reason: 'no_subscription' }
-
-    if (subscription.status !== 'active' && subscription.status !== 'trialing') {
-      return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
+    if (!coursePlanAllowed) {
+      coursePlanAllowed = await hasActiveOrganizationAccess(userId)
     }
 
-    const planType = subscription.plan.type
-    const courseAccess = lesson.module.course.planAccess
+    if (!coursePlanAllowed) {
+      const subscription = await prisma.userSubscription.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        include: { plan: true },
+      })
 
-    coursePlanAllowed = planType === 'premium' || (planType === 'basic' && courseAccess === 'basic')
+      if (!subscription) return { allowed: false, reason: 'no_subscription' }
 
-    if (!coursePlanAllowed) return { allowed: false, reason: 'plan_upgrade_required' }
+      if (subscription.status !== 'active' && subscription.status !== 'trialing') {
+        return { allowed: false, reason: 'subscription_inactive', subscriptionStatus: subscription.status }
+      }
+
+      const planType = subscription.plan.type
+      const courseAccess = lesson.module.course.planAccess
+
+      coursePlanAllowed = planType === 'premium' || (planType === 'basic' && courseAccess === 'basic')
+
+      if (!coursePlanAllowed) return { allowed: false, reason: 'plan_upgrade_required' }
+    }
   }
 
   // Liberação programada (drip content) é uma camada adicional sobre o acesso por
-  // plano/compra — nunca um substituto. Avaliada só depois de confirmar o acesso ao curso.
+  // plano/compra/organização — nunca um substituto. Avaliada só depois de confirmar o acesso.
   if (!isModuleReleased(lesson.module, enrollment)) {
     return { allowed: false, reason: 'module_not_released' }
   }
@@ -121,9 +149,14 @@ export async function checkCourseAccess(
 
   const course = await prisma.course.findUnique({
     where: { id: courseId },
-    select: { planAccess: true },
+    select: { planAccess: true, organizationId: true },
   })
   if (!course) return { allowed: false }
+
+  if (course.organizationId) {
+    if (await hasActiveAccessToOrganization(userId, course.organizationId)) return { allowed: true }
+    return { allowed: false, reason: 'organization_membership_required' }
+  }
 
   if (await hasActiveOrganizationAccess(userId)) return { allowed: true }
 

@@ -13,13 +13,13 @@
       "step": 1,
       "description": "Criar o componente",
       "details": "Criar `src/components/organization/EngagementDashboard.tsx`, buscando dados de `GET /api/organizations/me/engagement`. Tabela simples, reaproveitando `<lui-card>`/`<lui-tag>` do design system, mesmo princípio da seção de funil do AdminDashboard (TASK-195).",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Renderizar condicionalmente no painel",
       "details": "Em `src/app/organizacao/page.tsx`, renderizar `<EngagementDashboard />` apenas quando `myRole === 'owner'`, abaixo da lista de membros existente (TASK-164).",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-229", "TASK-164"],

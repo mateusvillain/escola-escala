@@ -1,7 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-export type UpgradeReason = 'plan_upgrade_required' | 'no_subscription' | 'subscription_inactive'
+export type UpgradeReason =
+  | 'plan_upgrade_required'
+  | 'no_subscription'
+  | 'subscription_inactive'
+  | 'organization_membership_required'
 
 interface PromptContent {
   title: string
@@ -10,7 +14,7 @@ interface PromptContent {
   ctaHref: string
 }
 
-const MESSAGES: Record<'plan_upgrade_required' | 'no_subscription', PromptContent> = {
+const MESSAGES: Record<'plan_upgrade_required' | 'no_subscription' | 'organization_membership_required', PromptContent> = {
   plan_upgrade_required: {
     title: 'Conteúdo exclusivo do plano Premium',
     description: 'Esta aula faz parte de um curso Premium. Faça upgrade para continuar assistindo.',
@@ -22,6 +26,12 @@ const MESSAGES: Record<'plan_upgrade_required' | 'no_subscription', PromptConten
     description: 'Esta aula é exclusiva para assinantes. Escolha um plano para começar a assistir.',
     ctaLabel: 'Fazer Upgrade para Premium',
     ctaHref: '/planos',
+  },
+  organization_membership_required: {
+    title: 'Conteúdo exclusivo de uma organização',
+    description: 'Esta aula é conteúdo interno de uma empresa parceira, disponível apenas para os membros dela.',
+    ctaLabel: 'Voltar ao catálogo',
+    ctaHref: '/cursos',
   },
 }
 
@@ -64,7 +74,7 @@ export function UpgradePrompt({ reason, subscriptionStatus, thumbnailUrl }: Upgr
     reason === 'subscription_inactive'
       ? INACTIVE_MESSAGES[subscriptionStatus as 'past_due' | 'canceled'] ?? INACTIVE_MESSAGES.default
       : MESSAGES[reason]
-  const showHighlights = reason !== 'subscription_inactive'
+  const showHighlights = reason !== 'subscription_inactive' && reason !== 'organization_membership_required'
 
   return (
     <div

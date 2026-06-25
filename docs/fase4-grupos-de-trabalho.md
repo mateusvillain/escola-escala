@@ -49,8 +49,9 @@ Nenhum grupo deve usar `--no-verify`, force-push, ou pular hooks.
 | 5   | B2B Parte A: Membros, convites e acesso                      | TASK-155 a 161, 166            | Grupo 4                  | `feat/fase4-b2b-membros`                  | ✅ Concluído (PR #26) |
 | 6   | B2B Parte A: Cobrança por seat + NFS-e B2B                   | TASK-162, 163, 221, 225        | Grupo 5, Grupo 2/3       | `feat/fase4-b2b-cobranca-nfse`            | ⏳ Pendente |
 | 7   | B2B Parte A: Painel da organização + dados fiscais            | TASK-164, 165, 223, 224        | Grupo 5, Grupo 4         | `feat/fase4-b2b-painel`                   | ✅ Concluído (PR #27) |
-| 8   | B2B diferencial: Conteúdo próprio + dashboard de engajamento  | TASK-226 a 230                 | Grupo 4, Grupo 5         | `feat/fase4-b2b-conteudo-engajamento`     | ⏳ Pendente |
+| 8   | B2B diferencial: Conteúdo próprio + dashboard de engajamento  | TASK-226 a 230                 | Grupo 4, Grupo 5         | `feat/fase4-b2b-conteudo-engajamento`     | ✅ Concluído (PR #29) |
 | 9   | B2B diferencial: Compliance e auditoria                       | TASK-231 a 234                 | Grupo 5                  | `feat/fase4-b2b-compliance`               | ✅ Concluído (PR #28) |
+| 10  | B2B diferencial: Visão de progresso por curso com prazo       | TASK-235 a 238                 | Grupo 8                  | `feat/fase4-b2b-cursos-progresso`         | ⏳ Pendente |
 
 ---
 
@@ -614,6 +615,70 @@ Como trabalhar:
 
 Definition of Done: acceptanceCriteria de TASK-231 a 234 atendidas e marcadas; cron testado manualmente
 (incluindo idempotência); exports de certificados e compliance-log validados; PR aberto.
+```
+
+---
+
+## Grupo 10 — B2B diferencial: Visão de progresso por curso com prazo
+
+**Tasks**: TASK-235, TASK-236, TASK-237, TASK-238
+**Depende de**: Grupo 8 (conteúdo próprio + dashboard de engajamento)
+
+> Evolução direta do dashboard de engajamento (Grupo 8): em vez de avaliar atraso por colaborador com um limiar
+> fixo de 14 dias, inverte a perspectiva — o curso é o sujeito, com prazo real (`dueDate`) definido pelo admin.
+> O owner passa a ver "quantos concluíram esse curso?" e, dentro de cada curso, "quem está atrasado e há quantos
+> dias?". A coluna "Atrasados" do dashboard de engajamento (lógica de 14 dias) é removida neste grupo.
+
+### Prompt para a IA
+
+```
+ATENÇÃO — confirme antes de começar: Grupo 8 (TASK-226 a 230, conteúdo próprio + dashboard de engajamento)
+mesclado em `main`. Este grupo depende de `Course.organizationId` (TASK-226) e do painel `/organizacao`
+(TASK-230) já existirem.
+
+Você vai implementar o Grupo 10 da Fase 4 da Plataforma de Cursos (Next.js 16 + Prisma 7). Leia CLAUDE.md,
+AGENTS.md e docs/wiki/b2b-diferenciais.md (item 2) antes de começar.
+
+Contexto: o dashboard de engajamento (TASK-229/230) avaliava 'atrasado' com um proxy de 14 dias sem atividade
+— arbitrário e sem relação com um prazo real de conclusão. Este grupo substitui essa heurística por um `dueDate`
+por curso e entrega uma visão centrada no curso (não no colaborador): o owner vê a lista de cursos com stats
+de progresso e pode fazer drill-down para ver o status individual de cada membro num curso específico.
+
+Tasks deste grupo, na ordem (leia o spec completo em .agent/tasks/TASK-<id>.json):
+1. TASK-235 — Campo `dueDate DateTime?` em `Course` (migration) + campo no `CourseForm` admin (só para cursos de org)
+2. TASK-236 — `GET /api/organizations/me/courses` — lista cursos da org com stats por curso (concluídos/em andamento/atrasados)
+3. TASK-237 — `GET /api/organizations/me/courses/[courseId]/members` — status individual de cada membro num curso
+4. TASK-238 — Aba 'Cursos' em `/organizacao`: lista de cursos com stats + drill-down de membros por curso; remove coluna 'Atrasados' do EngagementDashboard
+
+Atenção a padrões do projeto:
+- `params` é uma Promise no Next.js 16 — `const { courseId } = await ctx.params` (AGENTS.md).
+- Reutilizar `requireOrgOwner` de `src/lib/organization.ts` para os dois novos endpoints — mesmo padrão do
+  endpoint de engajamento (TASK-229).
+- Cursos públicos (organizationId null) também entram nas stats — a org tem acesso a eles.
+- 'Atrasado' no novo modelo = `dueDate` existe E `dueDate < now` E membro não concluiu. Sem `dueDate`, não há
+  conceito de atrasado para aquele curso.
+- `lui-tag`: usar variant='success' (concluído), 'info' (em andamento), 'danger' (atrasado), tag-style='subtle'
+  para badges de status na visão de membros (consistente com o resto do painel).
+- Expansão de curso inline (accordion) é preferível a navegação separada — mantém contexto da lista ao voltar.
+- TASK-238 remove a coluna 'Atrasados' e a propriedade `overdueCourses` do `EngagementDashboard` (TASK-230):
+  essa lógica de 14 dias é substituída pela visão por curso deste grupo.
+
+Como trabalhar:
+1. Crie a branch `feat/fase4-b2b-cursos-progresso` a partir de `main` atualizada (incluindo Grupo 8).
+2. Implemente as 4 tasks na ordem listada — TASK-237 depende de TASK-236 (schema de resposta), TASK-238 depende de ambas.
+3. Confira as acceptanceCriteria de cada task antes de seguir para a próxima.
+4. Valide: `npx tsc --noEmit` e `npx vitest run` sem erros novos.
+5. Teste manualmente como `dono@empresa-beta.com` (senha: Senha123!, org "Empresa Beta LTDA"):
+   - Aba 'Cursos' aparece com os cursos acessíveis e stats corretas para `colaborador@empresa-beta.com`
+   - Definir `dueDate` no passado num curso de teste via admin e confirmar que o colaborador aparece como 'atrasado' com dias de atraso corretos
+   - Confirmar que EngagementDashboard não mostra mais a coluna 'Atrasados'
+6. Marque `"pass": true` nos steps dos quatro JSONs de task e `"passes": true` em `.agent/tasks.json`.
+7. Commit(s) e abra PR com `gh pr create`. Título: "feat: visão de progresso por curso com prazo B2B (TASK-235 a 238)".
+   Descrição com o cenário de dueDate testado, a remoção da heurística de 14 dias documentada e link para
+   docs/wiki/b2b-diferenciais.md item 2. Não faça merge — deixe para revisão humana.
+
+Definition of Done: acceptanceCriteria de TASK-235 a 238 atendidas e marcadas; aba 'Cursos' funcional com
+drill-down; dueDate e cálculo de atraso testados; coluna 'Atrasados' do EngagementDashboard removida; PR aberto.
 ```
 
 ---

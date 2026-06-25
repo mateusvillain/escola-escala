@@ -13,19 +13,19 @@
       "step": 1,
       "description": "Adicionar o campo ao schema",
       "details": "Em `prisma/schema.prisma`, `model Course`, adicionar `organizationId String?` e a relação `organization Organization? @relation(fields: [organizationId], references: [id])`. Adicionar `courses Course[]` à lista de relações de `Organization`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Rodar a migration",
       "details": "Rodar `npx prisma migrate dev --name add_course_organization` e `npx prisma generate`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Filtrar o catálogo público",
       "details": "Em `GET /api/courses` (catálogo público) e na página `/cursos`, adicionar `where: { organizationId: null }` explicitamente aos cursos já filtrados por `status: 'published'`.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-151"],

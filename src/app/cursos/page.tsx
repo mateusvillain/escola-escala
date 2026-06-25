@@ -59,6 +59,7 @@ export default async function CursosPage({
     prisma.course.findMany({
       where: {
         status: 'published',
+        organizationId: null,
         trackItems: { none: {} },
         ...(!hasFullCatalogAccess && (planAccess === 'basic' || planAccess === 'premium')
           ? { planAccess }

@@ -1,0 +1,39 @@
+{
+  "id": "TASK-235",
+  "title": "Campo dueDate em Course (migration + CourseForm admin)",
+  "category": "schema",
+  "description": "Adiciona campo opcional `dueDate: DateTime?` ao model `Course` — o prazo para conclusão de um curso por todos os membros da organização. É por curso (não por membro), definido pelo admin da plataforma ao vincular o curso a uma organização. Sem `dueDate`, não existe conceito de 'atrasado' — o campo é completamente opcional e não afeta cursos públicos.",
+  "acceptanceCriteria": [
+    "`Course` tem campo `dueDate DateTime?` — migration aplicada sem afetar cursos públicos existentes (todos ficam com `null`)",
+    "`PATCH /api/admin/courses/[id]` aceita `dueDate` (ISO 8601 string ou null) e persiste corretamente",
+    "`GET /api/admin/courses/[id]` retorna `dueDate` na resposta",
+    "No `CourseForm` (`/admin/cursos/[id]`), o campo de data de prazo só é exibido quando `organizationId` está preenchido — cursos públicos não exibem o campo",
+    "O campo aceita data futura ou passada (sem validação de data mínima — o admin pode definir um prazo já passado para testes)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Migration — adicionar dueDate ao model Course",
+      "details": "Em `prisma/schema.prisma`, adicionar `dueDate DateTime?` ao model `Course`. Executar `npx prisma migrate dev --name add_course_due_date`.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Atualizar PATCH /api/admin/courses/[id]",
+      "details": "Adicionar `dueDate` ao schema Zod do body (z.string().datetime().nullable().optional()). Incluir no `data` do `prisma.course.update`. Retornar no GET.",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Campo de prazo no CourseForm",
+      "details": "Em `src/components/admin/CourseForm.tsx`, adicionar um `<input type='date'>` para `dueDate`, visível condicionalmente quando `organizationId` está selecionado. Usar `value` controlado (converter `Date` para `YYYY-MM-DD` no display e ISO 8601 no PATCH).",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-226"],
+  "estimatedComplexity": "low",
+  "technicalNotes": [
+    "dueDate é um atributo do curso, não da matrícula — um único valor por curso, compartilhado por todos os membros da organização.",
+    "Não adicionar dueDate na listagem pública (/api/courses) — é um dado interno de gestão da organização."
+  ]
+}

@@ -22,7 +22,7 @@ export default async function OrganizacaoPage() {
   if (role === 'member') redirect('/dashboard')
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Minha Organização</h1>
       <OrganizationPanel userId={userId} />
     </div>

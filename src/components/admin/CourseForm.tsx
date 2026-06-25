@@ -11,6 +11,11 @@ interface Instructor {
   instructorId: string | null
 }
 
+interface Organization {
+  id: string
+  name: string
+}
+
 type FormData = {
   title: string
   description: string
@@ -20,6 +25,8 @@ type FormData = {
   allowOneTimePurchase: boolean
   priceOneTime: string
   stripePriceIdOneTime: string
+  organizationId: string
+  dueDate: string
 }
 
 interface CourseFormProps {
@@ -40,6 +47,8 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
   const router = useRouter()
   const [instructors, setInstructors] = useState<Instructor[]>([])
   const [loadingInstructors, setLoadingInstructors] = useState(true)
+  const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [loadingOrganizations, setLoadingOrganizations] = useState(true)
   const [saving, setSaving] = useState<'draft' | 'publish' | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -60,12 +69,15 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
       allowOneTimePurchase: false,
       priceOneTime: '',
       stripePriceIdOneTime: '',
+      organizationId: '',
+      dueDate: '',
       ...defaultValues,
     },
   })
 
   const thumbnailUrl = watch('thumbnailUrl')
   const allowOneTimePurchase = watch('allowOneTimePurchase')
+  const organizationIdValue = watch('organizationId')
 
   useEffect(() => {
     fetch('/api/admin/users?role=instructor&limit=100')
@@ -73,6 +85,14 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
       .then(d => setInstructors((d.data ?? []).filter((u: Instructor) => u.instructorId)))
       .catch(() => {})
       .finally(() => setLoadingInstructors(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/admin/organizations')
+      .then(r => r.json())
+      .then(d => setOrganizations(d.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingOrganizations(false))
   }, [])
 
   // reset thumb error whenever url changes
@@ -91,6 +111,8 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
     }
     payload.priceOneTime = data.priceOneTime.trim() ? Number(data.priceOneTime) : null
     payload.stripePriceIdOneTime = data.stripePriceIdOneTime.trim() || null
+    payload.organizationId = data.organizationId || null
+    payload.dueDate = data.dueDate ? new Date(data.dueDate).toISOString() : null
 
     try {
       let res: Response
@@ -253,6 +275,50 @@ export function CourseForm({ courseId, slug, canPublish = false, defaultValues }
             </label>
           </div>
         </div>
+
+        {/* Organization (private content) */}
+        <div>
+          <label className={LABEL_CLASS} htmlFor="organizationId">
+            Organização (conteúdo privado)
+          </label>
+          <select
+            id="organizationId"
+            className={INPUT_CLASS}
+            disabled={loadingOrganizations}
+            {...register('organizationId')}
+          >
+            <option value="">
+              {loadingOrganizations ? 'Carregando...' : 'Nenhuma (catálogo público)'}
+            </option>
+            {organizations.map(org => (
+              <option key={org.id} value={org.id}>
+                {org.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-xs text-gray-400">
+            Ao vincular a uma organização, o curso fica visível só para os membros dela e não aparece no
+            catálogo público.
+          </p>
+        </div>
+
+        {/* Due date — only for org courses */}
+        {organizationIdValue && (
+          <div>
+            <label className={LABEL_CLASS} htmlFor="dueDate">
+              Prazo de conclusão
+            </label>
+            <input
+              id="dueDate"
+              type="date"
+              className={INPUT_CLASS}
+              {...register('dueDate')}
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Prazo para os membros da organização concluírem este curso. Deixe em branco para sem prazo.
+            </p>
+          </div>
+        )}
 
         {/* One-time purchase */}
         <div>

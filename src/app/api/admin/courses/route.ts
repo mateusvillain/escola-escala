@@ -35,6 +35,9 @@ export async function GET(request: NextRequest) {
             user: { select: { name: true } },
           },
         },
+        organization: {
+          select: { name: true },
+        },
       },
       orderBy: { createdAt: "desc" },
       skip,
@@ -43,9 +46,10 @@ export async function GET(request: NextRequest) {
     prisma.course.count({ where }),
   ]);
 
-  const data = courses.map(({ instructor, ...course }) => ({
+  const data = courses.map(({ instructor, organization, ...course }) => ({
     ...course,
     instructor: { name: instructor.user.name },
+    organization: organization ? { name: organization.name } : null,
   }));
 
   return NextResponse.json({
@@ -68,6 +72,7 @@ const createSchema = z.object({
   allowOneTimePurchase: z.boolean().optional(),
   priceOneTime: z.number().positive().nullable().optional(),
   stripePriceIdOneTime: z.string().min(1).nullable().optional(),
+  organizationId: z.string().uuid().nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -98,6 +103,7 @@ export async function POST(request: NextRequest) {
     allowOneTimePurchase,
     priceOneTime,
     stripePriceIdOneTime,
+    organizationId,
   } = parsed.data;
 
   if (!instructorId) {
@@ -121,6 +127,7 @@ export async function POST(request: NextRequest) {
       allowOneTimePurchase: allowOneTimePurchase ?? false,
       priceOneTime: priceOneTime ?? null,
       stripePriceIdOneTime: stripePriceIdOneTime ?? null,
+      organizationId: organizationId ?? null,
     },
     select: {
       id: true,
@@ -131,6 +138,7 @@ export async function POST(request: NextRequest) {
       planAccess: true,
       status: true,
       instructorId: true,
+      organizationId: true,
       createdAt: true,
     },
   });

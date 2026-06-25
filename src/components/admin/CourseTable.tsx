@@ -15,6 +15,7 @@ interface Course {
   status: CourseStatus
   planAccess: 'basic' | 'premium'
   instructor: { name: string }
+  organization: { name: string } | null
   createdAt: string
 }
 
@@ -249,7 +250,19 @@ export function CourseTable() {
                           </div>
                         )}
                       </div>
-                      <span className="font-medium text-gray-900 line-clamp-1">{course.title}</span>
+                      <div className="min-w-0">
+                        <span className="font-medium text-gray-900 line-clamp-1">{course.title}</span>
+                        {course.organization && (
+                          <div className="mt-1">
+                            <lui-tag
+                              label={`Org: ${course.organization.name}`}
+                              variant="secondary"
+                              tag-style="outline"
+                              size="sm"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
 

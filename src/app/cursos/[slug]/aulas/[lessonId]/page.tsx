@@ -4,7 +4,7 @@ import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
-import { checkLessonAccess } from '@/lib/access'
+import { checkLessonAccess, hasActiveAccessToOrganization } from '@/lib/access'
 import { trackEvent } from '@/lib/events'
 import { isModuleReleased, getReleaseCountdownLabel } from '@/lib/drip-content'
 import { getAdjacentLessons, type LessonAttachment } from '@/lib/utils/lessons'
@@ -29,6 +29,7 @@ export default async function AulaPage({
       slug: true,
       title: true,
       thumbnailUrl: true,
+      organizationId: true,
       modules: {
         orderBy: { order: 'asc' },
         select: {
@@ -64,6 +65,14 @@ export default async function AulaPage({
     try {
       user = verifyToken(token)
     } catch {}
+  }
+
+  // Curso de organização nunca aparece no catálogo público (TASK-226) — evita também o acesso
+  // direto via URL por quem não é membro dessa organização (nem admin), incluindo a estrutura
+  // de módulos/aulas exibida na sidebar mesmo quando o vídeo está bloqueado.
+  if (course.organizationId && user?.role !== 'admin') {
+    const isOrgMember = user ? await hasActiveAccessToOrganization(user.userId, course.organizationId) : false
+    if (!isOrgMember) notFound()
   }
 
   const access = await checkLessonAccess(user?.userId ?? null, lessonId, user?.role)

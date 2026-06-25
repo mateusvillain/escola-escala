@@ -1,0 +1,47 @@
+{
+  "id": "TASK-238",
+  "title": "Aba 'Cursos' em /organizacao — lista de cursos com drill-down por colaborador",
+  "category": "ui",
+  "description": "Nova aba 'Cursos' no painel da organização (owner only), entre 'Membros' e 'Engajamento'. Mostra a lista de cursos acessíveis pela organização com stats agregadas (concluídos/em andamento/atrasados). Ao selecionar um curso, exibe a visão interna com todos os colaboradores e seu status individual naquele curso. Esta é a interface principal para o owner acompanhar o progresso por curso — substitui a lógica de 'atrasado' baseada em 14 dias do dashboard de engajamento (TASK-229/230), que passa a mostrar só concluídos/em andamento.",
+  "acceptanceCriteria": [
+    "Aba 'Cursos' aparece entre 'Membros' e 'Engajamento' no painel `/organizacao`, visível apenas para owner",
+    "Lista de cursos mostra: título do curso, tag 'Próprio' para cursos com `organizationId` preenchido, prazo (`dueDate` formatado em pt-BR ou 'Sem prazo'), e contadores: X concluídos / Y em andamento / Z atrasados — 'atrasados' só aparece quando `dueDate` está preenchido e já passou",
+    "Clicar num curso abre a visão de membros do curso (pode ser expansão inline ou navegação interna com botão 'Voltar')",
+    "Visão de membros: lista todos os colaboradores ativos com nome, e-mail, badge de status (Concluído verde / Em andamento azul / Atrasado vermelho com 'X dias de atraso' / Não iniciado cinza) e data de conclusão (para concluídos) ou última atividade (para os demais)",
+    "Estado de loading e estado vazio ('Nenhum curso acessível ainda') tratados",
+    "Dashboard de engajamento (TASK-230) tem a coluna 'Atrasados' removida — passa a mostrar só Concluídos, Em andamento e Tempo de estudo (sem a lógica de 14 dias, que foi substituída pela visão por curso)"
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "description": "Componente CourseProgressList",
+      "details": "Novo `src/components/organization/CourseProgressList.tsx` — client component. Chama `GET /api/organizations/me/courses` ao montar. Renderiza lista de cursos com stats. Estado local `selectedCourseId` controla qual curso está expandido.",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "description": "Componente CourseMemberList (visão de drill-down)",
+      "details": "Dentro de `CourseProgressList`, quando `selectedCourseId` está definido: chama `GET /api/organizations/me/courses/[courseId]/members`. Renderiza tabela com colunas: Membro, Status, Última atividade. Badge de status via `<lui-tag>` (variant success/info/danger/secondary).",
+      "pass": true
+    },
+    {
+      "step": 3,
+      "description": "Adicionar aba 'Cursos' no OrganizationPanel",
+      "details": "Em `src/components/organization/OrganizationPanel.tsx`: adicionar 'cursos' ao tipo `Tab`, inserir na array de tabs entre 'membros' e 'engajamento' (isOwner only), renderizar `<CourseProgressList />` quando `tab === 'cursos'`.",
+      "pass": true
+    },
+    {
+      "step": 4,
+      "description": "Remover coluna 'Atrasados' do EngagementDashboard",
+      "details": "Em `src/components/organization/EngagementDashboard.tsx`: remover a coluna 'Atrasados' da tabela e a referência a `overdueCourses` na interface `MemberEngagement`. A lógica de 'atrasado' agora pertence à visão por curso (TASK-236/237), não ao dashboard de engajamento geral.",
+      "pass": true
+    }
+  ],
+  "dependencies": ["TASK-236", "TASK-237"],
+  "estimatedComplexity": "medium",
+  "technicalNotes": [
+    "Não usar react-hook-form aqui — componente é somente leitura, sem formulário.",
+    "Reaproveitamento de lui-tag para badges de status: variant='success' para concluído, variant='info' para em andamento, variant='danger' para atrasado, variant='secondary' para não iniciado.",
+    "A expansão inline (accordion) é preferível à navegação separada para manter o contexto da lista ao voltar."
+  ]
+}

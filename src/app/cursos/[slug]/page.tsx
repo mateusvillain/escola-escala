@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { verifyToken } from '@/lib/jwt'
 import { prisma } from '@/lib/prisma'
 import { isModuleReleased, getReleaseCountdownLabel } from '@/lib/drip-content'
+import { hasActiveOrganizationAccess, hasActiveAccessToOrganization } from '@/lib/access'
 import { CourseAccordion } from '@/components/cursos/CourseAccordion'
 import { StarRating } from '@/components/cursos/StarRating'
 import { ReviewReminderBanner } from '@/components/cursos/ReviewReminderBanner'
@@ -42,6 +43,7 @@ export default async function CursoDetalhe({
       planAccess: true,
       allowOneTimePurchase: true,
       priceOneTime: true,
+      organizationId: true,
       instructor: {
         select: {
           slug: true,
@@ -76,6 +78,22 @@ export default async function CursoDetalhe({
 
   if (!course) notFound()
 
+  // Auth (movida antes do guard de organização, que depende do usuário autenticado)
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+  let user = null
+  if (token) {
+    try { user = verifyToken(token) } catch {}
+  }
+
+  // Curso de organização nunca aparece no catálogo público (TASK-226) — evita também o acesso
+  // direto via slug por quem não é membro dessa organização (nem admin), incluindo título e
+  // estrutura de módulos/aulas, que de outra forma ficariam expostos publicamente.
+  if (course.organizationId && user?.role !== 'admin') {
+    const isOrgMember = user ? await hasActiveAccessToOrganization(user.userId, course.organizationId) : false
+    if (!isOrgMember) notFound()
+  }
+
   const reviewAggregate = await prisma.courseReview.aggregate({
     where: { courseId: course.id },
     _avg: { rating: true },
@@ -88,14 +106,6 @@ export default async function CursoDetalhe({
   const totalSeconds = allLessons.reduce((s, l) => s + (l.videoDuration ?? 0), 0)
   const totalDuration = formatTotalDuration(totalSeconds)
 
-  // Auth + access
-  const cookieStore = await cookies()
-  const token = cookieStore.get('auth-token')?.value
-  let user = null
-  if (token) {
-    try { user = verifyToken(token) } catch {}
-  }
-
   let hasAccess = false
   let hasEnrollment = false
   let isCompleted = false
@@ -104,7 +114,7 @@ export default async function CursoDetalhe({
   let enrollmentForDrip: { enrolledAt: Date } | null = null
 
   if (user) {
-    const [subscription, enrollment, lastProgress, review] = await Promise.all([
+    const [subscription, enrollment, lastProgress, review, orgAccess] = await Promise.all([
       prisma.userSubscription.findFirst({
         where: { userId: user.userId, status: 'active' },
         include: { plan: true },
@@ -125,6 +135,9 @@ export default async function CursoDetalhe({
         where: { userId_courseId: { userId: user.userId, courseId: course.id } },
         select: { rating: true, comment: true, createdAt: true },
       }),
+      course.organizationId
+        ? hasActiveAccessToOrganization(user.userId, course.organizationId)
+        : hasActiveOrganizationAccess(user.userId),
     ])
 
     const planType = subscription?.plan.type ?? null
@@ -134,7 +147,8 @@ export default async function CursoDetalhe({
       user.role === 'admin' ||
       planType === 'premium' ||
       (planType === 'basic' && course.planAccess === 'basic') ||
-      hasEnrollment
+      hasEnrollment ||
+      orgAccess
     isCompleted = enrollment?.completedAt != null
     myReview = review
     lastWatchedLessonTitle = lastProgress?.lesson.title ?? null

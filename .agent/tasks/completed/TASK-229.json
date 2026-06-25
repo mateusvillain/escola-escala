@@ -14,19 +14,19 @@
       "step": 1,
       "description": "Criar o route handler",
       "details": "Criar `src/app/api/organizations/me/engagement/route.ts` com `GET`, restrito a `owner`.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 2,
       "description": "Agregar por membro",
       "details": "Para cada `OrganizationMember`, buscar `CourseEnrollment`/`LessonProgress` relacionados aos cursos acessíveis pela organização (catálogo geral + cursos próprios da organização, TASK-226) e calcular as métricas do acceptanceCriteria.",
-      "pass": false
+      "pass": true
     },
     {
       "step": 3,
       "description": "Definir o critério de 'atrasado'",
       "details": "Curso matriculado há mais de 14 dias sem nenhuma atualização de `LessonProgress` nesse período, e ainda não concluído — proxy simples, sem necessidade de um campo dedicado.",
-      "pass": false
+      "pass": true
     }
   ],
   "dependencies": ["TASK-157"],
